@@ -80,4 +80,8 @@ tbody tr:hover {
   background-color: #4caf50;
   color: white;
 }
+.red-text {
+  color: red;
+  font-weight: 700;
+}
 
