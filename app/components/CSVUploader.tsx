@@ -20,17 +20,17 @@ interface ApiUserInfo {
 interface GroupedData {
   Name: string;
   ID: string;
-  AbsentDates: string[];
+  Absences: { date: string; course: string }[];
   userInfo?: ApiUserInfo;
-  Courses?: string[];
 }
+
 const parseCsv = (text: string): CsvRow[] => {
   const lines = text.trim().split("\n");
   const headers = lines[0].split(",");
 
   const rows = lines.slice(1).map((line) => {
     const values: string[] = [];
-    let current = '';
+    let current = "";
     let insideQuotes = false;
 
     for (let i = 0; i < line.length; i++) {
@@ -40,12 +40,12 @@ const parseCsv = (text: string): CsvRow[] => {
         continue; // Skip quotes
       }
 
-      if (char === ',' && !insideQuotes) {
+      if (char === "," && !insideQuotes) {
         values.push(current.trim());
-        current = '';
+        current = "";
       } else {
         // Replace comma with colon only if inside quotes
-        current += insideQuotes && char === ',' ? ':' : char;
+        current += insideQuotes && char === "," ? ":" : char;
       }
     }
     values.push(current.trim()); // push last cell
@@ -157,27 +157,19 @@ const CsvUpload: React.FC = () => {
     const filteredRows = rawCsvRows.filter((row) => {
       const percentageNum = parseFloat(row.Percentage.replace("%", ""));
       const rowDate = new Date(row.Date);
-      return (
-        percentageNum === 0 &&
-        rowDate >= from &&
-        rowDate <= to
-      );
+      return percentageNum === 0 && rowDate >= from && rowDate <= to;
     });
 
     // Group by Name + ID
     const groupedMap = new Map<string, GroupedData>();
-    filteredRows.forEach(({ Name, ID, Date, Course }) => {
-  const key = `${Name}-${ID}`;
-  if (!groupedMap.has(key)) {
-    groupedMap.set(key, { Name, ID, AbsentDates: [], Courses: [] });
-  }
-  const group = groupedMap.get(key)!;
-  group.AbsentDates.push(Date);
-  if (Course && !group.Courses?.includes(Course)) {
-    group.Courses?.push(Course);
-  }
-});
 
+    filteredRows.forEach(({ Name, ID, Date, Course }) => {
+      const key = `${Name}-${ID}`;
+      if (!groupedMap.has(key)) {
+        groupedMap.set(key, { Name, ID, Absences: [] });
+      }
+      groupedMap.get(key)!.Absences.push({ date: Date, course: Course });
+    });
 
     return Array.from(groupedMap.values());
   }, [rawCsvRows, startDate, endDate]);
@@ -198,7 +190,9 @@ const CsvUpload: React.FC = () => {
   }, [filteredGroupedData, currentPage]);
 
   // State to hold user info for current page rows
-  const [pagedUserInfo, setPagedUserInfo] = useState<Map<string, ApiUserInfo>>(new Map());
+  const [pagedUserInfo, setPagedUserInfo] = useState<Map<string, ApiUserInfo>>(
+    new Map()
+  );
 
   // Fetch user info only for current page IDs
   useEffect(() => {
@@ -244,14 +238,21 @@ const CsvUpload: React.FC = () => {
   const exportToCsv = (data: GroupedData[]) => {
     if (data.length === 0) return;
 
-    const headers = ["Name", "ID", "AbsentDates", "User Email", "Course"];
-    const rows = data.map(({ Name, ID, AbsentDates, userInfo, Courses }) => [
-      `"${Name.replace(/"/g, '""')}"`,
-      `"${ID.replace(/"/g, '""')}"`,
-      `"${AbsentDates.join("; ").replace(/"/g, '""')}"`,
-      `"${userInfo?.email?.replace(/"/g, '""') ?? ""}"`,
-      `"${Courses?.join("; ").replace(/"/g, '""')}"`,,
-    ]);
+    const headers = ["Name", "ID", "AbsentDates", "User Email", "Courses"];
+    const rows = data.map(({ Name, ID, Absences, userInfo }) => {
+      const formattedAbsences = Absences.map(
+        (a) => `${a.date} (${a.course})`
+      ).join("; ");
+      const courses = [...new Set(Absences.map((a) => a.course))].join("; ");
+
+      return [
+        `"${Name.replace(/"/g, '""')}"`,
+        `"${ID.replace(/"/g, '""')}"`,
+        `"${formattedAbsences.replace(/"/g, '""')}"`,
+        `"${userInfo?.email?.replace(/"/g, '""') ?? ""}"`,
+        `"${courses.replace(/"/g, '""')}"`,
+      ];
+    });
 
     const csvContent = [
       headers.join(","),
@@ -280,7 +281,9 @@ const CsvUpload: React.FC = () => {
         <button
           key={i}
           onClick={() => setCurrentPage(i)}
-          className={i === currentPage ? "pagination-btn active" : "pagination-btn"}
+          className={
+            i === currentPage ? "pagination-btn active" : "pagination-btn"
+          }
         >
           {i}
         </button>
@@ -369,7 +372,8 @@ const CsvUpload: React.FC = () => {
           ) : (
             <>
               <p>
-                <strong>Total Rows: {filteredGroupedData.length}</strong> | Page {currentPage} of {pageCount}
+                <strong>Total Rows: {filteredGroupedData.length}</strong> | Page{" "}
+                {currentPage} of {pageCount}
               </p>
 
               <button
@@ -395,27 +399,34 @@ const CsvUpload: React.FC = () => {
                     <th>ID</th>
                     <th>AbsentDates</th>
                     <th>User Email</th>
-                    <th>Course Name</th>
+                    {/* <th>Course Name</th> */}
                   </tr>
                 </thead>
                 <tbody>
-                  {currentPageData.map(({ Name, ID, AbsentDates, Courses }) => (
+                  {currentPageData.map(({ Name, ID, Absences }) => (
                     <tr key={`${Name}-${ID}`}>
-                      <td className={AbsentDates.length >= 5 ? "red-text" : ""}>
+                      <td className={Absences.length >= 5 ? "red-text" : ""}>
                         {Name}
                       </td>
-                      <td className={AbsentDates.length >= 5 ? "red-text" : ""}>
+                      <td className={Absences.length >= 5 ? "red-text" : ""}>
                         {ID}
                       </td>
-                      <td className={AbsentDates.length >= 5 ? "red-text" : ""}>
-                        {AbsentDates.join(", ")}
+                      <td>
+                        <div className="absences-table">
+                          {Absences.map((a, idx) => (
+                            <div key={idx} className="absence-row">
+                              <div className="absence-date">{a.date}</div>
+                              <div className="absence-course">{a.course}</div>
+                            </div>
+                          ))}
+                        </div>
                       </td>
-                      <td className={AbsentDates.length >= 5 ? "red-text" : ""}>
+                      <td className={Absences.length >= 5 ? "red-text" : ""}>
                         {pagedUserInfo.get(ID)?.email ?? "—"}
                       </td>
-                      <td className={AbsentDates.length >= 5 ? "red-text" : ""}>
-                        {Courses?.join("; ")}
-                      </td>
+                      {/* <td className={Absences.length >= 5 ? "red-text" : ""}>
+                        {[...new Set(Absences.map((a) => a.course))].join(", ")}
+                      </td> */}
                     </tr>
                   ))}
                 </tbody>
@@ -431,3 +442,13 @@ const CsvUpload: React.FC = () => {
 };
 
 export default CsvUpload;
+const fetchCourseInfo = async (courseName: string): Promise<any> => {
+  try {
+    const res = await fetch(`/api/course?name=${encodeURIComponent(courseName)}`);
+    if (!res.ok) throw new Error("API error");
+    return await res.json();
+  } catch (err) {
+    console.error(`Failed to fetch course info for "${courseName}"`, err);
+    return null;
+  }
+};

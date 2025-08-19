@@ -144,3 +144,28 @@ tbody tr:hover {
   background-color: #005bb5;
 }
 
+td div {
+  margin-bottom: 2px;
+  line-height: 1.4;
+}
+.absences-table {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.absence-row {
+  display: grid;
+  grid-template-columns: auto 1fr; /* Date auto-width, course takes remaining */
+  gap: 12px;
+  font-size: 14px;
+  align-items: start;
+}
+
+
+.absence-date,
+.absence-course {
+  white-space: nowrap;
+}
+
+
