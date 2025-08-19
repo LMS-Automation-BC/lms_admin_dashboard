@@ -169,3 +169,39 @@ td div {
 }
 
 
+.name-filter {
+  margin: 10px 0;
+}
+.name-filter input {
+  margin-left: 10px;
+  padding: 5px;
+  width: 200px;
+}
+.name-filter {
+  margin-top: 15px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.name-filter input {
+  padding: 8px;
+  font-size: 14px;
+  flex: 1;
+}
+
+.search-btn {
+  padding: 8px 14px;
+  font-size: 14px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.search-btn:hover {
+  background-color: #218838;
+}

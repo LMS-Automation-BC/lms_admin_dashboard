@@ -61,6 +61,30 @@ const parseCsv = (text: string): CsvRow[] => {
 
   return rows;
 };
+const parseUserCsv = (text: string): Map<string, ApiUserInfo> => {
+  const lines = text.trim().split("\n");
+  const headers = lines[0].split(",");
+  const idIndex = headers.findIndex((h) => h.trim() === "Student ID");
+  const nameIndex = headers.findIndex(
+    (h) => h.trim().toLowerCase() === "full name"
+  );
+  const emailIndex = headers.findIndex(
+    (h) => h.trim().toLowerCase() === "Email Address"
+  );
+
+  const map = new Map<string, ApiUserInfo>();
+  lines.slice(1).forEach((line) => {
+    const values = line.split(",");
+    const id = values[idIndex]?.trim();
+    const fullName = values[nameIndex]?.trim();
+    const email = values[emailIndex]?.trim();
+
+    if (id && fullName && email) {
+      map.set(id, { id, fullName, email });
+    }
+  });
+  return map;
+};
 
 // const parseCsv = (text: string): CsvRow[] => {
 //   const lines = text.trim().split("\n");
@@ -97,6 +121,12 @@ const CsvUpload: React.FC = () => {
   const [endDate, setEndDate] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [dateError, setDateError] = useState<string | null>(null);
+  const [nameSearchInput, setNameSearchInput] = useState<string>(""); // user typing
+  const [nameFilter, setNameFilter] = useState<string>(""); // applied filter
+
+  const [uploadedUserData, setUploadedUserData] = useState<
+    Map<string, ApiUserInfo>
+  >(new Map());
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -149,20 +179,23 @@ const CsvUpload: React.FC = () => {
   // Filter CSV rows by selected date range (without userInfo)
   const filteredGroupedData = useMemo(() => {
     if (!startDate || !endDate) return [];
+
     const from = new Date(startDate);
     const to = new Date(endDate);
     if (to < from) return [];
 
-    // Filter rows based on criteria
     const filteredRows = rawCsvRows.filter((row) => {
       const percentageNum = parseFloat(row.Percentage.replace("%", ""));
       const rowDate = new Date(row.Date);
-      return percentageNum === 0 && rowDate >= from && rowDate <= to;
+      return (
+        percentageNum === 0 &&
+        rowDate >= from &&
+        rowDate <= to &&
+        row.Name.toLowerCase().includes(nameFilter.trim().toLowerCase())
+      );
     });
 
-    // Group by Name + ID
     const groupedMap = new Map<string, GroupedData>();
-
     filteredRows.forEach(({ Name, ID, Date, Course }) => {
       const key = `${Name}-${ID}`;
       if (!groupedMap.has(key)) {
@@ -172,7 +205,7 @@ const CsvUpload: React.FC = () => {
     });
 
     return Array.from(groupedMap.values());
-  }, [rawCsvRows, startDate, endDate]);
+  }, [rawCsvRows, startDate, endDate, nameFilter]);
 
   // Current page's grouped data slice
   const pageCount = Math.ceil(filteredGroupedData.length / PAGE_SIZE);
@@ -204,8 +237,13 @@ const CsvUpload: React.FC = () => {
       const newUserInfoMap = new Map<string, ApiUserInfo>();
 
       for (const group of currentPageData) {
-        if (userCache.has(group.ID)) {
-          newUserInfoMap.set(group.ID, userCache.get(group.ID)!);
+        const cached = userCache.get(group.ID);
+        if (cached) {
+          newUserInfoMap.set(group.ID, cached);
+        } else if (uploadedUserData.has(group.ID)) {
+          const localInfo = uploadedUserData.get(group.ID)!;
+          userCache.set(group.ID, localInfo);
+          newUserInfoMap.set(group.ID, localInfo);
         } else {
           const info = await fetchUserInfo(group.ID);
           if (info) {
@@ -214,6 +252,7 @@ const CsvUpload: React.FC = () => {
           }
         }
       }
+
       setPagedUserInfo(newUserInfoMap);
       setLoading(false);
     };
@@ -223,7 +262,7 @@ const CsvUpload: React.FC = () => {
     } else {
       setPagedUserInfo(new Map());
     }
-  }, [currentPageData, userCache]);
+  }, [currentPageData, , uploadedUserData, userCache]);
   useEffect(() => {
     const fetchCourseInfoForPage = async () => {
       const newCourseMap = new Map(courseInfoMap); // clone existing map
@@ -269,40 +308,43 @@ const CsvUpload: React.FC = () => {
     }
   }, [startDate, endDate]);
 
-const exportToCsv = (data: GroupedData[]) => {
-  if (data.length === 0) return;
+  const exportToCsv = (data: GroupedData[]) => {
+    if (data.length === 0) return;
 
-  const headers = ["Name", "ID", "Email", "Date", "Course"];
-  const rows: string[][] = [];
+    const headers = ["Name", "ID", "Email", "Date", "Course"];
+    const rows: string[][] = [];
 
-  data.forEach(({ Name, ID, Absences }) => {
-    const email = userCache.get(ID)?.email ?? "";
+    data.forEach(({ Name, ID, Absences }) => {
+      const email =
+        uploadedUserData.get(ID)?.email ?? userCache.get(ID)?.email ?? "";
 
-    Absences.forEach(({ date, course }) => {
-      rows.push([
-        `"${Name.replace(/"/g, '""')}"`,
-        `"${ID.replace(/"/g, '""')}"`,
-        `"${email.replace(/"/g, '""')}"`,
-        `"${date.replace(/"/g, '""')}"`,
-        `"${course.replace(/"/g, '""')}"`,
-      ]);
+      Absences.forEach(({ date, course }) => {
+        rows.push([
+          `"${Name.replace(/"/g, '""')}"`,
+          `"${ID.replace(/"/g, '""')}"`,
+          `"${email.replace(/"/g, '""')}"`,
+          `"${date.replace(/"/g, '""')}"`,
+          `"${course.replace(/"/g, '""')}"`,
+        ]);
+      });
     });
-  });
 
-  const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((r) => r.join(",")),
+    ].join("\n");
 
-  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
 
-  const link = document.createElement("a");
-  link.href = url;
-  link.setAttribute("download", "absences.csv");
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
-};
-
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "absences.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
 
   // Pagination controls
   const renderPagination = () => {
@@ -346,45 +388,101 @@ const exportToCsv = (data: GroupedData[]) => {
 
   return (
     <div className="container">
-      <h2>Upload CSV (Name, ID, Date, Percentage, Course)</h2>
-      <label htmlFor="csv-upload" className="upload-label">
-        Choose CSV File
-      </label>
-      <input
-        id="csv-upload"
-        type="file"
-        accept=".csv"
-        onChange={handleFileUpload}
-        disabled={loading}
-      />
+      <div className="upload-buttons">
+        <div className="upload-group">
+          <label htmlFor="csv-upload" className="upload-label">
+            Choose Attendance CSV
+          </label>
+          <input
+            id="csv-upload"
+            type="file"
+            accept=".csv"
+            onChange={handleFileUpload}
+            disabled={loading}
+          />
+        </div>
+        <div className="upload-group">
+          <label htmlFor="user-csv-upload" className="upload-label">
+            Upload User Info CSV
+          </label>
+          <input
+            id="user-csv-upload"
+            type="file"
+            accept=".csv"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+
+              const reader = new FileReader();
+              reader.onload = (event) => {
+                const text = event.target?.result;
+                if (typeof text !== "string") return;
+
+                const userMap = parseUserCsv(text);
+                setUploadedUserData(userMap);
+              };
+              reader.readAsText(file);
+            }}
+            disabled={loading}
+          />
+        </div>
+      </div>
 
       {rawCsvRows.length > 0 && (
-        <div className="date-range-filter">
-          <label>
-            Start Date
-            <Select
-              options={dateOptions}
-              value={startDate ? { value: startDate, label: startDate } : null}
-              onChange={(selectedOption) =>
-                setStartDate(selectedOption ? selectedOption.value : null)
-              }
-              isClearable
-              placeholder="Select start date"
-            />
-          </label>
+        <div>
+          <div className="date-range-filter">
+            <label>
+              Start Date
+              <Select
+                options={dateOptions}
+                value={
+                  startDate ? { value: startDate, label: startDate } : null
+                }
+                onChange={(selectedOption) =>
+                  setStartDate(selectedOption ? selectedOption.value : null)
+                }
+                isClearable
+                placeholder="Select start date"
+              />
+            </label>
 
-          <label>
-            End Date
-            <Select
-              options={dateOptions}
-              value={endDate ? { value: endDate, label: endDate } : null}
-              onChange={(selectedOption) =>
-                setEndDate(selectedOption ? selectedOption.value : null)
-              }
-              isClearable
-              placeholder="Select end date"
-            />
-          </label>
+            <label>
+              End Date
+              <Select
+                options={dateOptions}
+                value={endDate ? { value: endDate, label: endDate } : null}
+                onChange={(selectedOption) =>
+                  setEndDate(selectedOption ? selectedOption.value : null)
+                }
+                isClearable
+                placeholder="Select end date"
+              />
+            </label>
+          </div>
+          <div className="name-filter">
+            <label htmlFor="name-search">
+              Search by Name:
+              <input
+                id="name-search"
+                type="text"
+                value={nameSearchInput}
+                onChange={(e) => setNameSearchInput(e.target.value)}
+                placeholder="Enter student name"
+                disabled={loading}
+              />
+              <button
+                type="button"
+                className="search-btn"
+                onClick={() => {
+                  setCurrentPage(1); // reset to first page on search
+                  setNameFilter(nameSearchInput);
+                }}
+                disabled={loading}
+              >
+                Search
+              </button>
+            </label>
+          </div>
         </div>
       )}
       {dateError && (
@@ -430,46 +528,54 @@ const exportToCsv = (data: GroupedData[]) => {
                   <tr>
                     <th>Name</th>
                     <th>ID</th>
-                    
+
                     <th>User Email</th>
                     <th>AbsentDates</th>
-                     <th>Course Name</th> 
+                    <th>Course Name</th>
                   </tr>
                 </thead>
-               <tbody>
-  {currentPageData.map(({ Name, ID, Absences }) => {
-    const email = pagedUserInfo.get(ID)?.email ?? "—";
-    const isHighlighted = Absences.length >= 5;
+                <tbody>
+                  {currentPageData.map(({ Name, ID, Absences }) => {
+                    const email = pagedUserInfo.get(ID)?.email ?? "—";
+                    const isHighlighted = Absences.length >= 5;
 
-    return Absences.map((absence, index) => (
-      <tr key={`${ID}-${index}`}>
-        {index === 0 && (
-          <>
-            <td rowSpan={Absences.length} className={isHighlighted ? "red-text" : ""}>
-              {Name}
-            </td>
-            <td rowSpan={Absences.length} className={isHighlighted ? "red-text" : ""}>
-              {ID}
-            </td>
-            <td rowSpan={Absences.length} className={isHighlighted ? "red-text" : ""}>
-              {email}
-            </td>
-          </>
-        )}
-        <td>{absence.date}</td>
-        <td>
-          {absence.course}
-          {/* {courseInfoMap.get(absence.course) && (
+                    return Absences.map((absence, index) => (
+                      <tr key={`${ID}-${index}`}>
+                        {index === 0 && (
+                          <>
+                            <td
+                              rowSpan={Absences.length}
+                              className={isHighlighted ? "red-text" : ""}
+                            >
+                              {Name}
+                            </td>
+                            <td
+                              rowSpan={Absences.length}
+                              className={isHighlighted ? "red-text" : ""}
+                            >
+                              {ID}
+                            </td>
+                            <td
+                              rowSpan={Absences.length}
+                              className={isHighlighted ? "red-text" : ""}
+                            >
+                              {email}
+                            </td>
+                          </>
+                        )}
+                        <td>{absence.date}</td>
+                        <td>
+                          {absence.course}
+                          {/* {courseInfoMap.get(absence.course) && (
             <span className="course-info">
               {" "}— {courseInfoMap.get(absence.course).id}
             </span>
           )} */}
-        </td>
-      </tr>
-    ));
-  })}
-</tbody>
-
+                        </td>
+                      </tr>
+                    ));
+                  })}
+                </tbody>
               </table>
 
               {renderPagination()}

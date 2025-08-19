@@ -7,7 +7,6 @@ export async function GET(request: NextRequest) {
   const end = searchParams.get('endDate') ?? '';
 
   try {
-    console.log(`https://brookescollege.neolms.com/api/v3/classes?api_key=6984896035c60de3c3d5d9c23a7aa645675997e4aa9c3fb72e67&$filter={\"name\":\"${decodeURIComponent(name)}\"}&$include=parent,current_lesson,organization`)
     const res = await fetch(`https://brookescollege.neolms.com/api/v3/classes?api_key=6984896035c60de3c3d5d9c23a7aa645675997e4aa9c3fb72e67&$filter={\"name\":\"${decodeURIComponent(name)}\"}&$include=parent,current_lesson,organization`);
     const data = await res.json();
     let sessionId;
