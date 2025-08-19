@@ -22,22 +22,59 @@ interface GroupedData {
   ID: string;
   AbsentDates: string[];
   userInfo?: ApiUserInfo;
-  Course?: string;
+  Courses?: string[];
 }
-
 const parseCsv = (text: string): CsvRow[] => {
   const lines = text.trim().split("\n");
   const headers = lines[0].split(",");
-  return lines.slice(1).map((line) => {
-    const values = line.split(",");
+
+  const rows = lines.slice(1).map((line) => {
+    const values: string[] = [];
+    let current = '';
+    let insideQuotes = false;
+
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      if (char === '"') {
+        insideQuotes = !insideQuotes;
+        continue; // Skip quotes
+      }
+
+      if (char === ',' && !insideQuotes) {
+        values.push(current.trim());
+        current = '';
+      } else {
+        // Replace comma with colon only if inside quotes
+        current += insideQuotes && char === ',' ? ':' : char;
+      }
+    }
+    values.push(current.trim()); // push last cell
+
     const row: any = {};
     headers.forEach((header, i) => {
-      const key = header.trim();
-      row[key === "Course Name" ? "Course" : key] = values[i]?.trim() ?? "";
+      const key = header.trim() === "Course Name" ? "Course" : header.trim();
+      row[key] = values[i] ?? "";
     });
+
     return row as CsvRow;
   });
+
+  return rows;
 };
+
+// const parseCsv = (text: string): CsvRow[] => {
+//   const lines = text.trim().split("\n");
+//   const headers = lines[0].split(",");
+//   return lines.slice(1).map((line) => {
+//     const values = line.split(",");
+//     const row: any = {};
+//     headers.forEach((header, i) => {
+//       const key = header.trim();
+//       row[key === "Course Name" ? "Course" : key] = values[i]?.trim() ?? "";
+//     });
+//     return row as CsvRow;
+//   });
+// };
 
 const fetchUserInfo = async (id: string): Promise<ApiUserInfo | null> => {
   try {
@@ -130,12 +167,17 @@ const CsvUpload: React.FC = () => {
     // Group by Name + ID
     const groupedMap = new Map<string, GroupedData>();
     filteredRows.forEach(({ Name, ID, Date, Course }) => {
-      const key = `${Name}-${ID}`;
-      if (!groupedMap.has(key)) {
-        groupedMap.set(key, { Name, ID, AbsentDates: [], Course });
-      }
-      groupedMap.get(key)!.AbsentDates.push(Date);
-    });
+  const key = `${Name}-${ID}`;
+  if (!groupedMap.has(key)) {
+    groupedMap.set(key, { Name, ID, AbsentDates: [], Courses: [] });
+  }
+  const group = groupedMap.get(key)!;
+  group.AbsentDates.push(Date);
+  if (Course && !group.Courses?.includes(Course)) {
+    group.Courses?.push(Course);
+  }
+});
+
 
     return Array.from(groupedMap.values());
   }, [rawCsvRows, startDate, endDate]);
@@ -203,12 +245,12 @@ const CsvUpload: React.FC = () => {
     if (data.length === 0) return;
 
     const headers = ["Name", "ID", "AbsentDates", "User Email", "Course"];
-    const rows = data.map(({ Name, ID, AbsentDates, userInfo, Course }) => [
+    const rows = data.map(({ Name, ID, AbsentDates, userInfo, Courses }) => [
       `"${Name.replace(/"/g, '""')}"`,
       `"${ID.replace(/"/g, '""')}"`,
       `"${AbsentDates.join("; ").replace(/"/g, '""')}"`,
       `"${userInfo?.email?.replace(/"/g, '""') ?? ""}"`,
-      `"${Course?.replace(/"/g, '""') ?? ""}"`,
+      `"${Courses?.join("; ").replace(/"/g, '""')}"`,,
     ]);
 
     const csvContent = [
@@ -357,22 +399,22 @@ const CsvUpload: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {currentPageData.map(({ Name, ID, AbsentDates, Course }) => (
+                  {currentPageData.map(({ Name, ID, AbsentDates, Courses }) => (
                     <tr key={`${Name}-${ID}`}>
-                      <td className={AbsentDates.length > 5 ? "red-text" : ""}>
+                      <td className={AbsentDates.length >= 5 ? "red-text" : ""}>
                         {Name}
                       </td>
-                      <td className={AbsentDates.length > 5 ? "red-text" : ""}>
+                      <td className={AbsentDates.length >= 5 ? "red-text" : ""}>
                         {ID}
                       </td>
-                      <td className={AbsentDates.length > 5 ? "red-text" : ""}>
+                      <td className={AbsentDates.length >= 5 ? "red-text" : ""}>
                         {AbsentDates.join(", ")}
                       </td>
-                      <td className={AbsentDates.length > 5 ? "red-text" : ""}>
+                      <td className={AbsentDates.length >= 5 ? "red-text" : ""}>
                         {pagedUserInfo.get(ID)?.email ?? "—"}
                       </td>
-                      <td className={AbsentDates.length > 5 ? "red-text" : ""}>
-                        {Course}
+                      <td className={AbsentDates.length >= 5 ? "red-text" : ""}>
+                        {Courses?.join("; ")}
                       </td>
                     </tr>
                   ))}
