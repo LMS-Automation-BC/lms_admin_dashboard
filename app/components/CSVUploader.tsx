@@ -4,7 +4,9 @@ import "./csvUpload.css";
 
 interface CsvRow {
   Name: string;
+
   ID: string;
+  Course: string;
   Date: string;
   Percentage: string;
 }
@@ -20,17 +22,23 @@ interface GroupedData {
   Name: string;
   ID: string;
   AbsentDates: string[];
-  userInfo?: ApiUserInfo; // extra API data per ID
+  userInfo?: ApiUserInfo;
+  Course?: string; // extra API data per ID
 }
 
 const parseCsv = (text: string): CsvRow[] => {
   const lines = text.trim().split("\n");
   const headers = lines[0].split(",");
+
   const rows = lines.slice(1).map((line) => {
     const values = line.split(",");
     const row: any = {};
     headers.forEach((header, i) => {
-      row[header.trim()] = values[i]?.trim() ?? "";
+      if (header.trim() === "Course Name") {
+        row.Course = values[i];
+      } else {
+        row[header.trim()] = values[i]?.trim() ?? "";
+      }
     });
     return row as CsvRow;
   });
@@ -42,7 +50,7 @@ const isDateInLast5Days = (dateStr: string): boolean => {
   const now = new Date();
   const diffTime = now.getTime() - date.getTime();
   const diffDays = diffTime / (1000 * 60 * 60 * 24);
-  return diffDays >= 0 && diffDays <= 5;
+  return diffDays >= 0 && diffDays <= 7;
 };
 
 const fetchUserInfo = async (id: string): Promise<ApiUserInfo | null> => {
@@ -85,10 +93,10 @@ const CsvUpload: React.FC = () => {
 
       // Group by Name + ID
       const groupedMap = new Map<string, GroupedData>();
-      filtered.forEach(({ Name, ID, Date }) => {
+      filtered.forEach(({ Name, ID, Date, Course }) => {
         const key = `${Name}-${ID}`;
         if (!groupedMap.has(key)) {
-          groupedMap.set(key, { Name, ID, AbsentDates: [] });
+          groupedMap.set(key, { Name, ID, AbsentDates: [], Course }); // <-- assign Course here
         }
         groupedMap.get(key)!.AbsentDates.push(Date);
       });
@@ -97,9 +105,19 @@ const CsvUpload: React.FC = () => {
       const groupedArray = Array.from(groupedMap.values());
 
       // For each group, fetch user info API by ID
+      const userCache = new Map<string, ApiUserInfo>();
       const withUserInfo: GroupedData[] = [];
+
       for (const group of groupedArray) {
-        const userInfo = await fetchUserInfo(group.ID);
+        let userInfo = userCache.get(group.ID);
+
+        if (!userInfo) {
+          userInfo = (await fetchUserInfo(group.ID)) || undefined; 
+          if (userInfo) {
+            userCache.set(group.ID, userInfo); // ✅ cache it
+          }
+        }
+
         withUserInfo.push({ ...group, userInfo: userInfo ?? undefined });
       }
 
@@ -148,7 +166,9 @@ const CsvUpload: React.FC = () => {
 
       {groupedData.length > 0 && (
         <>
-        <p><strong>Total Rows: {filteredData.length}</strong></p>
+          <p>
+            <strong>Total Rows: {filteredData.length}</strong>
+          </p>
           <div className="date-filters">
             <button
               className={`date-filter-btn ${
@@ -170,14 +190,14 @@ const CsvUpload: React.FC = () => {
               </button>
             ))}
           </div>
-  <button
-      className="upload-label"
-      style={{ marginBottom: '15px' }}
-      onClick={() => exportToCsv(filteredData)}
-      disabled={filteredData.length === 0}
-    >
-      Export CSV
-    </button>
+          <button
+            className="upload-label"
+            style={{ marginBottom: "15px" }}
+            onClick={() => exportToCsv(filteredData)}
+            disabled={filteredData.length === 0}
+          >
+            Export CSV
+          </button>
           <table>
             <thead>
               <tr>
@@ -185,20 +205,32 @@ const CsvUpload: React.FC = () => {
                 <th>ID</th>
                 <th>AbsentDates</th>
                 <th>User Email</th>
+                <th>Course Name</th>
                 {/* example extra info from API */}
               </tr>
             </thead>
             <tbody>
-              {filteredData.map(({ Name, ID, AbsentDates, userInfo }) => (
-                <tr key={`${Name}-${ID}`}>
-                  <td  className={AbsentDates.length > 5 ? "red-text" : ""}>{Name}</td>
-                  <td  className={AbsentDates.length > 5 ? "red-text" : ""}>{ID}</td>
-                  <td className={AbsentDates.length > 5 ? "red-text" : ""}>
-                    {AbsentDates.join(", ")}
-                  </td>
-                  <td  className={AbsentDates.length > 5 ? "red-text" : ""}>{userInfo?.email ?? "—"}</td>
-                </tr>
-              ))}
+              {filteredData.map(
+                ({ Name, ID, AbsentDates, userInfo, Course }) => (
+                  <tr key={`${Name}-${ID}`}>
+                    <td className={AbsentDates.length > 5 ? "red-text" : ""}>
+                      {Name}
+                    </td>
+                    <td className={AbsentDates.length > 5 ? "red-text" : ""}>
+                      {ID}
+                    </td>
+                    <td className={AbsentDates.length > 5 ? "red-text" : ""}>
+                      {AbsentDates.join(", \n ")}
+                    </td>
+                    <td className={AbsentDates.length > 5 ? "red-text" : ""}>
+                      {userInfo?.email ?? "—"}
+                    </td>
+                    <td className={AbsentDates.length > 5 ? "red-text" : ""}>
+                      {Course}
+                    </td>
+                  </tr>
+                )
+              )}
             </tbody>
           </table>
         </>
@@ -212,28 +244,40 @@ const exportToCsv = (data: GroupedData[]) => {
   if (data.length === 0) return;
 
   // CSV header
-  const headers = ['Name', 'ID', 'AbsentDates', 'User Email'];
+  const headers = ["Name", "ID", "AbsentDates", "User Email", "Course"];
 
   // Build CSV rows
-  const rows = data.map(({ Name, ID, AbsentDates, userInfo }) => [
+  const rows = data.map(({ Name, ID, AbsentDates, userInfo, Course }) => [
     `"${Name.replace(/"/g, '""')}"`,
     `"${ID.replace(/"/g, '""')}"`,
-    `"${AbsentDates.join('; ').replace(/"/g, '""')}"`,
-    `"${userInfo?.email?.replace(/"/g, '""') ?? ''}"`,
+    `"${AbsentDates.join("; ").replace(/"/g, '""')}"`,
+    `"${userInfo?.email?.replace(/"/g, '""') ?? ""}"`,
+    `"${Course?.replace(/"/g, '""') ?? ""}"`,
   ]);
 
-  const csvContent =
-    [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
+  const csvContent = [
+    headers.join(","),
+    ...rows.map((row) => row.join(",")),
+  ].join("\n");
 
-  // Create blob and trigger download
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
 
-  const link = document.createElement('a');
+  const link = document.createElement("a");
   link.href = url;
-  link.setAttribute('download', 'exported_data.csv');
+  link.setAttribute("download", "exported_data.csv");
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
+};
+
+const getDistinctCourses = (rows: CsvRow[]): string[] => {
+  const courseSet = new Set<string>();
+  rows.forEach((row) => {
+    if (row.Course) {
+      courseSet.add(row.Course);
+    }
+  });
+  return Array.from(courseSet);
 };
