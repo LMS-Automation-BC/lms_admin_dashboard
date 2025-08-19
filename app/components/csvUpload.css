@@ -83,4 +83,64 @@ tbody tr:hover {
   color: red;
   font-weight: 700;
 }
+.date-range-filter {
+  margin: 20px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: center;
+}
+
+.date-range-filter label {
+  font-weight: 600;
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  color: #333;
+}
+
+.date-range-filter select {
+  margin-top: 5px;
+  padding: 8px 12px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  transition: border-color 0.2s ease-in-out;
+}
+
+.date-range-filter select:focus {
+  outline: none;
+  border-color: #0070f3;
+  background-color: #fff;
+}
+.pagination {
+  margin-top: 15px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+
+.pagination-btn {
+  background-color: #0070f3;
+  border: none;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.pagination-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.pagination-btn.active {
+  font-weight: 700;
+  background-color: #005bb5;
+}
 
