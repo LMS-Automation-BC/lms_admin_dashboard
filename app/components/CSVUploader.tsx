@@ -78,7 +78,7 @@ const parseCsv = (text: string): CsvRow[] => {
 
 const fetchUserInfo = async (id: string): Promise<ApiUserInfo | null> => {
   try {
-    const response = await fetch(`/api/lms?userId=${id}`);
+    const response = await fetch(`/api/user?userId=${id}`);
     if (!response.ok) throw new Error("API error");
     const data = await response.json();
     return data as ApiUserInfo;
@@ -193,6 +193,9 @@ const CsvUpload: React.FC = () => {
   const [pagedUserInfo, setPagedUserInfo] = useState<Map<string, ApiUserInfo>>(
     new Map()
   );
+  const [courseInfoMap, setCourseInfoMap] = useState<Map<string, any>>(
+    new Map()
+  );
 
   // Fetch user info only for current page IDs
   useEffect(() => {
@@ -221,6 +224,37 @@ const CsvUpload: React.FC = () => {
       setPagedUserInfo(new Map());
     }
   }, [currentPageData, userCache]);
+  useEffect(() => {
+    const fetchCourseInfoForPage = async () => {
+      const newCourseMap = new Map(courseInfoMap); // clone existing map
+
+      const coursesToFetch = new Set<string>();
+      for (const group of currentPageData) {
+        for (const { course } of group.Absences) {
+          if (course && !newCourseMap.has(course)) {
+            coursesToFetch.add(course);
+          }
+        }
+      }
+
+      for (const course of coursesToFetch) {
+        const info = await fetchCourseInfo(
+          course,
+          startDate || undefined,
+          endDate || undefined
+        );
+        if (info) {
+          newCourseMap.set(course, info);
+        }
+      }
+
+      setCourseInfoMap(newCourseMap);
+    };
+
+    if (currentPageData.length > 0) {
+      fetchCourseInfoForPage();
+    }
+  }, [currentPageData]);
 
   // Error checking for date
   useEffect(() => {
@@ -235,41 +269,40 @@ const CsvUpload: React.FC = () => {
     }
   }, [startDate, endDate]);
 
-  const exportToCsv = (data: GroupedData[]) => {
-    if (data.length === 0) return;
+const exportToCsv = (data: GroupedData[]) => {
+  if (data.length === 0) return;
 
-    const headers = ["Name", "ID", "AbsentDates", "User Email", "Courses"];
-    const rows = data.map(({ Name, ID, Absences, userInfo }) => {
-      const formattedAbsences = Absences.map(
-        (a) => `${a.date} (${a.course})`
-      ).join("; ");
-      const courses = [...new Set(Absences.map((a) => a.course))].join("; ");
+  const headers = ["Name", "ID", "Email", "Date", "Course"];
+  const rows: string[][] = [];
 
-      return [
+  data.forEach(({ Name, ID, Absences }) => {
+    const email = userCache.get(ID)?.email ?? "";
+
+    Absences.forEach(({ date, course }) => {
+      rows.push([
         `"${Name.replace(/"/g, '""')}"`,
         `"${ID.replace(/"/g, '""')}"`,
-        `"${formattedAbsences.replace(/"/g, '""')}"`,
-        `"${userInfo?.email?.replace(/"/g, '""') ?? ""}"`,
-        `"${courses.replace(/"/g, '""')}"`,
-      ];
+        `"${email.replace(/"/g, '""')}"`,
+        `"${date.replace(/"/g, '""')}"`,
+        `"${course.replace(/"/g, '""')}"`,
+      ]);
     });
+  });
 
-    const csvContent = [
-      headers.join(","),
-      ...rows.map((r) => r.join(",")),
-    ].join("\n");
+  const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
 
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
 
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", "filtered_data.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  };
+  const link = document.createElement("a");
+  link.href = url;
+  link.setAttribute("download", "absences.csv");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
+
 
   // Pagination controls
   const renderPagination = () => {
@@ -397,39 +430,46 @@ const CsvUpload: React.FC = () => {
                   <tr>
                     <th>Name</th>
                     <th>ID</th>
-                    <th>AbsentDates</th>
+                    
                     <th>User Email</th>
-                    {/* <th>Course Name</th> */}
+                    <th>AbsentDates</th>
+                     <th>Course Name</th> 
                   </tr>
                 </thead>
-                <tbody>
-                  {currentPageData.map(({ Name, ID, Absences }) => (
-                    <tr key={`${Name}-${ID}`}>
-                      <td className={Absences.length >= 5 ? "red-text" : ""}>
-                        {Name}
-                      </td>
-                      <td className={Absences.length >= 5 ? "red-text" : ""}>
-                        {ID}
-                      </td>
-                      <td>
-                        <div className="absences-table">
-                          {Absences.map((a, idx) => (
-                            <div key={idx} className="absence-row">
-                              <div className="absence-date">{a.date}</div>
-                              <div className="absence-course">{a.course}</div>
-                            </div>
-                          ))}
-                        </div>
-                      </td>
-                      <td className={Absences.length >= 5 ? "red-text" : ""}>
-                        {pagedUserInfo.get(ID)?.email ?? "—"}
-                      </td>
-                      {/* <td className={Absences.length >= 5 ? "red-text" : ""}>
-                        {[...new Set(Absences.map((a) => a.course))].join(", ")}
-                      </td> */}
-                    </tr>
-                  ))}
-                </tbody>
+               <tbody>
+  {currentPageData.map(({ Name, ID, Absences }) => {
+    const email = pagedUserInfo.get(ID)?.email ?? "—";
+    const isHighlighted = Absences.length >= 5;
+
+    return Absences.map((absence, index) => (
+      <tr key={`${ID}-${index}`}>
+        {index === 0 && (
+          <>
+            <td rowSpan={Absences.length} className={isHighlighted ? "red-text" : ""}>
+              {Name}
+            </td>
+            <td rowSpan={Absences.length} className={isHighlighted ? "red-text" : ""}>
+              {ID}
+            </td>
+            <td rowSpan={Absences.length} className={isHighlighted ? "red-text" : ""}>
+              {email}
+            </td>
+          </>
+        )}
+        <td>{absence.date}</td>
+        <td>
+          {absence.course}
+          {/* {courseInfoMap.get(absence.course) && (
+            <span className="course-info">
+              {" "}— {courseInfoMap.get(absence.course).id}
+            </span>
+          )} */}
+        </td>
+      </tr>
+    ));
+  })}
+</tbody>
+
               </table>
 
               {renderPagination()}
@@ -442,9 +482,17 @@ const CsvUpload: React.FC = () => {
 };
 
 export default CsvUpload;
-const fetchCourseInfo = async (courseName: string): Promise<any> => {
+const fetchCourseInfo = async (
+  courseName: string,
+  startDate?: string,
+  endDate?: string
+): Promise<any> => {
   try {
-    const res = await fetch(`/api/course?name=${encodeURIComponent(courseName)}`);
+    const res = await fetch(
+      `/api/class?name=${encodeURIComponent(
+        courseName
+      )}&startDate=${startDate}&endDate=${endDate}`
+    );
     if (!res.ok) throw new Error("API error");
     return await res.json();
   } catch (err) {
