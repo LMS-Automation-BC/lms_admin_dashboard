@@ -549,7 +549,7 @@ const CsvUpload: React.FC = () => {
             </label>
 
             <label>
-              Courses
+              Course
               <Select
                 options={courseOptions}
                 value={
@@ -559,7 +559,7 @@ const CsvUpload: React.FC = () => {
                   setCourseName(selectedOption ? selectedOption.value : null)
                 }
                 isClearable
-                placeholder="Select end date"
+                placeholder="Select Course"
               />
             </label>
           </div>
