@@ -20,7 +20,7 @@ interface ApiUserInfo {
 interface GroupedData {
   Name: string;
   ID: string;
-  Absences: { date: string; course: string }[];
+  Absences: { date: string; course: string, note:string }[];
   userInfo?: ApiUserInfo;
 }
 
@@ -121,7 +121,13 @@ const CsvUpload: React.FC = () => {
   const [courseName, setCourseName] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [dateError, setDateError] = useState<string | null>(null);
-  const [textSearchInput, setTextSearchInput] = useState<string>(""); // user typing
+  // State to hold user info for current page rows
+  const [pagedUserInfo, setPagedUserInfo] = useState<Map<string, ApiUserInfo>>(
+    new Map()
+  );
+  const [courseInfoMap, setCourseInfoMap] = useState<Map<string, any>>(
+    new Map()
+  );
 
   const [courseInfoLoading, setCourseInfoLoading] = useState(false);
   const [uploadedUserData, setUploadedUserData] = useState<
@@ -260,14 +266,36 @@ const CsvUpload: React.FC = () => {
     const groupedMap = new Map<string, GroupedData>();
     filteredRows.forEach(({ Name, ID, Date, Course }) => {
       const key = `${Name}-${ID}`;
-      if (!groupedMap.has(key)) {
-        groupedMap.set(key, { Name, ID, Absences: [] });
-      }
-      groupedMap.get(key)!.Absences.push({ date: Date, course: Course });
-    });
+       // Try to find note from courseInfo
+    const courseInfo = courseInfoMap.get(Course);
+    let note = "—"; // Default if not found
 
-    return Array.from(groupedMap.values());
-  }, [rawCsvRows, startDate, endDate, selectedStudent, courseName]);
+    if (courseInfo) {
+      const matchedSession = courseInfo.find(
+        (session: any) =>  session.sessionDate.indexOf( Date) > -1
+      );
+
+      const studentEntry = matchedSession?.attendance.find(
+        (entry: any) =>
+          entry.user_id?.toString() === ID || entry.id?.toString() === ID
+      );
+
+      note = studentEntry?.note || "no notes found";
+    } else {
+      note = "Course info not found (check LMS or report)";
+    }
+    if (!groupedMap.has(key)) {
+        groupedMap.set(key, { Name, ID, Absences: [] });
+    }
+    groupedMap.get(key)!.Absences.push({
+      date: Date,
+      course: Course,
+      note, // Embed note here
+    });
+  });
+
+  return Array.from(groupedMap.values());
+  }, [rawCsvRows, startDate, endDate, selectedStudent, courseName, courseInfoMap]);
 
   // Current page's grouped data slice
   const pageCount = Math.ceil(filteredGroupedData.length / PAGE_SIZE);
@@ -284,13 +312,7 @@ const CsvUpload: React.FC = () => {
     return filteredGroupedData.slice(startIndex, startIndex + PAGE_SIZE);
   }, [filteredGroupedData, currentPage]);
 
-  // State to hold user info for current page rows
-  const [pagedUserInfo, setPagedUserInfo] = useState<Map<string, ApiUserInfo>>(
-    new Map()
-  );
-  const [courseInfoMap, setCourseInfoMap] = useState<Map<string, any>>(
-    new Map()
-  );
+  
 
   // Fetch user info only for current page IDs
   useEffect(() => {
@@ -376,20 +398,21 @@ const CsvUpload: React.FC = () => {
   const exportToCsv = (data: GroupedData[]) => {
     if (data.length === 0) return;
 
-    const headers = ["Name", "ID", "Email", "Date", "Course"];
+    const headers = ["Name", "ID", "Email", "Date", "Course","Notes"];
     const rows: string[][] = [];
 
     data.forEach(({ Name, ID, Absences }) => {
       const email =
         uploadedUserData.get(ID)?.email ?? userCache.get(ID)?.email ?? "";
 
-      Absences.forEach(({ date, course }) => {
+      Absences.forEach(({ date, course, note }) => {
         rows.push([
           `"${Name.replace(/"/g, '""')}"`,
           `"${ID.replace(/"/g, '""')}"`,
           `"${email.replace(/"/g, '""')}"`,
           `"${date.replace(/"/g, '""')}"`,
           `"${course.replace(/"/g, '""')}"`,
+          `"${note.replace(/"/g, '""')}"`,
         ]);
       });
     });
@@ -629,7 +652,8 @@ const CsvUpload: React.FC = () => {
                         <td>{absence.date}</td>
                         <td>{absence.course}</td>
                         <td>
-                          {courseInfoLoading ? (
+                          {absence.note}
+                          {/* {courseInfoLoading ? (
                             <span style={{ color: "#aaa" }}>Loading...</span>
                           ) : (
                             (() => {
@@ -662,7 +686,7 @@ const CsvUpload: React.FC = () => {
                               //return studentEntry?.note || "—";
                               return studentEntry[0].note || 'no notes found';
                             })()
-                          )}
+                          )} */}
                         </td>
                       </tr>
                     ));
