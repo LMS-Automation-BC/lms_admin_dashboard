@@ -64,12 +64,10 @@ const parseCsv = (text: string): CsvRow[] => {
 const parseUserCsv = (text: string): Map<string, ApiUserInfo> => {
   const lines = text.trim().split("\n");
   const headers = lines[0].split(",");
-  const idIndex = headers.findIndex((h) => h.trim() === "Student ID");
-  const nameIndex = headers.findIndex(
-    (h) => h.trim().toLowerCase() === "full name"
-  );
+  const idIndex = headers.findIndex((h) => h.trim() === "ID");
+  const nameIndex = headers.findIndex((h) => h.trim() === "First name");
   const emailIndex = headers.findIndex(
-    (h) => h.trim().toLowerCase() === "Email Address"
+    (h) => h.trim().toLowerCase().indexOf("email") > -1
   );
 
   const map = new Map<string, ApiUserInfo>();
@@ -119,11 +117,13 @@ const CsvUpload: React.FC = () => {
   const [groupedData, setGroupedData] = useState<GroupedData[]>([]);
   const [startDate, setStartDate] = useState<string | null>(null);
   const [endDate, setEndDate] = useState<string | null>(null);
+  const [selectedStudent, setselectedStudent] = useState<string | null>(null);
+  const [courseName, setCourseName] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [dateError, setDateError] = useState<string | null>(null);
-  const [nameSearchInput, setNameSearchInput] = useState<string>(""); // user typing
-  const [nameFilter, setNameFilter] = useState<string>(""); // applied filter
+  const [textSearchInput, setTextSearchInput] = useState<string>(""); // user typing
 
+  const [courseInfoLoading, setCourseInfoLoading] = useState(false);
   const [uploadedUserData, setUploadedUserData] = useState<
     Map<string, ApiUserInfo>
   >(new Map());
@@ -136,6 +136,9 @@ const CsvUpload: React.FC = () => {
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    const label = document.getElementById("csv-filename");
+    if (label && file) label.textContent = file.name;
+
     if (!file) return;
 
     const reader = new FileReader();
@@ -147,6 +150,8 @@ const CsvUpload: React.FC = () => {
       setRawCsvRows(rows);
       setStartDate(null);
       setEndDate(null);
+      setselectedStudent(null);
+      setCourseName(null);
       setGroupedData([]);
       setCurrentPage(1);
       userCache.clear();
@@ -155,7 +160,46 @@ const CsvUpload: React.FC = () => {
 
     reader.readAsText(file);
   };
+  const uniqueUsers = useMemo(() => {
+    if (!startDate || !endDate) return [];
 
+    const from = new Date(startDate);
+    const to = new Date(endDate);
+
+    const seen = new Set<string>();
+    const users: { id: string; name: string }[] = [];
+
+    rawCsvRows.forEach((row) => {
+      const rowDate = new Date(row.Date);
+      if (isNaN(rowDate.getTime()) || rowDate < from || rowDate > to) return;
+
+      const id = row.ID.trim();
+      const name = row.Name.trim();
+      const key = `${id}-${name}`;
+
+      if (!seen.has(key)) {
+        seen.add(key);
+        users.push({ id, name });
+      }
+    });
+
+    return users.sort((a, b) => a.name.localeCompare(b.name));
+  }, [rawCsvRows, startDate, endDate]);
+  const uniqueCourseNames = useMemo(() => {
+    if (!startDate) return [];
+    if (!endDate) return [];
+    const from = new Date(startDate);
+    const to = new Date(endDate);
+    const courses = rawCsvRows
+      .filter((row) => {
+        const rowDate = new Date(row.Date);
+        return !isNaN(rowDate.getTime()) && rowDate >= from && rowDate <= to;
+      })
+      .map((row) => row.Course.trim())
+      .filter(Boolean); // Remove empty strings
+
+    return Array.from(new Set(courses)).sort((a, b) => a.localeCompare(b));
+  }, [rawCsvRows, startDate, endDate]);
   // Unique dates from CSV
   const uniqueDates = useMemo(() => {
     const allDates = rawCsvRows
@@ -175,6 +219,14 @@ const CsvUpload: React.FC = () => {
     value: date,
     label: date,
   }));
+  const studentOptions = uniqueUsers.map((user) => ({
+    value: user.name,
+    label: user.name,
+  }));
+  const courseOptions = uniqueCourseNames.map((course) => ({
+    value: course,
+    label: course,
+  }));
 
   // Filter CSV rows by selected date range (without userInfo)
   const filteredGroupedData = useMemo(() => {
@@ -187,12 +239,22 @@ const CsvUpload: React.FC = () => {
     const filteredRows = rawCsvRows.filter((row) => {
       const percentageNum = parseFloat(row.Percentage.replace("%", ""));
       const rowDate = new Date(row.Date);
-      return (
-        percentageNum === 0 &&
-        rowDate >= from &&
-        rowDate <= to &&
-        row.Name.toLowerCase().includes(nameFilter.trim().toLowerCase())
-      );
+
+      // Check percentage and date range first
+      const isAbsent = percentageNum === 0;
+      const inDateRange = rowDate >= from && rowDate <= to;
+
+      // Apply student filter if set
+      const matchesStudent = selectedStudent
+        ? row.Name.toLowerCase().includes(selectedStudent.toLowerCase())
+        : true;
+
+      // Apply course name filter if set
+      const matchesCourse = courseName
+        ? row.Course.toLowerCase().includes(courseName.toLowerCase())
+        : true;
+
+      return isAbsent && inDateRange && matchesStudent && matchesCourse;
     });
 
     const groupedMap = new Map<string, GroupedData>();
@@ -205,7 +267,7 @@ const CsvUpload: React.FC = () => {
     });
 
     return Array.from(groupedMap.values());
-  }, [rawCsvRows, startDate, endDate, nameFilter]);
+  }, [rawCsvRows, startDate, endDate, selectedStudent, courseName]);
 
   // Current page's grouped data slice
   const pageCount = Math.ceil(filteredGroupedData.length / PAGE_SIZE);
@@ -262,9 +324,11 @@ const CsvUpload: React.FC = () => {
     } else {
       setPagedUserInfo(new Map());
     }
-  }, [currentPageData, , uploadedUserData, userCache]);
+  }, [currentPageData, uploadedUserData, userCache]);
   useEffect(() => {
     const fetchCourseInfoForPage = async () => {
+      setCourseInfoLoading(true);
+
       const newCourseMap = new Map(courseInfoMap); // clone existing map
 
       const coursesToFetch = new Set<string>();
@@ -288,12 +352,13 @@ const CsvUpload: React.FC = () => {
       }
 
       setCourseInfoMap(newCourseMap);
+      setCourseInfoLoading(false);
     };
 
     if (currentPageData.length > 0) {
       fetchCourseInfoForPage();
     }
-  }, [currentPageData]);
+  }, [currentPageData, startDate, endDate]);
 
   // Error checking for date
   useEffect(() => {
@@ -400,6 +465,7 @@ const CsvUpload: React.FC = () => {
             onChange={handleFileUpload}
             disabled={loading}
           />
+          <span id="csv-filename" className="filename-label"></span>
         </div>
         <div className="upload-group">
           <label htmlFor="user-csv-upload" className="upload-label">
@@ -411,6 +477,8 @@ const CsvUpload: React.FC = () => {
             accept=".csv"
             onChange={(e) => {
               const file = e.target.files?.[0];
+              const label = document.getElementById("user-filename");
+              if (label) label.textContent = file?.name || "";
               if (!file) return;
 
               const reader = new FileReader();
@@ -425,6 +493,7 @@ const CsvUpload: React.FC = () => {
             }}
             disabled={loading}
           />
+          <span id="user-filename" className="filename-label"></span>
         </div>
       </div>
 
@@ -460,27 +529,38 @@ const CsvUpload: React.FC = () => {
             </label>
           </div>
           <div className="name-filter">
-            <label htmlFor="name-search">
-              Search by Name:
-              <input
-                id="name-search"
-                type="text"
-                value={nameSearchInput}
-                onChange={(e) => setNameSearchInput(e.target.value)}
-                placeholder="Enter student name"
-                disabled={loading}
+            <label>
+              Student Name
+              <Select
+                options={studentOptions}
+                value={
+                  selectedStudent
+                    ? { value: selectedStudent, label: selectedStudent }
+                    : null
+                }
+                onChange={(selectedOption) =>
+                  setselectedStudent(
+                    selectedOption ? selectedOption.value : null
+                  )
+                }
+                isClearable
+                placeholder="Select Student"
               />
-              <button
-                type="button"
-                className="search-btn"
-                onClick={() => {
-                  setCurrentPage(1); // reset to first page on search
-                  setNameFilter(nameSearchInput);
-                }}
-                disabled={loading}
-              >
-                Search
-              </button>
+            </label>
+
+            <label>
+              Courses
+              <Select
+                options={courseOptions}
+                value={
+                  courseName ? { value: courseName, label: courseName } : null
+                }
+                onChange={(selectedOption) =>
+                  setCourseName(selectedOption ? selectedOption.value : null)
+                }
+                isClearable
+                placeholder="Select end date"
+              />
             </label>
           </div>
         </div>
@@ -527,11 +607,10 @@ const CsvUpload: React.FC = () => {
                 <thead>
                   <tr>
                     <th>Name</th>
-                    <th>ID</th>
-
                     <th>User Email</th>
                     <th>AbsentDates</th>
                     <th>Course Name</th>
+                    <th>Notes</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -540,37 +619,50 @@ const CsvUpload: React.FC = () => {
                     const isHighlighted = Absences.length >= 5;
 
                     return Absences.map((absence, index) => (
-                      <tr key={`${ID}-${index}`}>
-                        {index === 0 && (
-                          <>
-                            <td
-                              rowSpan={Absences.length}
-                              className={isHighlighted ? "red-text" : ""}
-                            >
-                              {Name}
-                            </td>
-                            <td
-                              rowSpan={Absences.length}
-                              className={isHighlighted ? "red-text" : ""}
-                            >
-                              {ID}
-                            </td>
-                            <td
-                              rowSpan={Absences.length}
-                              className={isHighlighted ? "red-text" : ""}
-                            >
-                              {email}
-                            </td>
-                          </>
-                        )}
+                      <tr key={`${ID}-${absence.date}-${index}`}>
+                        <td className={isHighlighted ? "red-text" : ""}>
+                          {Name}
+                        </td>
+                        <td className={isHighlighted ? "red-text" : ""}>
+                          {email}
+                        </td>
                         <td>{absence.date}</td>
+                        <td>{absence.course}</td>
                         <td>
-                          {absence.course}
-                          {/* {courseInfoMap.get(absence.course) && (
-            <span className="course-info">
-              {" "}— {courseInfoMap.get(absence.course).id}
-            </span>
-          )} */}
+                          {courseInfoLoading ? (
+                            <span style={{ color: "#aaa" }}>Loading...</span>
+                          ) : (
+                            (() => {
+                              const courseInfo = courseInfoMap.get(
+                                absence.course
+                              );
+                              if(!courseInfo){
+                                return 'Course info not found check name on lms or report'
+                              }
+                              const attendanceList = courseInfo?.filter(
+                                (x: any) => {
+                                  
+                                   return x.sessionDate.indexOf( absence.date) > -1;
+                                }
+                              );
+                              
+                              if(!courseInfo){
+                                return 'could not find session'
+                              }
+                              const studentEntry =
+                                attendanceList?.[0]?.attendance.filter(
+                                  (entry: any) =>{
+                                    return entry.user_id.toString() === ID || entry.id.toString() === ID
+                                  }
+                                );
+                                
+                              if(!studentEntry){
+                                return 'could not find student in session'
+                              }
+                              //return studentEntry?.note || "—";
+                              return studentEntry[0].note || 'no notes found';
+                            })()
+                          )}
                         </td>
                       </tr>
                     ));
@@ -595,9 +687,7 @@ const fetchCourseInfo = async (
 ): Promise<any> => {
   try {
     const res = await fetch(
-      `/api/class?name=${encodeURIComponent(
-        courseName
-      )}&startDate=${startDate}&endDate=${endDate}`
+      `/api/class?name=${courseName}&startDate=${startDate}&endDate=${endDate}`
     );
     if (!res.ok) throw new Error("API error");
     return await res.json();

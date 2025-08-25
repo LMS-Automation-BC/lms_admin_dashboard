@@ -18,6 +18,11 @@ const menuItems: MenuItem[] = [
     path: '/attendance',
     icon: FiActivity,
   },
+  {
+    name: 'Grade Transcript Generator',
+    path: '/grades',
+    icon: FiActivity,
+  }
   // You can add more menu items like this:
   // { name: 'Dashboard', path: '/dashboard', icon: FiGrid },
 ];

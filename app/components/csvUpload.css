@@ -205,3 +205,33 @@ td div {
 .search-btn:hover {
   background-color: #218838;
 }
+.reset-btn {
+  padding: 8px 14px;
+  font-size: 14px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.reset-btn:hover {
+  background-color: #c82333;
+}
+input[type="file"] {
+  display: none;
+}
+.name-filter {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Two equal columns */
+  gap: 1rem; /* Optional: spacing between columns */
+  margin-top: 1rem;
+}
+.name-filter label {
+  grid-column: span 1; /* Each label spans both columns */
+  display: flex;
+  flex-direction: column;
+  font-weight: bold;
+}
