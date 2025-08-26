@@ -267,9 +267,12 @@ const CsvUpload: React.FC = () => {
     filteredRows.forEach(({ Name, ID, Date, Course }) => {
       const key = `${Name}-${ID}`;
        // Try to find note from courseInfo
-    const courseInfo = courseInfoMap.get(Course);
     let note = "—"; // Default if not found
-
+      if (!courseInfoMap || courseInfoMap.size === 0) {
+    note = "Loading...";
+    } 
+       const courseInfo = courseInfoMap.get(Course);
+    
     if (courseInfo) {
       const matchedSession = courseInfo.find(
         (session: any) =>  session.sessionDate.indexOf( Date) > -1

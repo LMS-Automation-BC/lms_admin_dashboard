@@ -1,34 +1,3 @@
-export const getClassByName = async (className: string) => {
-  const res = await fetch(
-    `https://brookescollege.neolms.com/api/v3/classes?api_key=6984896035c60de3c3d5d9c23a7aa645675997e4aa9c3fb72e67&$filter={\"name\":\"${decodeURIComponent(
-      className
-    )}\"}&$include=parent,current_lesson,organization`
-  );
-  if (!res.ok) {
-    const errorText = await res.text();
-    console.log(errorText);
-    throw "Failed to fetch class";
-  }
-
-  let classes = await res.json();
-  if (!classes[0]) {
-    console.log('searching archives for '+decodeURIComponent(
-      className
-    ))
-    const archivedres = await fetch(
-      `https://brookescollege.neolms.com/api/v3/classes?api_key=6984896035c60de3c3d5d9c23a7aa645675997e4aa9c3fb72e67&&$filter={\"and\":[{\"name\":\"${decodeURIComponent(
-        className
-      )}\"},{\"archived\":\"true\"}]}&$include=parent,current_lesson,organization`
-    );
-    if (!archivedres.ok) {
-      const errorText = await archivedres.text();
-      console.log(errorText);
-      throw "Failed to fetch class";
-    }
-    classes = await archivedres.json();
-  }
-  return classes[0]; // assuming only one class matches
-};
 
 export const getSessionsForClass = async (
   classId: string,
