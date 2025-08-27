@@ -25,7 +25,7 @@ const CsvCombiner = () => {
     showAbsentOnly:false
   });
   const filteredData = useMemo(() => {
-    
+    console.log('filter memeo triggerd')
     const data
     = combinedData.filter((row) => {
       if (filters.startDate && new Date(row.date) < new Date(filters.startDate))

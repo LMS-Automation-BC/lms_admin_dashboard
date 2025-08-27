@@ -280,7 +280,7 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({ data }) => {
                 Export to Excel
               </button>
               <button
-                onClick={() => setShowModal(false)}
+                onClick={() =>{ setShowModal(false); setSelectedIds(new Set());}}
                 className="submit-btn" style={{ background: "#d6c3b5ff" }}
               >
                 Close

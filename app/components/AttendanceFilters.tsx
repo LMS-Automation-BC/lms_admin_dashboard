@@ -27,6 +27,7 @@ const AttendanceFilters: React.FC<FiltersProps> = ({
 }) => {
   // Extract all unique dates, sorted ascending
   const allDates = useMemo(() => {
+    console.log('alldates triggered')
     const uniqueDates = Array.from(new Set(data.map((d) => d.date)));
     uniqueDates.sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
     return uniqueDates.map((date) => ({
@@ -52,8 +53,9 @@ const AttendanceFilters: React.FC<FiltersProps> = ({
     });
   }, [data, startDate, endDate]);
   const handleReset = () => {
+    console.log(allDates)
   setSelectedName('');
-  setStartDate(null); setEndDate(null);setSelectedCourse(null);setShowAbsentOnly(false);
+  setEndDate(null);setSelectedCourse(null);setShowAbsentOnly(false);
   setStartDate(null);
   setEndDate(null);
   // Reset any other filters here
@@ -105,6 +107,7 @@ const AttendanceFilters: React.FC<FiltersProps> = ({
 
   return (
     <div>
+      {allDates.map(x => x.label)}
       {/* Row 1: Start & End Date */}
       <div
         className="date-range-filter"
