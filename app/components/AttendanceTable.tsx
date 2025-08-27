@@ -19,14 +19,16 @@ interface AttendanceTableProps {
 const AttendanceTable: React.FC<AttendanceTableProps> = ({ data }) => {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const selectAllRef = useRef<HTMLInputElement>(null);
-  const [isLoading, setIsLoading] = useState(false);  
-  const toggleSelect = (id: string) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [attendanceNotes, setAttendanceNotes] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const toggleSelect = (id: string, course_id: string) => {
     setSelectedIds((prev) => {
       const newSet = new Set(prev);
-      if (newSet.has(id)) {
-        newSet.delete(id);
+      if (newSet.has(id + course_id)) {
+        newSet.delete(id + course_id);
       } else {
-        newSet.add(id);
+        newSet.add(id + course_id);
       }
       return newSet;
     });
@@ -38,7 +40,7 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({ data }) => {
       setSelectedIds(new Set());
     } else {
       // Select all
-      setSelectedIds(new Set(data.map((row) => row.id)));
+      setSelectedIds(new Set(data.map((row) => row.id + row.course_id)));
     }
   };
   useEffect(() => {
@@ -53,13 +55,51 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({ data }) => {
   if (!data.length) {
     return <p>No attendance data to display.</p>;
   }
+  const exportToCSV = () => {
+    if (!data || data.length === 0) return;
+
+    const headers = ["Name", "Course Name", "Email", "Date", "Attendance"];
+
+    const csvRows = [
+      headers.join(","), // CSV header row
+      ...data.map((row) =>
+        [
+          row.name,
+          row.course_name,
+          row.email,
+          row.date,
+          row.attendance == "0%" ? "Absent" : "Present",
+        ]
+          .map((val) => `"${val}"`) // wrap in quotes to escape commas
+          .join(",")
+      ),
+    ];
+
+    const csvContent = csvRows.join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Report.csv`);
+    link.style.display = "none";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const handleSubmit = async () => {
-    const selectedRows = data.filter((row) => selectedIds.has(row.id));
+    console.log("submiting");
+    const selectedRows = data.filter((row) =>
+      selectedIds.has(row.id + row.course_id)
+    );
     const courseDateMap = new Map<
       string,
       { minDate: string; maxDate: string }
     >();
+    console.log(
+      "selectedRows" + JSON.stringify(selectedRows.map((X) => X.course_id))
+    );
     selectedRows.forEach(({ course_id, date }) => {
       if (!courseDateMap.has(course_id)) {
         courseDateMap.set(course_id, { minDate: date, maxDate: date });
@@ -69,7 +109,9 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({ data }) => {
         if (new Date(date) > new Date(current.maxDate)) current.maxDate = date;
       }
     });
-     setIsLoading(true);
+    console.log(courseDateMap);
+    setIsLoading(true);
+    const allNotes: any = [];
     // Now make one API call per distinct course_id with min/max dates
     for (const [course_id, { minDate, maxDate }] of courseDateMap) {
       const response = await fetch(
@@ -84,24 +126,72 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({ data }) => {
         console.error(
           `Failed to fetch course ${course_id}: ${response.statusText}`
         );
-         setIsLoading(false);
+        continue;
       } else {
         const result = await response.json();
-        console.log(`Success for course ${course_id}:`, result);
-         setIsLoading(false);
+        result.forEach((session: any) => {
+          session.attendance.forEach((att: any) => {
+            const rowId = att.user_id + course_id;
+
+            if (selectedIds.has(rowId)) {
+              allNotes.push({
+                sessionDate: session.sessionDate,
+                userId: att.user_id,
+                status: att.status,
+                note: att.note ?? "",
+                course: selectedRows.find((x) => x.id + x.course_id === rowId)
+                  ?.course_name,
+              });
+            }
+          });
+        });
       }
     }
+    setIsLoading(false);
+    setAttendanceNotes(allNotes);
+    console.log('openign modal')
+    setShowModal(true); //
+  };
+  const exportNotesToExcel = () => {
+    if (attendanceNotes.length === 0) return;
+
+    const headers = ["User ID", "Session Date", "Status", "Note","Course"];
+    const rows = attendanceNotes.map((note:any) => [
+      note.userId,
+      new Date(note.sessionDate).toLocaleDateString(),
+      note.status,
+      note.note,
+      note.course
+    ]);
+
+    const csvContent = [headers, ...rows]
+      .map((row) => row.map((val) => `"${val}"`).join(","))
+      .join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "attendance_notes.csv";
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
     <div className="table-wrapper">
-      {selectedIds.size > 0 && (
-        <div className="mb-2">
-          <button className="submit-btn" onClick={handleSubmit}>
-            Get attendance
-          </button>
-        </div>
-      )}
+      <div className="mb-2" style={{ display: "flex", gap: "10px" }}>
+        <button
+          className="submit-btn"
+          onClick={handleSubmit}
+          disabled={selectedIds.size <= 0}
+        >
+          Get attendance
+        </button>
+        <button className="submit-btn" onClick={exportToCSV}>
+          Export to CSV
+        </button>
+      </div>
       <div className="table-responsive">
         <table className="table table-bordered table-hover table-striped">
           <thead className="table-dark">
@@ -122,27 +212,83 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({ data }) => {
           </thead>
           <tbody>
             {data.map((row, index) => {
-              const isChecked = selectedIds.has(row.id);
+              const isChecked = selectedIds.has(row.id + row.course_id);
               return (
                 <tr key={`${row.id}-${index}`}>
                   <td>
                     <input
                       type="checkbox"
                       checked={isChecked}
-                      onChange={() => toggleSelect(row.id)}
+                      onChange={() => toggleSelect(row.id, row.course_id)}
                     />
                   </td>
                   <td>{row.name}</td>
-                  <td>{row.course_name}</td>
+                  <td>
+                    {row.course_name}-{row.course_id}
+                  </td>
                   <td>{row.email}</td>
                   <td>{row.date}</td>
-                  <td>{row.attendance}</td>
+                  <td>
+                    {row.attendance === "100%" ? (
+                      <>
+                        ✅ <span>Present</span>
+                      </>
+                    ) : row.attendance === "0%" ? (
+                      <>
+                        ❌ <span>Absent</span>
+                      </>
+                    ) : (
+                      <>
+                        ⏳ <span>{row.attendance}</span>
+                      </>
+                    )}
+                  </td>
                 </tr>
               );
             })}
           </tbody>
         </table>
       </div>
+      {showModal && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h4>Attendance Notes</h4>
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>User ID</th>
+                  <th>Session Date</th>
+                  <th>Status</th>
+                  <th>Note</th>
+                  <th>CourseName</th>
+                </tr>
+              </thead>
+              <tbody>
+                {attendanceNotes.map((note: any, index) => (
+                  <tr key={index}>
+                    <td>{note.userId}</td>
+                    <td>{new Date(note.sessionDate).toLocaleDateString()}</td>
+                    <td>{note.status}</td>
+                    <td>{note.note}</td>
+                    <td>{note.course}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <div className="d-flex justify-content-end gap-2 mt-3" style={{display:"flex", gap:"10px"}}>
+              <button onClick={exportNotesToExcel} className="submit-btn" style={{ background: "#9f6417ff" }}>
+                Export to Excel
+              </button>
+              <button
+                onClick={() => setShowModal(false)}
+                className="submit-btn" style={{ background: "#d6c3b5ff" }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

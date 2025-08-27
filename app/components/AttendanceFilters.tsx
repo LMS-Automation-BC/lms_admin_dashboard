@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import "./csvUpload.css";
 import Select from "react-select";
 type CombinedAttendance = {
@@ -17,7 +17,7 @@ interface FiltersProps {
     endDate: string | null;
     selectedName: string | null;
     selectedCourse: string | null;
-    showAbsentOnly:boolean;
+    showAbsentOnly: boolean;
   }) => void;
 }
 
@@ -51,22 +51,39 @@ const AttendanceFilters: React.FC<FiltersProps> = ({
       return d >= start && d <= end;
     });
   }, [data, startDate, endDate]);
-
+  const handleReset = () => {
+  setSelectedName('');
+  setStartDate(null); setEndDate(null);setSelectedCourse(null);setShowAbsentOnly(false);
+  setStartDate(null);
+  setEndDate(null);
+  // Reset any other filters here
+};
   // Unique names filtered by date
   const filteredNames = useMemo(() => {
     const names = Array.from(new Set(filteredByDate.map((d) => d.name)));
     names.sort();
     return names;
   }, [filteredByDate]);
-
+  useEffect(() => {
+    console.log("Start:", startDate, "End:", endDate);
+    console.log("Filtered by date:", filteredByDate);
+  }, [filteredByDate, startDate, endDate]);
+  useEffect(() => {
+    console.log("Filtered Names:", filteredNames);
+  }, [filteredNames]);
   // Unique courses filtered by date
   const filteredCourses = useMemo(() => {
     const courses = Array.from(
-      new Set(filteredByDate.map((d) => d.course_name))
+      new Set(
+        filteredByDate
+          .filter((d) => selectedName === '' || d.name === selectedName)
+          .map((d) => d.course_name)
+      )
     );
+    console.log(courses)
     courses.sort();
     return courses;
-  }, [filteredByDate]);
+  }, [filteredByDate, selectedName]);
 
   // Call parent's filter change on any change
   React.useEffect(() => {
@@ -75,9 +92,16 @@ const AttendanceFilters: React.FC<FiltersProps> = ({
       endDate,
       selectedName,
       selectedCourse,
-      showAbsentOnly
+      showAbsentOnly,
     });
-  }, [startDate, endDate, selectedName, selectedCourse, onFilterChange,showAbsentOnly]);
+  }, [
+    startDate,
+    endDate,
+    selectedName,
+    selectedCourse,
+    onFilterChange,
+    showAbsentOnly,
+  ]);
 
   return (
     <div>
@@ -152,16 +176,17 @@ const AttendanceFilters: React.FC<FiltersProps> = ({
           </select>
         </div>
       </div>
-      <div>
+      <div style={{ display: 'flex', gap: '10px' }}>
         <label>
-  <input
-    type="checkbox"
-    checked={showAbsentOnly}
-    onChange={() => setShowAbsentOnly(!showAbsentOnly)}
-  />
-  Show Absent Only (0% Attendance)
-</label>
+          <input
+            type="checkbox"
+            checked={showAbsentOnly}
+            onChange={() => setShowAbsentOnly(!showAbsentOnly)}
+          />
+          Show Absent Only (0% Attendance)
+        </label>
 
+        <button  className="submit-btn" onClick={handleReset}>Reset Filters</button>
       </div>
     </div>
   );

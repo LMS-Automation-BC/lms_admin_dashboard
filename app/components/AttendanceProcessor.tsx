@@ -10,6 +10,7 @@ const CsvCombiner = () => {
   const [attendanceFile, setAttendanceFile] = useState<File | null>(null);
   const [studentInfoFile, setStudentInfoFile] = useState<File | null>(null);
   const [combinedData, setCombinedData] = useState<any[]>([]);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [filters, setFilters] = useState<{
     startDate: string | null;
     endDate: string | null;
@@ -24,6 +25,7 @@ const CsvCombiner = () => {
     showAbsentOnly:false
   });
   const filteredData = useMemo(() => {
+    
     const data
     = combinedData.filter((row) => {
       if (filters.startDate && new Date(row.date) < new Date(filters.startDate))
@@ -56,7 +58,7 @@ const CsvCombiner = () => {
       alert("Please upload all 3 CSVs before processing.");
       return;
     }
-
+     setIsProcessing(true); // 
     try {
       const [classData, attendanceData, studentInfoData] = await Promise.all([
         parseCsv(classDataFile),
@@ -110,8 +112,10 @@ const CsvCombiner = () => {
       });
 
       setCombinedData(result);
+       setIsProcessing(false);
     } catch (error) {
       console.error("Error parsing files:", error);
+       setIsProcessing(false);
     }
   };
 
@@ -147,8 +151,8 @@ const CsvCombiner = () => {
           />
         </div>
 
-        <button className="process-btn" onClick={handleProcess}>
-          📊 Process
+        <button className="process-btn" onClick={handleProcess}  disabled={isProcessing}>
+         {isProcessing ? "⏳ Processing..." : "📊 Process"}
         </button>
       </div>
       <AttendanceFilters data={combinedData} onFilterChange={setFilters} />

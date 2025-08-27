@@ -26,7 +26,7 @@ input[type="file"] {
 
 .process-btn {
   padding: 0.6rem 1.2rem;
-  background-color: #007bff;
+  background-color: #28a745;
   color: white;
   font-weight: bold;
   border: none;
@@ -92,4 +92,9 @@ input[type="file"] {
   border-radius: 4px;          /* Rounded corners */
   background-color: white;
   cursor: pointer;
+}
+.processing-msg {
+  color: #555;
+  font-style: italic;
+  margin-top: 10px;
 }
