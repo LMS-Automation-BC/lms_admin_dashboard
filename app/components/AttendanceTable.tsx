@@ -90,6 +90,9 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({ data }) => {
 
   const handleSubmit = async () => {
     console.log("submiting");
+    if(selectedIds.size ===0){
+      alert('select students to get attendance')
+    } else {
     const selectedRows = data.filter((row) =>
       selectedIds.has(row.id + row.course_id)
     );
@@ -151,6 +154,7 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({ data }) => {
     setAttendanceNotes(allNotes);
     console.log('openign modal')
     setShowModal(true); //
+  }
   };
   const exportNotesToExcel = () => {
     if (attendanceNotes.length === 0) return;
@@ -184,7 +188,6 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({ data }) => {
         <button
           className="submit-btn"
           onClick={handleSubmit}
-          disabled={selectedIds.size <= 0}
         >
           Get attendance
         </button>
