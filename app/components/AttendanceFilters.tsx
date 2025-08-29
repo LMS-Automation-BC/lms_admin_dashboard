@@ -141,7 +141,7 @@ const AttendanceFilters: React.FC<FiltersProps> = ({ data, onFilterChange }) => 
       </div>
 
       {/* Row 2: Name and Course */}
-      <div style={{ display: "flex", gap: "1rem" }}>
+      <div className="filter-row">
         <div>
           <label>Name</label>
           <select
@@ -170,21 +170,34 @@ const AttendanceFilters: React.FC<FiltersProps> = ({ data, onFilterChange }) => 
           </select>
         </div>
 
-        <button className="submit-btn" onClick={applyFilters}>Search</button>
-        <button className="submit-btn" onClick={handleReset}>Reset Filters</button>
+        
       </div>
 
       {/* Row 3: Absent Checkbox */}
-      <div style={{ marginTop: "10px" }}>
-        <label>
-          <input
-            type="checkbox"
-            checked={showAbsentOnly}
-            onChange={() => setShowAbsentOnly(!showAbsentOnly)}
-          />
-          Show Absent Only (0% Attendance)
-        </label>
-      </div>
+      <div style={{ 
+  marginTop: "10px", 
+  display: "flex", 
+  justifyContent: "space-between", 
+  alignItems: "center" 
+}}>
+  {/* Left side - Checkbox */}
+  <label style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+    <input
+      type="checkbox"
+      checked={showAbsentOnly}
+      onChange={() => setShowAbsentOnly(!showAbsentOnly)}
+    />
+    Show Absent Only (0% Attendance)
+  </label>
+
+  {/* Right side - Buttons */}
+  <div style={{ display: "flex", gap: "10px" }}>
+    <button className="submit-btn" onClick={applyFilters}>Search</button>
+    <button className="submit-btn" onClick={handleReset}>Reset Filters</button>
+  </div>
+</div>
+
+      
     </div>
   );
 };

@@ -135,9 +135,13 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({ data }) => {
         result.forEach((session: any) => {
           session.attendance.forEach((att: any) => {
             const rowId = att.user_id + course_id;
+            
 
             if (selectedIds.has(rowId)) {
+              const matchedStudent = selectedRows.find((x) => x.id + x.course_id === rowId);
               allNotes.push({
+                email: matchedStudent?.email ?? '',
+        name: matchedStudent?.name ?? '',
                 sessionDate: session.sessionDate,
                 userId: att.user_id,
                 status: att.status,
@@ -159,9 +163,10 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({ data }) => {
   const exportNotesToExcel = () => {
     if (attendanceNotes.length === 0) return;
 
-    const headers = ["User ID", "Session Date", "Status", "Note","Course"];
+    const headers = ["Name","Email", "Session Date", "Status", "Note","Course"];
     const rows = attendanceNotes.map((note:any) => [
-      note.userId,
+      note.name,
+      note.email,
       new Date(note.sessionDate).toLocaleDateString(),
       note.status,
       note.note,
@@ -195,6 +200,7 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({ data }) => {
           Export to CSV
         </button>
       </div>
+      <div style={{color:'blue'}}>Select Students and click Get Attendance to get detailed Attendance Data</div>
       <div className="table-responsive">
         <table className="table table-bordered table-hover table-striped">
           <thead className="table-dark">
@@ -259,7 +265,8 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({ data }) => {
             <table className="table">
               <thead>
                 <tr>
-                  <th>User ID</th>
+                  <th>Name</th>
+                  <th>Email</th>
                   <th>Session Date</th>
                   <th>Status</th>
                   <th>Note</th>
@@ -269,7 +276,8 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({ data }) => {
               <tbody>
                 {attendanceNotes.map((note: any, index) => (
                   <tr key={index}>
-                    <td>{note.userId}</td>
+                    <td>{note.name}</td>
+                    <td>{note.email}</td>
                     <td>{new Date(note.sessionDate).toLocaleDateString()}</td>
                     <td>{note.status}</td>
                     <td>{note.note}</td>

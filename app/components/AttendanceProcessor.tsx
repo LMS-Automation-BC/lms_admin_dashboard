@@ -10,6 +10,7 @@ const CsvCombiner = () => {
   const [attendanceFile, setAttendanceFile] = useState<File | null>(null);
   const [combinedData, setCombinedData] = useState<any[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const [filters, setFilters] = useState<{
     startDate: string | null;
     endDate: string | null;
@@ -23,8 +24,18 @@ const CsvCombiner = () => {
     selectedCourse: null,
     showAbsentOnly: false,
   });
+  const handleClassFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0] || null;
+  setClassDataFile(file);
+  setReloadKey((k) => k + 1);  // Force remount
+};const handleAttendanceFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0] || null;
+  setAttendanceFile(file);
+  setReloadKey((k) => k + 1);  // Force remount
+};
   const filteredData = useMemo(() => {
     console.log("filter memeo triggerd");
+    setIsProcessing(true);
     const data = combinedData.filter((row) => {
       if (filters.startDate && new Date(row.date) < new Date(filters.startDate))
         return false;
@@ -37,11 +48,10 @@ const CsvCombiner = () => {
       if (filters.showAbsentOnly && row.attendance !== "0%") return false;
       return true;
     });
+    setIsProcessing(false);
     return data;
   }, [combinedData, filters]);
-
   
-
   const handleProcess = async () => {
     if (!classDataFile || !attendanceFile) {
       alert("Please upload all 2 CSVs before processing.");
@@ -61,7 +71,7 @@ const CsvCombiner = () => {
       });
 
       const data = await response.json();
-console.log(data);
+      console.log(data);
       if (!response.ok) {
         throw new Error(data.error || "Something went wrong.");
       }
@@ -85,7 +95,7 @@ console.log(data);
           <input
             type="file"
             accept=".csv"
-            onChange={(e) => setClassDataFile(e.target.files?.[0] || null)}
+            onChange={handleClassFileChange}
           />
         </div>
 
@@ -94,7 +104,7 @@ console.log(data);
           <input
             type="file"
             accept=".csv"
-            onChange={(e) => setAttendanceFile(e.target.files?.[0] || null)}
+           onChange={handleAttendanceFileChange}
           />
         </div>
 

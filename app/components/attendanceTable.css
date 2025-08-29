@@ -41,21 +41,26 @@ tbody tr:hover {
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0,0,0,0.5);
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0,0,0,0.5); /* semi-transparent backdrop */
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  overflow: auto; /* allow scrolling if needed */
 }
 
 .modal {
   background: white;
-  padding: 1.5rem;
+  width: 90vw;           /* wider */
+  max-width: 1200px;     /* limit max width */
+  max-height: 90vh;      /* limit max height */
+  padding: 20px;
   border-radius: 8px;
-  width: 90%;
-  max-width: 800px;
-  max-height: 80vh;
-  overflow-y: auto;
+  box-shadow: 0 0 15px rgba(0,0,0,0.3);
+  overflow-y: auto;      /* scroll vertical if content too tall */
+  display: flex;
+  flex-direction: column;
 }
+
