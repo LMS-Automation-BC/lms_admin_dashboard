@@ -1,0 +1,23 @@
+const courses = [
+  { courseCode: 'HSP101', courseName: 'Introduction to Human Services', lastAttempt: '', credits: 3.0, letterGrade: '' },
+  { courseCode: 'ENG101', courseName: 'Introduction to English Comprehension', lastAttempt: '', credits: 3.0, letterGrade: '' },
+  { courseCode: 'HSP110', courseName: 'Interpersonal Communication', lastAttempt: '', credits: 3.0, letterGrade: '' },
+  { courseCode: 'HSP200', courseName: 'Understanding Diversity and Inclusion', lastAttempt: '', credits: 3.0, letterGrade: '' },
+  { courseCode: 'HSP102', courseName: 'Social Welfare and Services in Canada', lastAttempt: '', credits: 3.0, letterGrade: '' },
+  { courseCode: 'PSY115', courseName: 'Psychology of Human Development', lastAttempt: '', credits: 3.0, letterGrade: '' },
+  { courseCode: 'HSP205', courseName: 'Interviews and Counselling Skills', lastAttempt: '', credits: 3.0, letterGrade: '' },
+  { courseCode: 'HSP204', courseName: 'Crisis Intervention & Management', lastAttempt: '', credits: 3.0, letterGrade: '' },
+  { courseCode: 'HSP230', courseName: 'Family Systems and Support', lastAttempt: '', credits: 3.0, letterGrade: '' },
+  { courseCode: 'PSY101', courseName: 'Introduction to Psychology', lastAttempt: '', credits: 3.0, letterGrade: '' },
+  { courseCode: 'HSP236', courseName: 'Introduction to Disability and Behaviour Management', lastAttempt: '', credits: 3.0, letterGrade: '' },
+  { courseCode: 'HSP220', courseName: 'Working with Vulnerable Populations', lastAttempt: '', credits: 3.0, letterGrade: '' },
+  { courseCode: 'HSP290', courseName: 'Case Management Skills', lastAttempt: '', credits: 3.0, letterGrade: '' },
+  { courseCode: 'HSP300', courseName: 'Indigenous People and Culture', lastAttempt: '', credits: 3.0, letterGrade: '' },
+  { courseCode: 'PSY400', courseName: 'Addiction, Mental Health, and Treatment', lastAttempt: '', credits: 3.0, letterGrade: '' },
+  { courseCode: 'HSP345', courseName: 'Working with Newcomers and Immigrants', lastAttempt: '', credits: 3.0, letterGrade: '' },
+  { courseCode: 'PHL352', courseName: 'Professionalism and Ethics in Human Services', lastAttempt: '', credits: 3.0, letterGrade: '' },
+  { courseCode: 'SOC101', courseName: 'Introduction to Sociology', lastAttempt: '', credits: 3.0, letterGrade: '' },
+  { courseCode: 'HSP210', courseName: 'Community Development and Engagement', lastAttempt: '', credits: 3.0, letterGrade: '' },
+  { courseCode: 'HSP111', courseName: 'Human Services Practicum I', lastAttempt: '', credits: 6.0, letterGrade: '' },
+  { courseCode: 'HSP112', courseName: 'Human Services Practicum II', lastAttempt: '', credits: 6.0, letterGrade: '' }
+];

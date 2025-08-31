@@ -1,355 +1,295 @@
 "use client"; // If using Next.js app router
 
-import React, { useRef, useState } from "react";
-import styles from "./UserGradesTable.module.css";
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
-import autoTable from 'jspdf-autotable';
-type ClassInfo = {
-  name: string;
-  course_code: string;
-};
+import React, { useEffect, useState } from "react";
+import Papa from "papaparse";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import "./GradeParser.css";
+import { v4 as uuidv4 } from "uuid";
+import { getGrade } from "../grades/helpers/grade";
+import { getMatchingProgram } from "../grades/helpers/courseList";
 
-type UserGradeRecord = {
-  user_id: number;
-  grade: string;
-  credits: number; // 🆕 new field
-  class: ClassInfo;
-};
+export interface CsvRow {
+  [key: string]: any;
+  "First name": string;
+  "Last name": string;
+  "Full Name": string;
+  "Program Name": string;
+  "Program Start Date": string;
+  "Student ID": string;
+  "Overall Class Name": string;
+  "Course code": string;
+  Semester: string;
+  Credits: number;
+  "Percent%": number;
+  Grade: string;
+  "Enrolled at": string;
+}
 
-const sampleData: UserGradeRecord[] = [
-  {
-    user_id: 10496996,
-    grade: "A+",
-    credits: 3,
-    class: {
-      name: "TEST TEST TEST Course",
-      course_code: "test",
-    },
-  },
-];
 const GradeParser: React.FC = () => {
-  const [userId, setUserId] = useState<string>("");
-  const [filteredData, setFilteredData] = useState<ApiUserGrades[]>([]);
-  const [grades, setGrades] = useState<Record<number, string>>({});
-  const [editableRows, setEditableRows] = useState<
-    Record<number, Partial<UserGradeRecord>>
-  >({});
-  const [editingRow, setEditingRow] = useState<number | null>(null);
-  
-  const handleSearch = async () => {
+  const [csvData, setCsvData] = useState<CsvRow[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [userList, setUserList] = useState<any[]>([]);
+  const [selectedUser, setSelectedUser] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [creditsEarned, setCreditsEarned] = useState<number>(0);
+  const [cumulativeGpa, setCumulativeGpa] = useState<number>(0);
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsLoading(true);
+
+    const formData = new FormData();
+    formData.append("file", file);
+    let sessionId = localStorage.getItem("sessionId") || uuidv4();
+    formData.append("sessionId", sessionId);
+    if (!localStorage.getItem("sessionId"))
+      localStorage.setItem("sessionId", sessionId);
     try {
-      const data = await fetchUserGrades(userId);
-      setFilteredData(data || []);
-
-      const gradeMap: Record<number, string> = {};
-      data?.forEach((item) => {
-        gradeMap[item.user_id] = item.grade;
+      const response = await fetch("/api/process-grades", {
+        method: "POST",
+        body: formData,
       });
-      setGrades(gradeMap);
-    } catch (error) {
-      console.error("Error fetching user grades:", error);
-      setFilteredData([]);
-    }
-  };
 
-
-  const handleEditToggle = (userId: number) => {
-    const user = filteredData.find((u) => u.user_id === userId);
-    if (user) {
-      setEditingRow(userId);
-      setEditableRows({
-        [userId]: {
-          grade: user.grade,
-          credits: user.credits,
-          class: {
-            name: user.class.name,
-            course_code: user.class.course_code,
-          },
-        },
-      });
-    }
-  };
-  const handleFieldChange = (
-    userId: number,
-    field: string,
-    value: string | number
-  ) => {
-    setEditableRows((prev: any) => ({
-      ...prev,
-      [userId]: {
-        ...prev[userId],
-        [field]: value,
-        class: {
-          ...prev[userId]?.class,
-        },
-      },
-    }));
-  };
-  const handleClassFieldChange = (
-    userId: number,
-    field: keyof ClassInfo,
-    value: string
-  ) => {
-    setEditableRows((prev: any) => ({
-      ...prev,
-      [userId]: {
-        ...prev[userId],
-        class: {
-          ...prev[userId]?.class,
-          [field]: value,
-        },
-      },
-    }));
-  };
-  const handleSave = (userId: number) => {
-    const updated = filteredData.map((row) => {
-      if (row.user_id === userId) {
-        return {
-          ...row,
-          ...editableRows[userId],
-          class: {
-            ...row.class,
-            ...editableRows[userId]?.class,
-          },
-        };
+      if (!response.ok) {
+        throw new Error("Failed to parse CSV on the server.");
       }
-      return row;
-    });
-    setFilteredData(updated);
-    setEditingRow(null);
-    setEditableRows({});
-  };
-  const generatePdf = () => {
-    const doc = new jsPDF();
 
-    doc.text('User Grades Table', 14, 15);
+      const json = await response.json();
 
-    const tableColumn = ['User ID', 'Grade', 'Class Name', 'Course Code', 'Credits'];
-    const tableRows: any[] = [];
-
-    filteredData.forEach(item => {
-      tableRows.push([
-        item.user_id.toString(),
-        grades[item.user_id] || item.grade,
-        item.class.name,
-        item.class.course_code,
-        item.credits?.toString() ?? '', // if you added credits to data
-      ]);
-    });
-
-    autoTable(doc,{
-      head: [tableColumn],
-      body: tableRows,
-      startY: 20,
-    });
-
-    // Create PDF blob and URL for preview
-    const pdfBlob = doc.output('blob');
-    const blobUrl  = URL.createObjectURL(pdfBlob);
-     const pdfWindow = window.open('', '_blank', 'width=800,height=600');
-    if (pdfWindow) {
-      pdfWindow.document.title = 'PDF Preview';
-      pdfWindow.document.body.style.margin = '0';
-
-      const iframe = pdfWindow.document.createElement('iframe');
-      iframe.style.border = 'none';
-      iframe.style.width = '100%';
-      iframe.style.height = '100vh';
-      iframe.src = blobUrl;
-
-      pdfWindow.document.body.appendChild(iframe);
-
-      pdfWindow.onunload = () => {
-        URL.revokeObjectURL(blobUrl);
-      };
-    } else {
-      alert('Popup blocked! Please allow popups for this website.');
+      console.log(JSON.stringify(json.users));
+      setUserList(json.users);
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || "An unexpected error occurred.");
+    } finally {
+      setIsLoading(false);
     }
-    // setPdfUrl(blobUrl );
   };
-  const exportPdf = () => {
-    const doc = new jsPDF();
+  const calculateScores = (users: any[]) => {
+    let totalCredits = 0;
+    let totalGPA = 0;
+    let processedusers = users.map((user: any) => {
+      const percent = Number(user["Percent%"]) || 0;
+      const credits = Number(user["Credits"]) || 0;
+      const gradePoint = getGrade(percent)?.gpa || 0;
 
-    doc.text('User Grades Table', 14, 15);
+      const gpa = credits * gradePoint;
+      user['Grade Point'] = gradePoint;
+      totalCredits += credits;
+      totalGPA += gpa;
 
-    const tableColumn = ['User ID', 'Grade', 'Class Name', 'Course Code', 'Credits'];
-    const tableRows: any[] = [];
-
-    filteredData.forEach(item => {
-      tableRows.push([
-        item.user_id.toString(),
-        grades[item.user_id] || item.grade,
-        item.class.name,
-        item.class.course_code,
-        item.credits?.toString() ?? '',
-      ]);
+      return user;
     });
+    setCumulativeGpa(totalGPA/totalCredits);
+    setCreditsEarned(totalCredits);
+    return processedusers;
+  };
+  useEffect(() => {
+    const checkSessionAndFetchUsers = async () => {
+      const existingSessionId = localStorage.getItem("sessionId");
 
-   autoTable(doc,{
+      if (existingSessionId) {
+        const confirmReplace = window.confirm(
+          "An existing session was found. Do you want to upload a new file or use the existing data?"
+        );
+
+        if (!confirmReplace) {
+          // Use existing sessionId to get user list from Redis
+          setIsLoading(true);
+          try {
+            const response = await fetch(
+              `/api/process-grades?sessionId=${existingSessionId}`
+            );
+            if (!response.ok) throw new Error("Failed to fetch user list");
+
+            const json = await response.json();
+            setUserList(json.users); // Expecting array of { name, id }
+          } catch (err: any) {
+            console.error(err);
+            setError("Could not load user list from existing session.");
+          } finally {
+            setIsLoading(false);
+          }
+        } else {
+          // If they choose to replace, clear the localStorage
+          localStorage.removeItem("sessionId");
+        }
+      }
+    };
+
+    checkSessionAndFetchUsers();
+  }, []);
+  useEffect(() => {
+    if (csvData.length > 0) {
+      const matchedProgram = getMatchingProgram(csvData);
+      console.log("Student Program:", matchedProgram);
+    }
+  }, [csvData]);
+
+  useEffect(() => {
+    const fetchStudentData = async () => {
+      if (!selectedUser) return;
+
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const response = await fetch(`/api/process-grades?id=${selectedUser}`);
+        if (!response.ok) throw new Error("Failed to fetch student data");
+
+        const json = await response.json();
+        setCumulativeGpa(0);
+        setCreditsEarned(0);
+        setCsvData(calculateScores(json.student));
+      } catch (err: any) {
+        console.error(err);
+        setError(err.message || "Error loading student data");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchStudentData();
+  }, [selectedUser]);
+
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    const tableColumn = [
+      "Course Code",
+      "Course Name",
+      "Credits",
+      "Percent%",
+      "Grade",
+    ];
+    const tableRows = csvData.map((row) => [
+      row["Course code"],
+      row["Overall Class Name"],
+      row["Credits"],
+      row["Percent%"],
+      row["Grade"],
+    ]);
+
+    autoTable(doc, {
       head: [tableColumn],
       body: tableRows,
-      startY: 20,
+      theme: "grid",
+      styles: { fontSize: 10 },
+      margin: { top: 20 },
     });
 
-    doc.save('user-grades.pdf');
+    doc.save("courses.pdf");
   };
 
   return (
-    <div style={{ padding: 20, fontFamily: "Arial" }}>
-      <h2>User Grade Table</h2>
+    <div className="App">
+      {isLoading && (
+        <div className="loading-container">
+          <div className="spinner" />
+          <p className="loading-text">Parsing grade file, please wait...</p>
+        </div>
+      )}
 
+      <label htmlFor="csv-upload" className="file-upload-label">
+        Upload Grade Report
+      </label>
       <input
-        type="text"
-        placeholder="Enter User ID"
-        value={userId}
-        onChange={(e) => setUserId(e.target.value)}
-        className={styles.searchInput}
+        type="file"
+        id="csv-upload"
+        accept=".csv"
+        onChange={handleFileUpload}
       />
-      <button onClick={handleSearch} className={styles.searchButton}>
-        Search
-      </button>
-        <button onClick={generatePdf} disabled={filteredData.length === 0}>
-        Preview PDF
-      </button>
-      <button onClick={exportPdf} disabled={filteredData.length === 0} style={{ marginLeft: 10 }}>
-        Export as PDF
-      </button>
 
-      {filteredData.length > 0 ? (
-        <table className={styles.gradeTable}>
-          <thead>
-            <tr>
-              <th>User ID</th>
-              <th>Grade</th>
-              <th>Class Name</th>
-              <th>Course Code</th>
-              <th>Credits</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredData.map((item, idx) => (
-              <tr key={idx}>
-                <td>{item.user_id}</td>
-
-                <td>
-                  {editingRow === item.user_id ? (
-                    <input
-                      className={styles.input}
-                      value={editableRows[item.user_id]?.grade || ""}
-                      onChange={(e) =>
-                        handleFieldChange(item.user_id, "grade", e.target.value)
-                      }
-                    />
-                  ) : (
-                    item.grade
-                  )}
-                </td>
-
-                <td>
-                  {editingRow === item.user_id ? (
-                    <input
-                      className={styles.input}
-                      value={editableRows[item.user_id]?.class?.name || ""}
-                      onChange={(e) =>
-                        handleClassFieldChange(
-                          item.user_id,
-                          "name",
-                          e.target.value
-                        )
-                      }
-                    />
-                  ) : (
-                    item.class.name
-                  )}
-                </td>
-
-                <td>
-                  {editingRow === item.user_id ? (
-                    <input
-                      className={styles.input}
-                      value={
-                        editableRows[item.user_id]?.class?.course_code || ""
-                      }
-                      onChange={(e) =>
-                        handleClassFieldChange(
-                          item.user_id,
-                          "course_code",
-                          e.target.value
-                        )
-                      }
-                    />
-                  ) : (
-                    item.class.course_code
-                  )}
-                </td>
-
-                <td>
-                  {editingRow === item.user_id ? (
-                    <input
-                      className={styles.input}
-                      type="number"
-                      value={editableRows[item.user_id]?.credits || ""}
-                      onChange={(e) =>
-                        handleFieldChange(
-                          item.user_id,
-                          "credits",
-                          Number(e.target.value)
-                        )
-                      }
-                    />
-                  ) : (
-                    item.credits
-                  )}
-                </td>
-
-                <td>
-                  {editingRow === item.user_id ? (
-                    <button
-                      onClick={() => handleSave(item.user_id)}
-                      className={styles.actionButton}
-                    >
-                      ✅ Save
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => handleEditToggle(item.user_id)}
-                      className={styles.actionButton}
-                    >
-                      ✏️ Edit
-                    </button>
-                  )}
-                </td>
+      {error && <div className="error">{error}</div>}
+      {userList?.length > 0 && (
+        <div style={{ margin: "20px 0" }}>
+          <label htmlFor="user-search" style={{ fontWeight: 600 }}>
+            Select Student:
+          </label>
+          <input
+            id="user-search"
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Type to search..."
+            className="user-search-input"
+          />
+          <select
+            className="user-select"
+            value={selectedUser ?? ""}
+            onChange={(e) => setSelectedUser(e.target.value)}
+          >
+            <option value="">-- Select a student --</option>
+            {userList
+              .filter((user) =>
+                user.name.toLowerCase().includes(searchTerm.toLowerCase())
+              )
+              .map((user, index) => (
+                <option key={index} value={user.id}>
+                  {user.name}
+                </option>
+              ))}
+          </select>
+        </div>
+      )}
+      {csvData.length > 0 && (
+        <>
+          <table className="grade-table">
+            <thead>
+              <tr>
+                <th>Course Code</th>
+                <th>Course Name</th>
+                <th>Last Attempt</th>
+                <th>Credits</th>
+                <th>Letter Grade</th>
+                <th> Grade Point</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      ) : (
-        <p style={{ marginTop: 20 }}>No data found. Enter a valid user ID.</p>
+            </thead>
+            <tbody>
+              {csvData.map((row, index) => (
+                <tr key={index}>
+                  <td>{row["Course code"]}</td>
+                  <td>{row["Overall Class Name"]}</td>
+                  <td>
+                    {row["Overall Class Name"].split(" - ").slice(-1)[0].trim()}
+                  </td>
+                  <td>{row["Credits"]}</td>
+                  <td>{row["Grade"]}</td>
+                  <td>
+                    {row["Grade Point"]}
+                  </td>
+                </tr>
+              ))}
+              <tr>
+                <td colSpan={4}  style={{ textAlign: 'right' }}> Credits Earned</td>
+                <td colSpan={2}> {creditsEarned}</td>
+              </tr>
+              <tr>
+                <td colSpan={4}  style={{ textAlign: 'right' }}>Total Credits</td>
+                <td colSpan={2}></td>
+              </tr>
+              <tr>
+                <td colSpan={4}  style={{ textAlign: 'right' }}>Cumulative Grade Point Average(CGPA)</td>
+                <td colSpan={2}>{cumulativeGpa}</td>
+              </tr>
+              <tr>
+                <td colSpan={4}  style={{ textAlign: 'right' }}>Program Status</td>
+                <td colSpan={2}></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <button className="export-btn" onClick={exportToPDF}>
+            Export to PDF
+          </button>
+        </>
       )}
     </div>
   );
 };
-const fetchUserGrades = async (id: string): Promise<ApiUserGrades[] | null> => {
-  try {
-    const response = await fetch(`/api/grades?lmsid=${id}`);
-    if (!response.ok) throw new Error("API error");
-    const data = await response.json();
-    return data as ApiUserGrades[];
-  } catch (err) {
-    console.error(`Failed to fetch user info for ID ${id}`, err);
-    return null;
-  }
-};
-interface ApiUserGrades {
-  user_id: number;
-  grade: string;
-  credits: number;
-  class: {
-    name: string;
-    course_code: string;
-  };
-}
 
 export default GradeParser;

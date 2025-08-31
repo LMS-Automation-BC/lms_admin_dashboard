@@ -7,7 +7,7 @@ import GradeParser from '../components/GradeParser';
 const GradesPage: React.FC = () => {
   return (
     <div>
-      <h1>User Grades</h1>
+      <h1>User Grades Transcriptor</h1>
       <GradeParser />
     </div>
   );
