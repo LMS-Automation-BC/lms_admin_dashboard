@@ -68,7 +68,7 @@ export default async function handler(
         name: `${row["First name"]} ${row["Last name"]}`,
         id: row["Student ID"],
       };
-    });
+    }).filter(user => user.id != null && user.id !== "");
     console.log(users);
     const uniqueUsers = Array.from(
       new Map(users.map((user) => [user.id, user])).values()
@@ -111,12 +111,7 @@ export default async function handler(
       const usersJson = await redis.get(`session:${sessionId}:users`);
 
       if (!usersJson) return res.status(404).json({ error: "No users found" });
-
-      const users = JSON.parse(usersJson as string) as {
-        id: string;
-        name: string;
-      }[];
-      return res.status(200).json({ users });
+      return res.status(200).json({ users: usersJson });
     }
   }
 

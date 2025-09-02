@@ -7,7 +7,11 @@ import autoTable from "jspdf-autotable";
 import "./GradeParser.css";
 import { v4 as uuidv4 } from "uuid";
 import { getGrade } from "../grades/helpers/grade";
-import { getMatchingProgram } from "../grades/helpers/courseList";
+import { getMatchingProgram, programs } from "../grades/helpers/courseList";
+import Select from "react-select";
+import GradeProgramMatch from "./GradeProgramMatch";
+import { Course, ProgramName } from "../grades/helpers/grades.type";
+import GradeTranscript from "./GradeTranscript";
 
 export interface CsvRow {
   [key: string]: any;
@@ -18,6 +22,7 @@ export interface CsvRow {
   "Program Start Date": string;
   "Student ID": string;
   "Overall Class Name": string;
+  "Default Class Name": string;
   "Course code": string;
   Semester: string;
   Credits: number;
@@ -31,10 +36,46 @@ const GradeParser: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [userList, setUserList] = useState<any[]>([]);
-  const [selectedUser, setSelectedUser] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [selectedUser, setSelectedUser] = useState<{
+    value: string;
+    label: string;
+  } | null>(null);
+  const [totalCredits, setTotalCredits] = useState<number>(0);
   const [creditsEarned, setCreditsEarned] = useState<number>(0);
   const [cumulativeGpa, setCumulativeGpa] = useState<number>(0);
+  const [confirmedProgram, setConfirmedProgram] = useState<string | null>(null);
+  const [filteredCsvData, setFilteredCsvData] = useState<CsvRow[]>([]);
+  useEffect(() => {
+    if (!confirmedProgram || !Array.isArray(programs[confirmedProgram])) {
+      setFilteredCsvData(calculateScores(csvData)); // fallback: show all if no match
+      return;
+    }
+
+    const matchedCourses = programs[confirmedProgram];
+
+    const filtered = csvData
+      .map((row) => {
+        const matchedCourse = matchedCourses.find(
+          (course) =>
+            course.courseCode === row["Course code"] ||
+            row["Overall Class Name"]
+              ?.toLowerCase()
+              .includes(course.courseName.toLowerCase())
+        );
+
+        if (!matchedCourse) return null; // No match — exclude this row
+
+        return {
+          ...row,
+          "Course code": row["Course code"] || matchedCourse.courseCode,
+          Credits: row["Credit"] || matchedCourse.credits,
+          "Default Class Name": matchedCourse.courseName,
+        };
+      })
+      .filter((row): row is (typeof csvData)[number] => row !== null);
+
+    setFilteredCsvData(filtered);
+  }, [confirmedProgram, csvData,selectedUser]);
   const handleFileUpload = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -73,20 +114,22 @@ const GradeParser: React.FC = () => {
   const calculateScores = (users: any[]) => {
     let totalCredits = 0;
     let totalGPA = 0;
+    let creditsEarned =0
     let processedusers = users.map((user: any) => {
       const percent = Number(user["Percent%"]) || 0;
       const credits = Number(user["Credits"]) || 0;
       const gradePoint = getGrade(percent)?.gpa || 0;
 
       const gpa = credits * gradePoint;
-      user['Grade Point'] = gradePoint;
-      totalCredits += credits;
+      user["Grade Point"] = gradePoint;
+      if(gradePoint!=0 )creditsEarned += credits;
       totalGPA += gpa;
-
+      totalCredits +=credits
       return user;
     });
-    setCumulativeGpa(totalGPA/totalCredits);
-    setCreditsEarned(totalCredits);
+    setTotalCredits(totalCredits);
+    setCumulativeGpa(totalGPA / totalCredits);
+    setCreditsEarned(creditsEarned);
     return processedusers;
   };
   useEffect(() => {
@@ -139,12 +182,15 @@ const GradeParser: React.FC = () => {
       setError(null);
 
       try {
-        const response = await fetch(`/api/process-grades?id=${selectedUser}`);
+        const response = await fetch(
+          `/api/process-grades?id=${selectedUser.value}`
+        );
         if (!response.ok) throw new Error("Failed to fetch student data");
 
         const json = await response.json();
         setCumulativeGpa(0);
         setCreditsEarned(0);
+        setTotalCredits(0);
         setCsvData(calculateScores(json.student));
       } catch (err: any) {
         console.error(err);
@@ -157,33 +203,6 @@ const GradeParser: React.FC = () => {
     fetchStudentData();
   }, [selectedUser]);
 
-  const exportToPDF = () => {
-    const doc = new jsPDF();
-    const tableColumn = [
-      "Course Code",
-      "Course Name",
-      "Credits",
-      "Percent%",
-      "Grade",
-    ];
-    const tableRows = csvData.map((row) => [
-      row["Course code"],
-      row["Overall Class Name"],
-      row["Credits"],
-      row["Percent%"],
-      row["Grade"],
-    ]);
-
-    autoTable(doc, {
-      head: [tableColumn],
-      body: tableRows,
-      theme: "grid",
-      styles: { fontSize: 10 },
-      margin: { top: 20 },
-    });
-
-    doc.save("courses.pdf");
-  };
 
   return (
     <div className="App">
@@ -206,87 +225,52 @@ const GradeParser: React.FC = () => {
 
       {error && <div className="error">{error}</div>}
       {userList?.length > 0 && (
-        <div style={{ margin: "20px 0" }}>
-          <label htmlFor="user-search" style={{ fontWeight: 600 }}>
-            Select Student:
-          </label>
-          <input
-            id="user-search"
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Type to search..."
-            className="user-search-input"
-          />
-          <select
-            className="user-select"
-            value={selectedUser ?? ""}
-            onChange={(e) => setSelectedUser(e.target.value)}
-          >
-            <option value="">-- Select a student --</option>
-            {userList
-              .filter((user) =>
-                user.name.toLowerCase().includes(searchTerm.toLowerCase())
-              )
-              .map((user, index) => (
-                <option key={index} value={user.id}>
-                  {user.name}
-                </option>
-              ))}
-          </select>
+        <div className="student-select-wrapper" style={{ margin: "20px 0" }}>
+          <div style={{ margin: "20px 0" }}>
+            <label
+              htmlFor="student-select"
+              style={{ fontWeight: 600, display: "block", marginBottom: "4px" }}
+            >
+              Select Student:
+            </label>
+            <Select
+              id="student-select"
+              options={userList.map((user: any) => ({
+                value: user.id,
+                label: user.name,
+              }))}
+              onChange={(selectedOption) => {
+                setConfirmedProgram(null);
+                setSelectedUser(selectedOption);
+              }}
+              placeholder="Search and select student..."
+              isClearable
+            />
+          </div>
         </div>
       )}
-      {csvData.length > 0 && (
-        <>
-          <table className="grade-table">
-            <thead>
-              <tr>
-                <th>Course Code</th>
-                <th>Course Name</th>
-                <th>Last Attempt</th>
-                <th>Credits</th>
-                <th>Letter Grade</th>
-                <th> Grade Point</th>
-              </tr>
-            </thead>
-            <tbody>
-              {csvData.map((row, index) => (
-                <tr key={index}>
-                  <td>{row["Course code"]}</td>
-                  <td>{row["Overall Class Name"]}</td>
-                  <td>
-                    {row["Overall Class Name"].split(" - ").slice(-1)[0].trim()}
-                  </td>
-                  <td>{row["Credits"]}</td>
-                  <td>{row["Grade"]}</td>
-                  <td>
-                    {row["Grade Point"]}
-                  </td>
-                </tr>
-              ))}
-              <tr>
-                <td colSpan={4}  style={{ textAlign: 'right' }}> Credits Earned</td>
-                <td colSpan={2}> {creditsEarned}</td>
-              </tr>
-              <tr>
-                <td colSpan={4}  style={{ textAlign: 'right' }}>Total Credits</td>
-                <td colSpan={2}></td>
-              </tr>
-              <tr>
-                <td colSpan={4}  style={{ textAlign: 'right' }}>Cumulative Grade Point Average(CGPA)</td>
-                <td colSpan={2}>{cumulativeGpa}</td>
-              </tr>
-              <tr>
-                <td colSpan={4}  style={{ textAlign: 'right' }}>Program Status</td>
-                <td colSpan={2}></td>
-              </tr>
-            </tbody>
-          </table>
-
-          <button className="export-btn" onClick={exportToPDF}>
-            Export to PDF
-          </button>
-        </>
+      {csvData.length > 0  && (
+        <GradeProgramMatch
+          csvData={csvData}
+          onProgramConfirm={(programName) => setConfirmedProgram(programName)}
+        />
+      )}
+      {selectedUser && confirmedProgram && (
+        <GradeTranscript
+          studentName={selectedUser?.label}
+          program={confirmedProgram}
+          programStartDate="September 1, 2021"
+          enrollmentNo={selectedUser?.value}
+          credits={creditsEarned}
+          cumulativeGpa={cumulativeGpa}
+          totalCredits = {totalCredits}
+          printDate={new Date().toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })}
+          courses={filteredCsvData}
+        ></GradeTranscript>
       )}
     </div>
   );

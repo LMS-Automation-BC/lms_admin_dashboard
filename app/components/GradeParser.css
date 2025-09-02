@@ -123,3 +123,12 @@ input[type="file"] {
   outline: none;
   box-shadow: 0 0 0 2px rgba(0, 112, 243, 0.2);
 }
+.student-select-wrapper {
+  margin: 1rem 0;
+}
+
+.user-search-input,
+.user-select {
+  padding: 6px;
+  font-size: 1rem;
+}

@@ -1,6 +1,7 @@
 import { CsvRow } from "@/app/components/GradeParser";
+import { CoursesMap } from "./grades.type";
 
-const courses:CoursesByProgram ={ 'Accounting':[
+export const programs:CoursesMap  ={ 'Accounting':[
   { courseCode: 'BUS110', courseName: 'Introduction to Business Administration', credits: 3.0,  },
   { courseCode: 'BCM101', courseName: 'Business Communication', credits: 3.0,  },
   { courseCode: 'LAW110', courseName: 'Business Law', credits: 3.0,  },
@@ -142,7 +143,7 @@ const courses:CoursesByProgram ={ 'Accounting':[
     { courseCode: "RMP111", courseName: "Practicum I", credits: 6.0 },
     { courseCode: "RMP112", courseName: "Practicum II", credits: 6.0 }
   ]
-};
+}  as const;;
 
 export function parseCourseString(courseString:string) {
   // Split the string at ' - '
@@ -159,28 +160,52 @@ export function parseCourseString(courseString:string) {
     lastAttempt
   };
 }
+
+const normalize = (str: string) =>
+  str.toLowerCase().replace(/[^a-z0-9\s]/gi, "").trim();
+
+const nameSimilarity = (a: string, b: string): boolean => {
+  const aWords = new Set(normalize(a).split(/\s+/));
+  const bWords = new Set(normalize(b).split(/\s+/));
+
+  // Count common words
+  const commonWords = [...aWords].filter(word => bWords.has(word));
+
+  return commonWords.length >= Math.min(2, Math.min(aWords.size, bWords.size));
+};
+
 export const getMatchingProgram = (csvData: CsvRow[]): string | null => {
   const studentCourseCodes = csvData.map(row => row["Course code"]);
+  const studentCourseNames = csvData.map(row => row["Overall Class Name"]);
 
-  for (const program in courses) {
-    const requiredCourseCodes = courses[program].map(course => course.courseCode);
-    const hasAllCourses = requiredCourseCodes.every(code => studentCourseCodes.includes(code));
+  let bestMatch: { program: string; score: number } = { program: "", score: 0 };
 
-    if (hasAllCourses) {
-      return program; // return the first fully matched program
+  for (const program in programs) {
+    const requiredCourses = programs[program];
+    const requiredCodes = requiredCourses.map(c => c.courseCode);
+
+    // Code match check
+    const matchedCodes = requiredCodes.filter(code =>
+      studentCourseCodes.includes(code)
+    );
+    const codeMatchScore = matchedCodes.length / requiredCodes.length;
+
+    // Name match fallback
+    const nameMatchCount = requiredCourses.filter(req =>
+      studentCourseNames.some(studentName => nameSimilarity(req.courseName, studentName))
+    ).length;
+    const nameMatchScore = nameMatchCount / requiredCourses.length;
+
+    const totalScore = Math.max(codeMatchScore, nameMatchScore); // prioritize full code match
+
+    if (totalScore === 1) return program; // perfect match
+
+    if (totalScore > bestMatch.score) {
+      bestMatch = { program, score: totalScore };
     }
   }
 
-  return null; // no match found
+  return bestMatch.score > 0.6 ? bestMatch.program : null; // return if at least 60% match
 };
 
-interface Course {
-  courseCode: string;
-  courseName: string;
-  credits: number;
-}
-
-type CoursesByProgram = {
-  [programName: string]: Course[];
-};
 
