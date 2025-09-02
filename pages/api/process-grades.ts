@@ -3,6 +3,7 @@ import { IncomingForm } from "formidable";
 import fs from "fs";
 import Papa from "papaparse";
 import { Redis } from "@upstash/redis";
+import { extractMonthYear } from "./helper";
 
 const redis = new Redis({
   url:
@@ -102,9 +103,11 @@ export default async function handler(
   if (method === "GET") {
     const { id, sessionId } = req.query;
     if (id) {
-      const data = await redis.get(`student:${id}`);
+      let data:any[] | null = await redis.get(`student:${id}`);
       if (!data) return res.status(404).json({ error: "Student not found" });
-
+      data = data?.map(x => {x["Last Attempt"] = extractMonthYear(x["Overall Class Name"]);
+        return x;  
+      })
       return res.status(200).json({ student: data });
     }
     if (sessionId) {

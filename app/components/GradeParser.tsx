@@ -52,7 +52,7 @@ const GradeParser: React.FC = () => {
     }
 
     const matchedCourses = programs[confirmedProgram];
-
+    
     const filtered = csvData
       .map((row) => {
         const matchedCourse = matchedCourses.find(
@@ -73,7 +73,8 @@ const GradeParser: React.FC = () => {
         };
       })
       .filter((row): row is (typeof csvData)[number] => row !== null);
-
+      console.log('filered parser file')
+      console.log(JSON.stringify(filtered))
     setFilteredCsvData(filtered);
   }, [confirmedProgram, csvData,selectedUser]);
   const handleFileUpload = async (

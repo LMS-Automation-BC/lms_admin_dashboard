@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CsvRow } from "./GradeParser";
 import "./GradeTranscript.css";
 import { FaEdit, FaSave, FaTrash, FaTimes } from "react-icons/fa";
@@ -35,7 +35,10 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
     const date = new Date(dateStr);
     return date.toISOString().split("T")[0]; // "2025-09-01"
   };
+  console.log("courses");
+  console.log(JSON.stringify(courses));
   const [coursesTranscript, setCoursesTranscript] = useState(courses);
+  console.log(JSON.stringify(coursesTranscript));
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editedRow, setEditedRow] = useState<CsvRow | undefined>();
   const transcriptRef = useRef<HTMLDivElement>(null);
@@ -47,6 +50,9 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
   const [transcriptPrint, setTranscriptPrint] = useState(
     toInputDate(new Date().toISOString())
   );
+  useEffect(() => {
+    setCoursesTranscript(courses);
+  }, [courses]);
   const exportToPdf = async () => {
     if (!transcriptRef.current) return;
 
@@ -133,11 +139,27 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
     cumulativeGpa: cumulativeGpa,
     programStatus: programStatus,
   };
+  const safeCourses = Array.isArray(courses)
+  ? JSON.parse(JSON.stringify(courses))
+  : [];
   return (
     <div className="transcript-page">
+      
       {/* <PDFDownloadLink
-        document={<TranscriptPDF {...data} />}
-        fileName={studentName+ '-transcript.pdf'}
+        document={
+          <TranscriptPDF
+            studentName={studentName || ''}
+            program={program || ''}
+            programStartDate={programStartDate || ''}
+            enrollmentNo={enrollmentNo || ''}
+            printDate={printDate || ''}
+            courses={Array.isArray(safeCourses) ? safeCourses : []} // <-- default empty array
+            credits={credits || 0}
+            cumulativeGpa={cumulativeGpa || 0}
+            programStatus={programStatus || ''}
+          />
+        }
+        fileName={`${studentName || 'sample'}-transcript.pdf`}
       >
         {({ loading }) =>
           loading ? (
@@ -149,6 +171,8 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
           )
         }
       </PDFDownloadLink> */}
+    
+
       <button onClick={exportToPdf} className="export-button">
         Export to PDF
       </button>
@@ -260,7 +284,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
                         row["Default Class Name"]
                       )}
                     </td>
-                    <td>{extractMonthYear(row["Overall Class Name"]) || ""}</td>
+                    <td>{(row["Last Attempt"]) || ""}</td>
                     <td>
                       {isEditing ? (
                         <input
