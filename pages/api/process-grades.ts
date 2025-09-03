@@ -105,7 +105,11 @@ export default async function handler(
     if (id) {
       let data:any[] | null = await redis.get(`student:${id}`);
       if (!data) return res.status(404).json({ error: "Student not found" });
-      data = data?.map(x => {x["Last Attempt"] = extractMonthYear(x["Overall Class Name"]);
+      data = data.filter(x => x["Grade"])
+      console.log(data);
+      data = data?.map(x => {
+        //console.log(x);
+        x["Last Attempt"] = x["Overall Class Name"] || x['Name'] ? extractMonthYear(x["Overall Class Name"]|| x['Name']):'';
         return x;  
       })
       return res.status(200).json({ student: data });

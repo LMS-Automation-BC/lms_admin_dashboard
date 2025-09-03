@@ -1,10 +1,9 @@
 .transcript-page {
   /* width: 8.5in;
   height: 11in; */
-  padding: 0.5in;
   box-sizing: border-box;
    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  font-size: 12pt;
+  font-size: 8pt;
   position: relative;
   color: #000;
   background-color: #fff;
@@ -13,7 +12,7 @@
   display: flex;
   align-items: center;
   gap: 15px; /* spacing between items */
-  margin-bottom: 20px;
+  margin-bottom: 2px;
 }
 
 .logo {
@@ -52,15 +51,16 @@
 .title {
   text-align: center;
   text-decoration: underline;
-  font-size: 16pt;
+  font-size: 10pt;
   font-weight: bold;
-  margin-bottom: 30px;
+  margin-bottom: 10px;
 }
 
 .info-row {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin-bottom: 1px;
+  font-size: 8pt;
 }
 
 .info-row .left {
@@ -114,9 +114,78 @@
   width: 100%;
   padding: 4px 6px;
   box-sizing: border-box;
-  font-size: 14px;
+  font-size: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
+}
+.grade-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed; /* Ensures columns respect the widths */
+  
+}
+.grade-table th, .grade-table td {
+  font-size: 8pt;
+  border: 1px solid #ddd;
+  padding: 2px;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* styles.css */
+
+.grade-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed; /* Ensures columns respect the widths */
+}
+
+.grade-table th, .grade-table td {
+  border: 1px solid #ddd;
+  padding: 3px;
+  text-align: left;
+  word-wrap: break-word;     /* Ensures long words break correctly */
+  word-break: break-word;    /* Break words at any point if needed */
+  white-space: normal;
+}
+
+.grade-table th.course-code{
+width: 70px;
+}
+.grade-table td.course-code {
+  width: 70px;
+}
+
+
+.grade-table td.course-name {
+  width: 200px;
+  word-wrap: break-word;     /* Ensures long words break correctly */
+  word-break: break-word;
+}
+.grade-table th.course-name
+{
+  width: 200px;
+}
+
+.grade-table th.last-attempt,
+.grade-table td.last-attempt {
+  width: 100px;
+}
+
+.grade-table th.credits,
+.grade-table td.credits {
+  width: 60px;
+}
+
+.grade-table th.letter-grade,
+.grade-table td.letter-grade {
+  width: 60px;
+}
+
+.grade-table th.grade-point,
+.grade-table td.grade-point {
+  width: 60px;
 }
 .contact-columns {
   display: flex;

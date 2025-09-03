@@ -7,6 +7,7 @@ import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import TranscriptPDF from "./GradeTranscriptPDF";
 import { PDFDownloadLink } from "@react-pdf/renderer";
+import { fontWeight } from "html2canvas/dist/types/css/property-descriptors/font-weight";
 interface TranscriptProps {
   studentName: string | undefined;
   program: string | null;
@@ -53,6 +54,25 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
   useEffect(() => {
     setCoursesTranscript(courses);
   }, [courses]);
+  const generatePDF = () => {
+    setHideActions(true);
+    if (!transcriptRef.current) return;
+
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "pt",
+      format: "letter",
+    });
+
+    doc.html(transcriptRef.current, {
+      callback: function (doc) {
+        doc.save(studentName + "-Transcript.pdf");
+      },
+      x: 20,
+      y: 20,
+    });
+    setHideActions(false);
+  };
   const exportToPdf = async () => {
     if (!transcriptRef.current) return;
 
@@ -140,11 +160,10 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
     programStatus: programStatus,
   };
   const safeCourses = Array.isArray(courses)
-  ? JSON.parse(JSON.stringify(courses))
-  : [];
+    ? JSON.parse(JSON.stringify(courses))
+    : [];
   return (
     <div className="transcript-page">
-      
       {/* <PDFDownloadLink
         document={
           <TranscriptPDF
@@ -171,12 +190,11 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
           )
         }
       </PDFDownloadLink> */}
-    
 
-      <button onClick={exportToPdf} className="export-button">
+      <button onClick={generatePDF} className="export-button">
         Export to PDF
       </button>
-      <div ref={transcriptRef}>
+      <div ref={transcriptRef} style={{ width: "100%", maxWidth: "400pt" }}>
         {/* Header: Logo and Institution Name */}
         <div className="header">
           <img
@@ -196,12 +214,21 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
 
         {/* Student Information */}
         <div className="info-row">
-          <div className="left">Student Name: {studentName}</div>
-          <div className="right">Program: {program}</div>
+          <div className="left">
+            <span style={{ fontWeight: "bold" }}>Student Name</span>:{" "}
+            {studentName}
+          </div>
+          <div className="right">
+            <span style={{ fontWeight: "bold" }}>Program:</span> {program}
+          </div>
         </div>
         <div className="info-row">
           {hideActions ? (
-            <div className="right">Program Start Date: {programStart}</div>
+            <div className="right">
+              <span style={{ fontWeight: "bold" }}>
+                Program Start Date: {programStart}
+              </span>
+            </div>
           ) : (
             <label htmlFor="programStartDate" className="right">
               Program Start Date:{" "}
@@ -215,11 +242,18 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
           )}
         </div>
         <div className="info-row">
-          <div className="left">Enrollment No: {enrollmentNo}</div>
+          <div className="left">
+            <span style={{ fontWeight: "bold" }}>Enrollment No:</span>{" "}
+            {enrollmentNo}
+          </div>
           <div className="right">
             {hideActions ? (
               <div className="right">
-                Transcript Print Date: {transcriptPrint}
+                <span style={{ fontWeight: "bold" }}>
+                  {" "}
+                  Transcript Print Date:
+                </span>{" "}
+                {transcriptPrint}
               </div>
             ) : (
               <label htmlFor="programStartDate" className="right">
@@ -236,14 +270,14 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
         </div>
         {coursesTranscript.length > 0 && (
           <table className="grade-table">
-            <thead>
+            <thead style={{ fontWeight: "10px" }}>
               <tr>
-                <th>Course Code</th>
-                <th>Course Name</th>
-                <th>Last Attempt</th>
-                <th>Credits</th>
-                <th>Letter Grade</th>
-                <th>Grade Point</th>
+                <th className="course-code">Course Code</th>
+                <th className="course-name">Course Name</th>
+                <th className="last-attempt">Last Attempt</th>
+                <th className="credits">Credits</th>
+                <th className="letter-grade">Letter Grade</th>
+                <th className="grade-point">Grade Point</th>
                 {/* {!hideActions && <th>Actions</th>} */}
               </tr>
             </thead>
@@ -252,7 +286,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
                 const isEditing = index === editingIndex;
                 return (
                   <tr key={index}>
-                    <td>
+                    <td className="course-code">
                       {isEditing ? (
                         <input
                           value={
@@ -268,7 +302,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
                         row["Course code"]
                       )}
                     </td>
-                    <td>
+                    <td className="course-name">
                       {isEditing ? (
                         <input
                           value={
@@ -284,8 +318,8 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
                         row["Default Class Name"]
                       )}
                     </td>
-                    <td>{(row["Last Attempt"]) || ""}</td>
-                    <td>
+                    <td className="last-attempt">{row["Last Attempt"] || ""}</td>
+                    <td className="credits">
                       {isEditing ? (
                         <input
                           value={
@@ -299,7 +333,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
                         row["Credits"]
                       )}
                     </td>
-                    <td>
+                    <td className="letter-grade">
                       {isEditing ? (
                         <input
                           value={
@@ -313,7 +347,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
                         row["Grade"]
                       )}
                     </td>
-                    <td>
+                    <td className="grade-point">
                       {isEditing ? (
                         <input
                           value={

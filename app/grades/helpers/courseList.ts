@@ -176,7 +176,7 @@ const nameSimilarity = (a: string, b: string): boolean => {
 
 export const getMatchingProgram = (csvData: CsvRow[]): string | null => {
   const studentCourseCodes = csvData.map(row => row["Course code"]);
-  const studentCourseNames = csvData.map(row => row["Overall Class Name"]);
+  const studentCourseNames = csvData.map(row => row["Overall Class Name"] || row["Name"]);
 
   let bestMatch: { program: string; score: number } = { program: "", score: 0 };
 
