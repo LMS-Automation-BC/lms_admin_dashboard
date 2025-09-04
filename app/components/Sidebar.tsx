@@ -14,12 +14,12 @@ interface MenuItem {
 
 const menuItems: MenuItem[] = [
   {
-    name: 'Organization Details',
+    name: 'Organization',
     path:'/organization',
     icon:FiHome
   },
   {
-    name: 'Program Details',
+    name: 'Programs & Courses',
     path:'/programs',
     icon:FiFolder
   },
@@ -29,7 +29,7 @@ const menuItems: MenuItem[] = [
     icon: FiCalendar,
   },
   {
-    name: 'Grade Transcript Generator',
+    name: 'Grades to Transcripts',
     path: '/grades',
     icon: FiAward,
   },
@@ -72,7 +72,18 @@ const Sidebar = () => {
   return (
     <nav style={containerStyle}>
       <h2 style={{ fontSize: '18px', marginBottom: '20px', color: '#444' }}>
-        🧭 LMS Data Processor
+        <div className="header">
+          <img
+            src="/brookes_college.png"
+            alt="Institution Logo"
+            className="logo"
+          />
+          <div className="vertical-line" />
+          <div className="institution-name-wrapper">
+            <div className="institution-name brookes">Brookes</div>
+            <div className="institution-name college">College</div>
+          </div>
+        </div> LMS Data Processor
       </h2>
 
       {menuItems.map(({ name, path, icon: Icon }) => (
