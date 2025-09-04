@@ -126,7 +126,6 @@ export default async function handler(req: any, res: any) {
         .status((resp as any).status || 500)
         .json({ error: (resp as any).error });
     }
-    console.log((resp as any).data);
     res.status(200).json((resp as any).data);
   } catch (error) {
     console.error(error);

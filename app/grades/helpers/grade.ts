@@ -27,7 +27,7 @@ export function extractMonthYear(text: string): string | null {
   const match = text.match(regex);
   if (!match) return "";
 
-  const month = match[1];
+  const month = match[1].substring(0, 3);
   const year = match[2];
   return `${month} ${year}`;
 }

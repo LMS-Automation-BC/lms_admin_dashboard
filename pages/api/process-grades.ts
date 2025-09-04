@@ -70,7 +70,6 @@ export default async function handler(
         id: row["Student ID"],
       };
     }).filter(user => user.id != null && user.id !== "");
-    console.log(users);
     const uniqueUsers = Array.from(
       new Map(users.map((user) => [user.id, user])).values()
     );
@@ -106,7 +105,6 @@ export default async function handler(
       let data:any[] | null = await redis.get(`student:${id}`);
       if (!data) return res.status(404).json({ error: "Student not found" });
       data = data.filter(x => x["Grade"])
-      console.log(data);
       data = data?.map(x => {
         //console.log(x);
         x["Last Attempt"] = x["Overall Class Name"] || x['Name'] ? extractMonthYear(x["Overall Class Name"]|| x['Name']):'';

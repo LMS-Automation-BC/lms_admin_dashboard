@@ -7,10 +7,10 @@ import autoTable from "jspdf-autotable";
 import "./GradeParser.css";
 import { v4 as uuidv4 } from "uuid";
 import { getGrade } from "../grades/helpers/grade";
-import { getMatchingProgram, programs } from "../grades/helpers/courseList";
+import { getMatchingProgram } from "../grades/helpers/courseList";
 import Select from "react-select";
 import GradeProgramMatch from "./GradeProgramMatch";
-import { Course, ProgramName } from "../grades/helpers/grades.type";
+import { Course, CoursesMap, ProgramName } from "../grades/helpers/grades.type";
 import GradeTranscript from "./GradeTranscript";
 
 export interface CsvRow {
@@ -45,6 +45,7 @@ const GradeParser: React.FC = () => {
   const [cumulativeGpa, setCumulativeGpa] = useState<number>(0);
   const [confirmedProgram, setConfirmedProgram] = useState<string | null>(null);
   const [filteredCsvData, setFilteredCsvData] = useState<CsvRow[]>([]);
+  const [programs, setPrograms] = useState<CoursesMap>({});
   useEffect(() => {
     if (!confirmedProgram || !Array.isArray(programs[confirmedProgram])) {
       setFilteredCsvData(calculateScores(csvData)); // fallback: show all if no match
@@ -73,8 +74,6 @@ const GradeParser: React.FC = () => {
         };
       })
       .filter((row): row is (typeof csvData)[number] => row !== null);
-      console.log('filered parser file')
-      console.log(JSON.stringify(filtered))
     setFilteredCsvData(filtered);
   }, [confirmedProgram, csvData,selectedUser]);
   const handleFileUpload = async (
@@ -103,7 +102,6 @@ const GradeParser: React.FC = () => {
 
       const json = await response.json();
 
-      console.log(JSON.stringify(json.users));
       setUserList(json.users);
     } catch (err: any) {
       console.error(err);
@@ -170,10 +168,15 @@ const GradeParser: React.FC = () => {
   }, []);
   useEffect(() => {
     if (csvData.length > 0) {
-      const matchedProgram = getMatchingProgram(csvData);
-      console.log("Student Program:", matchedProgram);
+      const matchedProgram = getMatchingProgram(programs,csvData);
     }
   }, [csvData]);
+    useEffect(() => {
+      fetch("/api/programs")
+        .then((res) => res.json())
+        .then(setPrograms)
+        .catch(console.error);
+    }, []);
 
   useEffect(() => {
     const fetchStudentData = async () => {
@@ -252,6 +255,7 @@ const GradeParser: React.FC = () => {
       )}
       {csvData.length > 0  && (
         <GradeProgramMatch
+          programs={programs}
           csvData={csvData}
           onProgramConfirm={(programName) => setConfirmedProgram(programName)}
         />

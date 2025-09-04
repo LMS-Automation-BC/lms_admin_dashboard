@@ -39,8 +39,9 @@ input[type="file"] {
 }
 
 .grade-table th {
-  background-color: #f2f2f2;
+  background-color: white;
   text-align: left;
+  color: black;
 }
 
 .export-btn {

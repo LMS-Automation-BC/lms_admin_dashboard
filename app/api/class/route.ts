@@ -13,7 +13,6 @@ export async function GET(request: NextRequest) {
   try {
     
     const sessions = await getSessionsForClass(classId, start, end);
-    console.log(`Found ${sessions?.length} sessions`);
     const allAttendance = [];
     for (const session of sessions) {
       const attendance = await getAttendanceForSession(

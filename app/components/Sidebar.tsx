@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { CSSProperties } from 'react';
-import { FiActivity } from 'react-icons/fi'; // Feather icon
+import { FiCalendar,FiAward,FiHome, FiFolder } from 'react-icons/fi'; // Feather icon
 import { IconType } from 'react-icons';
 
 interface MenuItem {
@@ -14,15 +14,26 @@ interface MenuItem {
 
 const menuItems: MenuItem[] = [
   {
+    name: 'Organization Details',
+    path:'/organization',
+    icon:FiHome
+  },
+  {
+    name: 'Program Details',
+    path:'/programs',
+    icon:FiFolder
+  },
+  {
     name: 'Attendance Processor',
     path: '/attendance',
-    icon: FiActivity,
+    icon: FiCalendar,
   },
   {
     name: 'Grade Transcript Generator',
     path: '/grades',
-    icon: FiActivity,
-  }
+    icon: FiAward,
+  },
+  
   // You can add more menu items like this:
   // { name: 'Dashboard', path: '/dashboard', icon: FiGrid },
 ];
@@ -61,7 +72,7 @@ const Sidebar = () => {
   return (
     <nav style={containerStyle}>
       <h2 style={{ fontSize: '18px', marginBottom: '20px', color: '#444' }}>
-        🧭 Navigation
+        🧭 LMS Data Processor
       </h2>
 
       {menuItems.map(({ name, path, icon: Icon }) => (

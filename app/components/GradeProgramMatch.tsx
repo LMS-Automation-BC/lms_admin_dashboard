@@ -2,23 +2,25 @@
 
 import React, { useEffect, useState } from "react";
 import { getMatchingProgram } from "../grades/helpers/courseList";
-import { programs } from "../grades/helpers/courseList";
+
 import { CsvRow } from "./GradeParser";
 import "./GradeProgramMatch.css";
+import { CoursesMap } from "../grades/helpers/grades.type";
 
 interface GradeProgramMatchProps {
   csvData: CsvRow[];
   onProgramConfirm: (programName: string) => void;
+  programs:CoursesMap;
 }
 
-const GradeProgramMatch: React.FC<GradeProgramMatchProps> = ({ csvData, onProgramConfirm }) => {
+const GradeProgramMatch: React.FC<GradeProgramMatchProps> = ({programs, csvData, onProgramConfirm }) => {
   const [matchedProgram, setMatchedProgram] = useState<string | null>(null);
   const [selectedProgram, setSelectedProgram] = useState<string | "">("");
 
 
   useEffect(() => {
     if (csvData.length > 0) {
-      const matched = getMatchingProgram(csvData);
+      const matched = getMatchingProgram(programs,csvData);
       setMatchedProgram(matched);
       if (matched) setSelectedProgram(matched);
     }

@@ -89,7 +89,6 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({ data }) => {
   };
 
   const handleSubmit = async () => {
-    console.log("submiting");
     if(selectedIds.size ===0){
       alert('select students to get attendance')
     } else {
@@ -100,9 +99,6 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({ data }) => {
       string,
       { minDate: string; maxDate: string }
     >();
-    console.log(
-      "selectedRows" + JSON.stringify(selectedRows.map((X) => X.course_id))
-    );
     selectedRows.forEach(({ course_id, date }) => {
       if (!courseDateMap.has(course_id)) {
         courseDateMap.set(course_id, { minDate: date, maxDate: date });
@@ -112,7 +108,6 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({ data }) => {
         if (new Date(date) > new Date(current.maxDate)) current.maxDate = date;
       }
     });
-    console.log(courseDateMap);
     setIsLoading(true);
     const allNotes: any = [];
     // Now make one API call per distinct course_id with min/max dates
@@ -156,7 +151,6 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({ data }) => {
     }
     setIsLoading(false);
     setAttendanceNotes(allNotes);
-    console.log('openign modal')
     setShowModal(true); //
   }
   };

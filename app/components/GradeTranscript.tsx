@@ -8,6 +8,7 @@ import html2canvas from "html2canvas";
 import TranscriptPDF from "./GradeTranscriptPDF";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { fontWeight } from "html2canvas/dist/types/css/property-descriptors/font-weight";
+import ContactColumns from "./GradeOrganization";
 interface TranscriptProps {
   studentName: string | undefined;
   program: string | null;
@@ -36,10 +37,8 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
     const date = new Date(dateStr);
     return date.toISOString().split("T")[0]; // "2025-09-01"
   };
-  console.log("courses");
-  console.log(JSON.stringify(courses));
+  
   const [coursesTranscript, setCoursesTranscript] = useState(courses);
-  console.log(JSON.stringify(coursesTranscript));
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editedRow, setEditedRow] = useState<CsvRow | undefined>();
   const transcriptRef = useRef<HTMLDivElement>(null);
@@ -57,21 +56,24 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
   const generatePDF = () => {
     setHideActions(true);
     if (!transcriptRef.current) return;
-
     const doc = new jsPDF({
       orientation: "portrait",
       unit: "pt",
       format: "letter",
     });
+    transcriptRef.current.classList.add("pdf-export");
 
     doc.html(transcriptRef.current, {
       callback: function (doc) {
         doc.save(studentName + "-Transcript.pdf");
+        setHideActions(false);
       },
       x: 20,
       y: 20,
+      html2canvas: {
+        scale: 0.7,
+      },
     });
-    setHideActions(false);
   };
   const exportToPdf = async () => {
     if (!transcriptRef.current) return;
@@ -163,7 +165,10 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
     ? JSON.parse(JSON.stringify(courses))
     : [];
   return (
-    <div className="transcript-page">
+    <div
+      className="transcript-page"
+      style={{ width: "100%", maxWidth: "572pt" }}
+    >
       {/* <PDFDownloadLink
         document={
           <TranscriptPDF
@@ -194,7 +199,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
       <button onClick={generatePDF} className="export-button">
         Export to PDF
       </button>
-      <div ref={transcriptRef} style={{ width: "100%", maxWidth: "400pt" }}>
+      <div ref={transcriptRef} style={{ width: "100%", maxWidth: "572pt" }}>
         {/* Header: Logo and Institution Name */}
         <div className="header">
           <img
@@ -210,7 +215,9 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
         </div>
 
         {/* Title */}
-        <div className="title">Transcript of Academic Records</div>
+        <div style={{textAlign:"center"}}>
+          <div className="title">TRANSCRIPT OF ACADEMIC RECORDS</div>
+        </div>
 
         {/* Student Information */}
         <div className="info-row">
@@ -225,9 +232,8 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
         <div className="info-row">
           {hideActions ? (
             <div className="right">
-              <span style={{ fontWeight: "bold" }}>
-                Program Start Date: {programStart}
-              </span>
+              <span style={{ fontWeight: "bold" }}>Program Start Date</span>:{" "}
+              {programStart}
             </div>
           ) : (
             <label htmlFor="programStartDate" className="right">
@@ -318,7 +324,9 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
                         row["Default Class Name"]
                       )}
                     </td>
-                    <td className="last-attempt">{row["Last Attempt"] || ""}</td>
+                    <td className="last-attempt">
+                      {row["Last Attempt"] || ""}
+                    </td>
                     <td className="credits">
                       {isEditing ? (
                         <input
@@ -417,7 +425,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
                 <td colSpan={4} style={{ textAlign: "right" }}>
                   Cumulative Grade Point Average (CGPA)
                 </td>
-                <td colSpan={3}>{cumulativeGpa}</td>
+                <td colSpan={3}>{cumulativeGpa.toFixed(1)}</td>
               </tr>
               <tr>
                 <td colSpan={4} style={{ textAlign: "right" }}>
@@ -425,7 +433,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
                 </td>
                 <td colSpan={3}>
                   {hideActions ? (
-                    programStatus || "—"
+                    programStatus || "Complete"
                   ) : (
                     <select
                       value={programStatus}
@@ -443,38 +451,21 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
           </table>
         )}
         <div className="note">
-          <p>Note:</p>
+          <p style={{ textDecoration: "underline", fontWeight: "bold" }}>
+            Note:
+          </p>
           <ol>
             <li>
-              The document is official only if original and bears an authorized
-              signature with a college stamp.
+              1. The document is official only if original and bears an
+              authorized signature with a college stamp.
             </li>
             <li>
-              Information to assist in evaluating the transcript is overleaf.
+              2. Information to assist in evaluating the transcript is overleaf.
             </li>
           </ol>
           <br></br>
-          <p>
-            Dr. Tomi Adeyemi
-            <br />
-            President
-          </p>
           <br></br>
-          <div className="contact-columns">
-            <div className="column address">
-              #250 6424 36 Street NE
-              <br />
-              Calgary AB T3J4C8, Canada
-            </div>
-            <div className="column phone">
-              Phone: (+1) 403-800-6613 <br></br> www.brookescollege.ca
-            </div>
-            <div className="column email">
-              <a href="mailto:hello@brookescollege.ca">
-                hello@brookescollege.ca
-              </a>
-            </div>
-          </div>
+          <ContactColumns></ContactColumns>
         </div>
         <br></br>
       </div>

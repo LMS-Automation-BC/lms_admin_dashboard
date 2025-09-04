@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import "./csvUpload.css";
 import Select from "react-select";
-import { debounce } from 'lodash';
+import { debounce } from "lodash";
 
 type CombinedAttendance = {
   course_id: string;
@@ -23,7 +23,10 @@ interface FiltersProps {
   }) => void;
 }
 
-const AttendanceFilters: React.FC<FiltersProps> = ({ data, onFilterChange }) => {
+const AttendanceFilters: React.FC<FiltersProps> = ({
+  data,
+  onFilterChange,
+}) => {
   // Form state (inputs)
   const [startDate, setStartDate] = useState<string | null>(null);
   const [endDate, setEndDate] = useState<string | null>(null);
@@ -41,10 +44,14 @@ const AttendanceFilters: React.FC<FiltersProps> = ({ data, onFilterChange }) => 
   });
 
   // Dates for dropdown
-  const allDates = useMemo(() => {
-    const uniqueDates = Array.from(new Set(data.map(d => d.date))).sort((a,b) => new Date(a).getTime() - new Date(b).getTime());
-    return uniqueDates.map(date => ({ value: date, label: new Date(date).toLocaleDateString() }));
-  }, [data]);
+const allDates = useMemo(() => {
+  const uniqueDates = Array.from(new Set(data.map((d) => d.date))).sort(); // string sort is enough
+
+  return uniqueDates.map((date) => ({
+    value: date,
+    label: date, // just show the raw date string
+  }));
+}, [data]);
 
   // Dynamic filter options based on form inputs
   const filteredNames = useMemo(() => {
@@ -57,7 +64,7 @@ const AttendanceFilters: React.FC<FiltersProps> = ({ data, onFilterChange }) => 
       return d >= start && d <= end;
     });
 
-    return Array.from(new Set(filtered.map(d => d.name))).sort();
+    return Array.from(new Set(filtered.map((d) => d.name))).sort();
   }, [data, startDate, endDate]);
 
   const filteredCourses = useMemo(() => {
@@ -65,12 +72,14 @@ const AttendanceFilters: React.FC<FiltersProps> = ({ data, onFilterChange }) => 
     const start = new Date(startDate);
     const end = new Date(endDate);
 
-    const filtered = data.filter(({ date }) => {
-      const d = new Date(date);
-      return d >= start && d <= end;
-    }).filter(d => !selectedName || d.name === selectedName);
+    const filtered = data
+      .filter(({ date }) => {
+        const d = new Date(date);
+        return d >= start && d <= end;
+      })
+      .filter((d) => !selectedName || d.name === selectedName);
 
-    return Array.from(new Set(filtered.map(d => d.course_name))).sort();
+    return Array.from(new Set(filtered.map((d) => d.course_name))).sort();
   }, [data, startDate, endDate, selectedName]);
 
   // Apply filters on Search click
@@ -121,8 +130,8 @@ const AttendanceFilters: React.FC<FiltersProps> = ({ data, onFilterChange }) => 
           <label>Start Date</label>
           <Select
             options={allDates}
-            value={allDates.find(opt => opt.value === startDate) || null}
-            onChange={opt => setStartDate(opt ? opt.value : null)}
+            value={allDates.find((opt) => opt.value === startDate) || null}
+            onChange={(opt) => setStartDate(opt ? opt.value : null)}
             isClearable
             placeholder="Select start date"
           />
@@ -131,9 +140,11 @@ const AttendanceFilters: React.FC<FiltersProps> = ({ data, onFilterChange }) => 
         <div>
           <label>End Date</label>
           <Select
-            options={allDates.filter(opt => !startDate || new Date(opt.value) >= new Date(startDate))}
-            value={allDates.find(opt => opt.value === endDate) || null}
-            onChange={opt => setEndDate(opt ? opt.value : null)}
+            options={allDates.filter(
+              (opt) => !startDate || opt.value >= startDate
+            )}
+            value={allDates.find((opt) => opt.value === endDate) || null}
+            onChange={(opt) => setEndDate(opt ? opt.value : null)}
             isClearable
             placeholder="Select end date"
           />
@@ -146,12 +157,14 @@ const AttendanceFilters: React.FC<FiltersProps> = ({ data, onFilterChange }) => 
           <label>Name</label>
           <select
             value={selectedName ?? ""}
-            onChange={e => setSelectedName(e.target.value || null)}
+            onChange={(e) => setSelectedName(e.target.value || null)}
             disabled={!startDate || !endDate}
           >
             <option value="">-- Select Name --</option>
-            {filteredNames.map(name => (
-              <option key={name} value={name}>{name}</option>
+            {filteredNames.map((name) => (
+              <option key={name} value={name}>
+                {name}
+              </option>
             ))}
           </select>
         </div>
@@ -160,47 +173,50 @@ const AttendanceFilters: React.FC<FiltersProps> = ({ data, onFilterChange }) => 
           <label>Course</label>
           <select
             value={selectedCourse ?? ""}
-            onChange={e => setSelectedCourse(e.target.value || null)}
+            onChange={(e) => setSelectedCourse(e.target.value || null)}
             disabled={!startDate || !endDate}
           >
             <option value="">-- Select Course --</option>
-            {filteredCourses.map(course => (
-              <option key={course} value={course}>{course}</option>
+            {filteredCourses.map((course) => (
+              <option key={course} value={course}>
+                {course}
+              </option>
             ))}
           </select>
         </div>
-
-        
       </div>
 
       {/* Row 3: Absent Checkbox */}
-      <div style={{ 
-  marginTop: "10px", 
-  display: "flex", 
-  justifyContent: "space-between", 
-  alignItems: "center" 
-}}>
-  {/* Left side - Checkbox */}
-  <label style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-    <input
-      type="checkbox"
-      checked={showAbsentOnly}
-      onChange={() => setShowAbsentOnly(!showAbsentOnly)}
-    />
-    Show Absent Only (0% Attendance)
-  </label>
+      <div
+        style={{
+          marginTop: "10px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        {/* Left side - Checkbox */}
+        <label style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <input
+            type="checkbox"
+            checked={showAbsentOnly}
+            onChange={() => setShowAbsentOnly(!showAbsentOnly)}
+          />
+          Show Absent Only (0% Attendance)
+        </label>
 
-  {/* Right side - Buttons */}
-  <div style={{ display: "flex", gap: "10px" }}>
-    <button className="submit-btn" onClick={applyFilters}>Search</button>
-    <button className="submit-btn" onClick={handleReset}>Reset Filters</button>
-  </div>
-</div>
-
-      
+        {/* Right side - Buttons */}
+        <div style={{ display: "flex", gap: "10px" }}>
+          <button className="submit-btn" onClick={applyFilters}>
+            Search
+          </button>
+          <button className="submit-btn" onClick={handleReset}>
+            Reset Filters
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
-
 
 export default AttendanceFilters;

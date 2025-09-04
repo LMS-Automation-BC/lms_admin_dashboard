@@ -1,0 +1,112 @@
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.programstitle {
+  font-size: 2rem;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.icon {
+  vertical-align: middle;
+  margin-right: 0.5rem;
+}
+
+.icon-small {
+  vertical-align: middle;
+  margin-right: 0.5rem;
+}
+
+.add-section {
+  margin-bottom: 2rem;
+}
+
+.input,
+.select {
+  padding: 0.5rem;
+  margin-right: 1rem;
+  margin-bottom: 0.5rem;
+  width: 60%;
+  max-width: 300px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.button {
+  padding: 0.5rem 1rem;
+  background-color: #0070f3;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.button:hover {
+  background-color: #005bb5;
+}
+
+.course-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.program-list {
+  margin-top: 3rem;
+}
+
+.program-section {
+  margin-bottom: 2rem;
+}
+
+.program-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+}
+
+.course-list {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+}
+
+.course-item {
+  margin-bottom: 0.3rem;
+}
+.course-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.course-table th,
+.course-table td {
+  border: 1px solid #ccc;
+  padding: 0.5rem 1rem;
+  text-align: left;
+}
+
+.course-table th {
+  background-color: #f0f0f0;
+}
+
+.button.small {
+  padding: 0.25rem 0.5rem;
+  margin-left: 0.25rem;
+  font-size: 1rem;
+}
+
+.button.danger {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.button.danger:hover {
+  background-color: #c0392b;
+}

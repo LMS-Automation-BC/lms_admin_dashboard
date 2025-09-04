@@ -174,7 +174,7 @@ const nameSimilarity = (a: string, b: string): boolean => {
   return commonWords.length >= Math.min(2, Math.min(aWords.size, bWords.size));
 };
 
-export const getMatchingProgram = (csvData: CsvRow[]): string | null => {
+export const getMatchingProgram = (programs:CoursesMap,csvData: CsvRow[]): string | null => {
   const studentCourseCodes = csvData.map(row => row["Course code"]);
   const studentCourseNames = csvData.map(row => row["Overall Class Name"] || row["Name"]);
 
