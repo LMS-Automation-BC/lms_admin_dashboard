@@ -1,9 +1,6 @@
 "use client"; // If using Next.js app router
 
 import React, { useEffect, useState } from "react";
-import Papa from "papaparse";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
 import "./GradeParser.css";
 import { v4 as uuidv4 } from "uuid";
 import { getGrade } from "../grades/helpers/grade";
@@ -40,42 +37,40 @@ const GradeParser: React.FC = () => {
     value: string;
     label: string;
   } | null>(null);
-  const [totalCredits, setTotalCredits] = useState<number>(0);
-  const [creditsEarned, setCreditsEarned] = useState<number>(0);
-  const [cumulativeGpa, setCumulativeGpa] = useState<number>(0);
   const [confirmedProgram, setConfirmedProgram] = useState<string | null>(null);
   const [filteredCsvData, setFilteredCsvData] = useState<CsvRow[]>([]);
   const [programs, setPrograms] = useState<CoursesMap>({});
   useEffect(() => {
+    console.log('all changes')
     if (!confirmedProgram || !Array.isArray(programs[confirmedProgram])) {
-      setFilteredCsvData(calculateScores(csvData)); // fallback: show all if no match
+      setFilteredCsvData(calculateGradePoint(csvData)); // fallback: show all if no match
       return;
     }
-
+ 
     const matchedCourses = programs[confirmedProgram];
-    
-    const filtered = csvData
-      .map((row) => {
-        const matchedCourse = matchedCourses.find(
-          (course) =>
-            course.courseCode === row["Course code"] ||
-            row["Overall Class Name"]
-              ?.toLowerCase()
-              .includes(course.courseName.toLowerCase())
-        );
+    const filtered: typeof csvData = [];
 
-        if (!matchedCourse) return null; // No match — exclude this row
+    matchedCourses.forEach((course) => {
+      const match = csvData.find(
+        (row) =>
+          course.courseCode === row["Course code"] ||
+          row["Overall Class Name"]
+            ?.toLowerCase()
+            .includes(course.courseName.toLowerCase())
+      );
 
-        return {
-          ...row,
-          "Course code": row["Course code"] || matchedCourse.courseCode,
-          Credits: row["Credit"] || matchedCourse.credits,
-          "Default Class Name": matchedCourse.courseName,
-        };
-      })
-      .filter((row): row is (typeof csvData)[number] => row !== null);
+      if (match) {
+        filtered.push({
+          ...match,
+          "Course code": match["Course code"] || course.courseCode,
+          Credits: match["Credit"] || course.credits,
+          "Default Class Name": course.courseName,
+        });
+      }
+    });
+
     setFilteredCsvData(filtered);
-  }, [confirmedProgram, csvData,selectedUser]);
+  }, [confirmedProgram, csvData, selectedUser]);
   const handleFileUpload = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -110,25 +105,18 @@ const GradeParser: React.FC = () => {
       setIsLoading(false);
     }
   };
-  const calculateScores = (users: any[]) => {
-    let totalCredits = 0;
-    let totalGPA = 0;
-    let creditsEarned =0
+  const calculateGradePoint = (users: any[]) => {
+   
     let processedusers = users.map((user: any) => {
       const percent = Number(user["Percent%"]) || 0;
       const credits = Number(user["Credits"]) || 0;
-      const gradePoint = getGrade(percent)?.gpa || 0;
+      const gradePoint = getGrade(user["Grade"])?.gpa || 0;
 
       const gpa = credits * gradePoint;
       user["Grade Point"] = gradePoint;
-      if(gradePoint!=0 )creditsEarned += credits;
-      totalGPA += gpa;
-      totalCredits +=credits
+      
       return user;
     });
-    setTotalCredits(totalCredits);
-    setCumulativeGpa(totalGPA / totalCredits);
-    setCreditsEarned(creditsEarned);
     return processedusers;
   };
   useEffect(() => {
@@ -166,17 +154,18 @@ const GradeParser: React.FC = () => {
 
     checkSessionAndFetchUsers();
   }, []);
+  // useEffect(() => {
+  //   if (csvData.length > 0) {
+  //     const matchedProgram = getMatchingProgram(programs, csvData);
+  //   }
+  //   setCsvData(calculateScores(csvData));
+  // }, [csvData]);
   useEffect(() => {
-    if (csvData.length > 0) {
-      const matchedProgram = getMatchingProgram(programs,csvData);
-    }
-  }, [csvData]);
-    useEffect(() => {
-      fetch("/api/programs")
-        .then((res) => res.json())
-        .then(setPrograms)
-        .catch(console.error);
-    }, []);
+    fetch("/api/programs")
+      .then((res) => res.json())
+      .then(setPrograms)
+      .catch(console.error);
+  }, []);
 
   useEffect(() => {
     const fetchStudentData = async () => {
@@ -192,10 +181,8 @@ const GradeParser: React.FC = () => {
         if (!response.ok) throw new Error("Failed to fetch student data");
 
         const json = await response.json();
-        setCumulativeGpa(0);
-        setCreditsEarned(0);
-        setTotalCredits(0);
-        setCsvData(calculateScores(json.student));
+        
+        setCsvData(calculateGradePoint(json.student));
       } catch (err: any) {
         console.error(err);
         setError(err.message || "Error loading student data");
@@ -203,10 +190,13 @@ const GradeParser: React.FC = () => {
         setIsLoading(false);
       }
     };
-
+    console.log('selected user changed')
     fetchStudentData();
   }, [selectedUser]);
-
+  useEffect(() => {
+        setCsvData(calculateGradePoint(csvData));
+        console.log('confirmed program change changed')
+  },[confirmedProgram])
 
   return (
     <div className="App">
@@ -253,7 +243,7 @@ const GradeParser: React.FC = () => {
           </div>
         </div>
       )}
-      {csvData.length > 0  && (
+      {csvData.length > 0 && selectedUser && (
         <GradeProgramMatch
           programs={programs}
           csvData={csvData}
@@ -264,17 +254,15 @@ const GradeParser: React.FC = () => {
         <GradeTranscript
           studentName={selectedUser?.label}
           program={confirmedProgram}
-          programStartDate="September 1, 2021"
+          programStartDate={filteredCsvData[0]["Program Start Date"]}
           enrollmentNo={selectedUser?.value}
-          credits={creditsEarned}
-          cumulativeGpa={cumulativeGpa}
-          totalCredits = {totalCredits}
           printDate={new Date().toLocaleDateString("en-US", {
             year: "numeric",
             month: "long",
             day: "numeric",
           })}
           courses={filteredCsvData}
+          selectedProgram={programs[confirmedProgram]}
         ></GradeTranscript>
       )}
     </div>

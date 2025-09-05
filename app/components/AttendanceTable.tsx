@@ -286,7 +286,7 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({ data }) => {
               </button>
               <button
                 onClick={() =>{ setShowModal(false); setSelectedIds(new Set());}}
-                className="submit-btn" style={{ background: "#d6c3b5ff" }}
+                className="submit-btn" style={{ background: "#645ecfff" }}
               >
                 Close
               </button>

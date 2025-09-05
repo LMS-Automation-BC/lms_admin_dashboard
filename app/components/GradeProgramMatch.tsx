@@ -19,10 +19,14 @@ const GradeProgramMatch: React.FC<GradeProgramMatchProps> = ({programs, csvData,
 
 
   useEffect(() => {
+    console.log('csv change')
     if (csvData.length > 0) {
+      
       const matched = getMatchingProgram(programs,csvData);
       setMatchedProgram(matched);
       if (matched) setSelectedProgram(matched);
+    } else {
+      setMatchedProgram(null);
     }
   }, [csvData]);
 

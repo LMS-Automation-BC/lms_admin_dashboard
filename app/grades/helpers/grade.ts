@@ -13,9 +13,9 @@ const gradeScale = [
 ];
 
 // Function to look up grade based on score
-export function getGrade(score:number) {
+export function getGrade(grade:string) {
   for (const range of gradeScale) {
-    if (score >= range.min && score <= range.max) {
+    if (grade?.toLowerCase().trim() === range.grade.toLowerCase().trim()) {
       return range;
     }
   }

@@ -36,3 +36,17 @@
 .institution-name.college {
   color: #ff7f00; /* Orange */
 }
+.logout-button {
+  background: none;
+  border: none;
+  color: #d00;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 10px;
+  margin-top: 10px;
+  width: 100%;
+  text-align: left;
+}
+.logout-button:hover {
+  background-color: #ffe5e5;
+}

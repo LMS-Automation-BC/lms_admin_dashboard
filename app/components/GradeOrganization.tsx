@@ -34,7 +34,6 @@ export default function ContactColumns() {
             <br />
             President
           </p>
-          <br></br>
     <div className="contact-columns">
       <div className="column address">
         {/* assuming address is multiline string or you can split by \n if needed */}

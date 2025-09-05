@@ -1,14 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { CsvRow } from "./GradeParser";
 import "./GradeTranscript.css";
-import { FaEdit, FaSave, FaTrash, FaTimes } from "react-icons/fa";
-import { extractMonthYear } from "../grades/helpers/grade";
+import  { useReactToPrint } from "react-to-print";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-import TranscriptPDF from "./GradeTranscriptPDF";
-import { PDFDownloadLink } from "@react-pdf/renderer";
-import { fontWeight } from "html2canvas/dist/types/css/property-descriptors/font-weight";
 import ContactColumns from "./GradeOrganization";
+import { FiCheck, FiEdit2, FiTrash2, FiX } from "react-icons/fi";
+import { Course } from "../grades/helpers/grades.type";
+
 interface TranscriptProps {
   studentName: string | undefined;
   program: string | null;
@@ -16,9 +15,7 @@ interface TranscriptProps {
   enrollmentNo: string | undefined;
   printDate: string;
   courses: CsvRow[];
-  credits: number;
-  cumulativeGpa: number;
-  totalCredits: number;
+  selectedProgram:Course[];
 }
 
 const GradeTranscript: React.FC<TranscriptProps> = ({
@@ -28,20 +25,30 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
   enrollmentNo,
   printDate,
   courses,
-  credits,
-  cumulativeGpa,
-  totalCredits,
+  selectedProgram
 }) => {
   const toInputDate = (dateStr: string | null) => {
     if (!dateStr) return "";
     const date = new Date(dateStr);
     return date.toISOString().split("T")[0]; // "2025-09-01"
   };
-  
+
   const [coursesTranscript, setCoursesTranscript] = useState(courses);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editedRow, setEditedRow] = useState<CsvRow | undefined>();
+  const [totalCredits, setTotalCredits] = useState<number>(0);
+    const [creditsEarned, setCreditsEarned] = useState<number>(0);
+    const [cumulativeGpa, setCumulativeGpa] = useState<number>(0);
+    
   const transcriptRef = useRef<HTMLDivElement>(null);
+  const reactToPrintFn = useReactToPrint({ contentRef:transcriptRef,
+    onAfterPrint: () => setHideActions(false),
+   });
+   const handlePrint = async () => {
+    setHideActions(true); // Hide before printing
+    await new Promise((resolve) => setTimeout(resolve, 0)); // Let React update the UI
+    reactToPrintFn();
+  };
   const [hideActions, setHideActions] = useState(false);
   const [programStatus, setProgramStatus] = useState<string>("");
   const [programStart, setProgramStart] = useState(
@@ -51,8 +58,12 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
     toInputDate(new Date().toISOString())
   );
   useEffect(() => {
+    calculateScores(courses);
     setCoursesTranscript(courses);
   }, [courses]);
+  useEffect(() => {
+    calculateScores(coursesTranscript);
+  },[coursesTranscript])
   const generatePDF = () => {
     setHideActions(true);
     if (!transcriptRef.current) return;
@@ -125,14 +136,14 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
   };
 
   const handleRemove = (index: number) => {
-    const updated = [...courses];
+    const updated = [...coursesTranscript];
     updated.splice(index, 1);
     setCoursesTranscript(updated);
   };
 
   const handleEdit = (index: number) => {
     setEditingIndex(index);
-    setEditedRow({ ...courses[index] });
+    setEditedRow({ ...coursesTranscript[index] });
   };
 
   const handleSave = (index: number) => {
@@ -141,7 +152,29 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
     setCoursesTranscript(updated);
     setEditingIndex(null);
   };
+  const calculateScores = (users: any[]) => {
+      let totalCredits = 0;
+      if (program) {
+        totalCredits = selectedProgram?.reduce(
+          (sum, course) => sum + (course.credits || 0),
+          0
+        );
+      }
+      let totalGPA = 0;
+      let creditsEarned = 0;
+      let processedusers = users.map((user: any) => {
 
+        if (user["Grade Point"] != 0) creditsEarned += user["Credits"] ;
+        totalGPA += user["Credits"] * user["Grade Point"];
+        // console.log(user["Program Start Date"])
+        return user;
+      });
+      
+      setTotalCredits(totalCredits);
+      setCumulativeGpa(totalGPA / totalCredits);
+      setCreditsEarned(creditsEarned);
+      return processedusers;
+    };
   type CsvField = keyof CsvRow;
 
   const handleChange = (field: CsvField, value: string) => {
@@ -150,56 +183,20 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
       return { ...prev, [field]: value };
     });
   };
-  let data = {
-    studentName,
-    program,
-    programStartDate: programStart,
-    enrollmentNo: enrollmentNo,
-    printDate: transcriptPrint,
-    courses: coursesTranscript,
-    credits: credits,
-    cumulativeGpa: cumulativeGpa,
-    programStatus: programStatus,
-  };
-  const safeCourses = Array.isArray(courses)
-    ? JSON.parse(JSON.stringify(courses))
-    : [];
+
   return (
     <div
       className="transcript-page"
       style={{ width: "100%", maxWidth: "572pt" }}
     >
-      {/* <PDFDownloadLink
-        document={
-          <TranscriptPDF
-            studentName={studentName || ''}
-            program={program || ''}
-            programStartDate={programStartDate || ''}
-            enrollmentNo={enrollmentNo || ''}
-            printDate={printDate || ''}
-            courses={Array.isArray(safeCourses) ? safeCourses : []} // <-- default empty array
-            credits={credits || 0}
-            cumulativeGpa={cumulativeGpa || 0}
-            programStatus={programStatus || ''}
-          />
-        }
-        fileName={`${studentName || 'sample'}-transcript.pdf`}
-      >
-        {({ loading }) =>
-          loading ? (
-            <span className="pdf-download-link disabled">
-              Generating PDF...
-            </span>
-          ) : (
-            <span className="pdf-download-link">Download Transcript PDF</span>
-          )
-        }
-      </PDFDownloadLink> */}
-
-      <button onClick={generatePDF} className="export-button">
+      <div>
+        <button onClick={handlePrint} className="export-button">Print</button>
+        <div ref={transcriptRef} className="printable-content"></div>
+      </div>
+      {/* <button onClick={generatePDF} className="export-button">
         Export to PDF
-      </button>
-      <div ref={transcriptRef} style={{ width: "100%", maxWidth: "572pt" }}>
+      </button> */}
+      <div ref={transcriptRef} style={{ width: "100%", padding: "5mm" }}>
         {/* Header: Logo and Institution Name */}
         <div className="header">
           <img
@@ -215,7 +212,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
         </div>
 
         {/* Title */}
-        <div style={{textAlign:"center"}}>
+        <div style={{ textAlign: "center" }}>
           <div className="title">TRANSCRIPT OF ACADEMIC RECORDS</div>
         </div>
 
@@ -284,11 +281,11 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
                 <th className="credits">Credits</th>
                 <th className="letter-grade">Letter Grade</th>
                 <th className="grade-point">Grade Point</th>
-                {/* {!hideActions && <th>Actions</th>} */}
+                {!hideActions && <th className="grade-point">Actions</th>}
               </tr>
             </thead>
             <tbody>
-              {courses.map((row, index) => {
+              {coursesTranscript.map((row, index) => {
                 const isEditing = index === editingIndex;
                 return (
                   <tr key={index}>
@@ -371,50 +368,56 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
                         row["Grade Point"]
                       )}
                     </td>
-                    {/* {!hideActions && (
+                    {!hideActions && (
                       <td>
                         {isEditing ? (
                           <>
                             <button
                               onClick={() => handleSave(index)}
-                              className="icon-button save"
+                              className="button small"
                             >
-                              <FaSave className="icon" /> Save
+                              <FiCheck />
                             </button>
                             <button
                               onClick={() => setEditingIndex(null)}
-                              className="icon-button cancel"
+                              className="button small danger"
                             >
-                              <FaTimes className="icon" /> Cancel
+                              <FiX />
                             </button>
                           </>
                         ) : (
                           <>
                             <button
                               onClick={() => handleEdit(index)}
-                              className="icon-button edit"
+                              className="button small"
+                              title="Edit course"
                             >
-                              <FaEdit className="icon" /> Edit
+                              <FiEdit2 />
                             </button>
                             <button
                               onClick={() => handleRemove(index)}
-                              className="icon-button delete"
+                              className="button small danger"
+                              title="Delete course"
                             >
-                              <FaTrash className="icon" /> Delete
+                              <FiTrash2 />
                             </button>
                           </>
                         )}
                       </td>
-                    )} */}
+                    )}
                   </tr>
                 );
               })}
-              <tr>
-                <td colSpan={4} style={{ textAlign: "right" }}>
-                  Credits Earned
-                </td>
-                <td colSpan={3}>{credits}</td>
-              </tr>
+              {programStatus != "Complete" ? (
+                <tr>
+                  <td colSpan={4} style={{ textAlign: "right" }}>
+                    Credits Earned
+                  </td>
+                  <td colSpan={3}>{creditsEarned}</td>
+                </tr>
+              ) : (
+                <></>
+              )}
               <tr>
                 <td colSpan={4} style={{ textAlign: "right" }}>
                   Total Credits
@@ -464,10 +467,8 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
             </li>
           </ol>
           <br></br>
-          <br></br>
           <ContactColumns></ContactColumns>
         </div>
-        <br></br>
       </div>
     </div>
   );
