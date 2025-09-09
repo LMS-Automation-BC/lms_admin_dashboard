@@ -19,6 +19,7 @@ export interface CsvRow {
   "Program Start Date": string;
   "Student ID": string;
   "Overall Class Name": string;
+  Name: string;
   "Default Class Name": string;
   "Course code": string;
   Semester: string;
@@ -41,30 +42,38 @@ const GradeParser: React.FC = () => {
   const [filteredCsvData, setFilteredCsvData] = useState<CsvRow[]>([]);
   const [programs, setPrograms] = useState<CoursesMap>({});
   useEffect(() => {
-    console.log('all changes')
+    console.log("all changes");
     if (!confirmedProgram || !Array.isArray(programs[confirmedProgram])) {
       setFilteredCsvData(calculateGradePoint(csvData)); // fallback: show all if no match
       return;
     }
- 
+
     const matchedCourses = programs[confirmedProgram];
     const filtered: typeof csvData = [];
-
+    const otherCourses: typeof csvData = [];
+    const sanitize = (str: string) =>
+      str?.toLowerCase().replace(/\s+/g, " ").trim();
     matchedCourses.forEach((course) => {
-      const match = csvData.find(
-        (row) =>
-          course.courseCode === row["Course code"] ||
-          row["Overall Class Name"]
-            ?.toLowerCase()
-            .includes(course.courseName.toLowerCase())
-      );
+      const matches = csvData.filter((row) => {
+        const csvCode = row["Course code"];
+        const csvName = sanitize(row["Overall Class Name"] || row["Name"]);
+        const courseCode = course.courseCode;
+        const courseName = sanitize(course.courseName);
 
-      if (match) {
-        filtered.push({
-          ...match,
-          "Course code": match["Course code"] || course.courseCode,
-          Credits: match["Credit"] || course.credits,
-          "Default Class Name": course.courseName,
+        return (
+          csvCode === courseCode ||
+          csvName.includes(courseName) ||
+          courseName.includes(csvName) // <-- added reverse match
+        );
+      });
+      if (matches.length > 0) {
+        matches.forEach((match) => {
+          filtered.push({
+            ...match,
+            "Course code": match["Course code"] || course.courseCode,
+            Credits: match["Credit"] || course.credits,
+            "Default Class Name": course.courseName,
+          });
         });
       }
     });
@@ -106,7 +115,6 @@ const GradeParser: React.FC = () => {
     }
   };
   const calculateGradePoint = (users: any[]) => {
-   
     let processedusers = users.map((user: any) => {
       const percent = Number(user["Percent%"]) || 0;
       const credits = Number(user["Credits"]) || 0;
@@ -114,7 +122,7 @@ const GradeParser: React.FC = () => {
 
       const gpa = credits * gradePoint;
       user["Grade Point"] = gradePoint;
-      
+
       return user;
     });
     return processedusers;
@@ -181,7 +189,7 @@ const GradeParser: React.FC = () => {
         if (!response.ok) throw new Error("Failed to fetch student data");
 
         const json = await response.json();
-        
+
         setCsvData(calculateGradePoint(json.student));
       } catch (err: any) {
         console.error(err);
@@ -190,13 +198,13 @@ const GradeParser: React.FC = () => {
         setIsLoading(false);
       }
     };
-    console.log('selected user changed')
+    console.log("selected user changed");
     fetchStudentData();
   }, [selectedUser]);
   useEffect(() => {
-        setCsvData(calculateGradePoint(csvData));
-        console.log('confirmed program change changed')
-  },[confirmedProgram])
+    setCsvData(calculateGradePoint(csvData));
+    console.log("confirmed program change changed");
+  }, [confirmedProgram]);
 
   return (
     <div className="App">

@@ -322,7 +322,18 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
                       )}
                     </td>
                     <td className="last-attempt">
-                      {row["Last Attempt"] || ""}
+                      {isEditing ? (
+                        <input
+                          value={
+                            isEditing && editedRow ? editedRow["Last Attempt"] : ""
+                          }
+                          onChange={(e) =>
+                            handleChange("Last Attempt", e.target.value)
+                          }
+                        />
+                      ) : (
+                        row["Last Attempt"]
+                      )}
                     </td>
                     <td className="credits">
                       {isEditing ? (
