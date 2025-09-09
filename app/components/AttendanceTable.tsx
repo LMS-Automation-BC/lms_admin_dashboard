@@ -22,6 +22,16 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({ data }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [attendanceNotes, setAttendanceNotes] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  // Toggle sort direction on click
+  const handleDateSort = () => {
+    setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
+  };
+  const sortedData = [...data].sort((a, b) => {
+    const dateA = new Date(a.date).getTime();
+    const dateB = new Date(b.date).getTime();
+    return sortDirection === "asc" ? dateA - dateB : dateB - dateA;
+  });
   const toggleSelect = (id: string, course_id: string) => {
     setSelectedIds((prev) => {
       const newSet = new Set(prev);
@@ -89,82 +99,92 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({ data }) => {
   };
 
   const handleSubmit = async () => {
-    if(selectedIds.size ===0){
-      alert('select students to get attendance')
+    if (selectedIds.size === 0) {
+      alert("select students to get attendance");
     } else {
-    const selectedRows = data.filter((row) =>
-      selectedIds.has(row.id + row.course_id)
-    );
-    const courseDateMap = new Map<
-      string,
-      { minDate: string; maxDate: string }
-    >();
-    selectedRows.forEach(({ course_id, date }) => {
-      if (!courseDateMap.has(course_id)) {
-        courseDateMap.set(course_id, { minDate: date, maxDate: date });
-      } else {
-        const current = courseDateMap.get(course_id)!;
-        if (new Date(date) < new Date(current.minDate)) current.minDate = date;
-        if (new Date(date) > new Date(current.maxDate)) current.maxDate = date;
-      }
-    });
-    setIsLoading(true);
-    const allNotes: any = [];
-    // Now make one API call per distinct course_id with min/max dates
-    for (const [course_id, { minDate, maxDate }] of courseDateMap) {
-      const response = await fetch(
-        `/api/class?classId=${course_id}&startDate=${minDate}&endDate=${maxDate}`,
-        {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        }
+      const selectedRows = data.filter((row) =>
+        selectedIds.has(row.id + row.course_id)
       );
-
-      if (!response.ok) {
-        console.error(
-          `Failed to fetch course ${course_id}: ${response.statusText}`
+      const courseDateMap = new Map<
+        string,
+        { minDate: string; maxDate: string }
+      >();
+      selectedRows.forEach(({ course_id, date }) => {
+        if (!courseDateMap.has(course_id)) {
+          courseDateMap.set(course_id, { minDate: date, maxDate: date });
+        } else {
+          const current = courseDateMap.get(course_id)!;
+          if (new Date(date) < new Date(current.minDate))
+            current.minDate = date;
+          if (new Date(date) > new Date(current.maxDate))
+            current.maxDate = date;
+        }
+      });
+      setIsLoading(true);
+      const allNotes: any = [];
+      // Now make one API call per distinct course_id with min/max dates
+      for (const [course_id, { minDate, maxDate }] of courseDateMap) {
+        const response = await fetch(
+          `/api/class?classId=${course_id}&startDate=${minDate}&endDate=${maxDate}`,
+          {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+          }
         );
-        continue;
-      } else {
-        const result = await response.json();
-        result.forEach((session: any) => {
-          session.attendance.forEach((att: any) => {
-            const rowId = att.user_id + course_id;
-            
 
-            if (selectedIds.has(rowId)) {
-              const matchedStudent = selectedRows.find((x) => x.id + x.course_id === rowId);
-              allNotes.push({
-                email: matchedStudent?.email ?? '',
-        name: matchedStudent?.name ?? '',
-                sessionDate: session.sessionDate,
-                userId: att.user_id,
-                status: att.status,
-                note: att.note ?? "",
-                course: selectedRows.find((x) => x.id + x.course_id === rowId)
-                  ?.course_name,
-              });
-            }
+        if (!response.ok) {
+          console.error(
+            `Failed to fetch course ${course_id}: ${response.statusText}`
+          );
+          continue;
+        } else {
+          const result = await response.json();
+          result.forEach((session: any) => {
+            session.attendance.forEach((att: any) => {
+              const rowId = att.user_id + course_id;
+
+              if (selectedIds.has(rowId)) {
+                const matchedStudent = selectedRows.find(
+                  (x) => x.id + x.course_id === rowId
+                );
+                allNotes.push({
+                  email: matchedStudent?.email ?? "",
+                  name: matchedStudent?.name ?? "",
+                  sessionDate: session.sessionDate,
+                  userId: att.user_id,
+                  status: att.status,
+                  note: att.note ?? "",
+                  course: selectedRows.find((x) => x.id + x.course_id === rowId)
+                    ?.course_name,
+                });
+              }
+            });
           });
-        });
+        }
       }
+      setIsLoading(false);
+      setAttendanceNotes(allNotes);
+      setShowModal(true); //
     }
-    setIsLoading(false);
-    setAttendanceNotes(allNotes);
-    setShowModal(true); //
-  }
   };
   const exportNotesToExcel = () => {
     if (attendanceNotes.length === 0) return;
 
-    const headers = ["Name","Email", "Session Date", "Status", "Note","Course"];
-    const rows = attendanceNotes.map((note:any) => [
+    const headers = [
+      "Name",
+      "Email",
+      "Session Date",
+      "Status",
+      "Note",
+      "Course",
+    ];
+    const rows = attendanceNotes.map((note: any) => [
       note.name,
       note.email,
       new Date(note.sessionDate).toLocaleDateString(),
       note.status,
       note.note,
-      note.course
+      note.course,
     ]);
 
     const csvContent = [headers, ...rows]
@@ -180,21 +200,27 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({ data }) => {
     link.click();
     URL.revokeObjectURL(url);
   };
+  // Count appearances of each student by their ID
+  const studentAbsenceCounts = data.reduce((acc, row) => {
+    if (row.attendance === "0%") {
+      acc[row.id] = (acc[row.id] || 0) + 1;
+    }
+    return acc;
+  }, {} as Record<string, number>);
 
   return (
     <div className="table-wrapper">
       <div className="mb-2" style={{ display: "flex", gap: "10px" }}>
-        <button
-          className="submit-btn"
-          onClick={handleSubmit}
-        >
+        <button className="submit-btn" onClick={handleSubmit}>
           Get attendance
         </button>
         <button className="submit-btn" onClick={exportToCSV}>
           Export to CSV
         </button>
       </div>
-      <div style={{color:'blue'}}>Select Students and click Get Attendance to get detailed Attendance Data</div>
+      <div style={{ color: "blue" }}>
+        Select Students and click Get Attendance to get detailed Attendance Data
+      </div>
       <div className="table-responsive">
         <table className="table table-bordered table-hover table-striped">
           <thead className="table-dark">
@@ -209,12 +235,16 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({ data }) => {
               <th>Name</th>
               <th>Course Name</th>
               <th>Email</th>
-              <th>Date</th>
+              <th style={{ cursor: "pointer" }} onClick={handleDateSort}>
+        Date {sortDirection === "asc" ? "⬆️" : "⬇️"}
+      </th>
               <th>Attendance</th>
             </tr>
           </thead>
           <tbody>
-            {data.map((row, index) => {
+            {sortedData.map((row, index) => {
+              const isOverLimit = studentAbsenceCounts[row.id] > 5;
+
               const isChecked = selectedIds.has(row.id + row.course_id);
               return (
                 <tr key={`${row.id}-${index}`}>
@@ -225,7 +255,16 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({ data }) => {
                       onChange={() => toggleSelect(row.id, row.course_id)}
                     />
                   </td>
-                  <td>{row.name}</td>
+                  <td
+                    style={{
+                      color:
+                        isOverLimit && row.attendance === "0%"
+                          ? "red"
+                          : "black",
+                    }}
+                  >
+                    {row.name}
+                  </td>
                   <td>
                     {row.course_name}-{row.course_id}
                   </td>
@@ -280,13 +319,24 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({ data }) => {
                 ))}
               </tbody>
             </table>
-            <div className="d-flex justify-content-end gap-2 mt-3" style={{display:"flex", gap:"10px"}}>
-              <button onClick={exportNotesToExcel} className="submit-btn" style={{ background: "#9f6417ff" }}>
+            <div
+              className="d-flex justify-content-end gap-2 mt-3"
+              style={{ display: "flex", gap: "10px" }}
+            >
+              <button
+                onClick={exportNotesToExcel}
+                className="submit-btn"
+                style={{ background: "#9f6417ff" }}
+              >
                 Export to Excel
               </button>
               <button
-                onClick={() =>{ setShowModal(false); setSelectedIds(new Set());}}
-                className="submit-btn" style={{ background: "#645ecfff" }}
+                onClick={() => {
+                  setShowModal(false);
+                  setSelectedIds(new Set());
+                }}
+                className="submit-btn"
+                style={{ background: "#645ecfff" }}
               >
                 Close
               </button>
