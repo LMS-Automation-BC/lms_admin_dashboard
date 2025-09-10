@@ -12,21 +12,21 @@ import GradeTranscript from "./GradeTranscript";
 
 export interface CsvRow {
   [key: string]: any;
-  "First name": string;
-  "Last name": string;
-  "Full Name": string;
-  "Program Name": string;
-  "Program Start Date": string;
-  "Student ID": string;
+  "First name"?: string;
+  "Last name"?: string;
+  "Full Name"?: string;
+  "Program Name"?: string;
+  "Program Start Date"?: string;
+  "Student ID"?: string;
   "Overall Class Name": string;
   Name: string;
   "Default Class Name": string;
   "Course code": string;
-  Semester: string;
-  Credits: number;
-  "Percent%": number;
+  Semester?: string;
+  Credits?: number;
+  "Percent%"?: number;
   Grade: string;
-  "Enrolled at": string;
+  "Enrolled at"?: string;
 }
 
 const GradeParser: React.FC = () => {
@@ -75,6 +75,18 @@ const GradeParser: React.FC = () => {
             "Default Class Name": course.courseName,
           });
         });
+      } else {
+        filtered.push({
+        "Course code": course.courseCode,
+        "Default Class Name": course.courseName,
+        "Overall Class Name": "Not Found",
+        Name: "",
+        "Credit": course.credits,
+        "Grade": "",
+        "Grade Point": "",
+        Credits: course.credits,
+        // Add any other fields your table expects
+      });
       }
     });
 
@@ -262,7 +274,7 @@ const GradeParser: React.FC = () => {
         <GradeTranscript
           studentName={selectedUser?.label}
           program={confirmedProgram}
-          programStartDate={filteredCsvData[0]["Program Start Date"]}
+          programStartDate={filteredCsvData[0]["Program Start Date"] || null}
           enrollmentNo={selectedUser?.value}
           printDate={new Date().toLocaleDateString("en-US", {
             year: "numeric",

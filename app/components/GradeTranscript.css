@@ -262,3 +262,20 @@ width: 10%;
     display: none;
   }
 }
+.grade-select {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+  font-size: 14px;
+  color: #333;
+  width: 100%; /* or a fixed width if needed */
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+}
+
+.grade-select:focus {
+  border-color: #007bff;
+  outline: none;
+  background-color: #fff;
+}

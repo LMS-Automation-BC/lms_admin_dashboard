@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { CsvRow } from "./GradeParser";
 import "./GradeTranscript.css";
-import  { useReactToPrint } from "react-to-print";
+import { useReactToPrint } from "react-to-print";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import ContactColumns from "./GradeOrganization";
 import { FiCheck, FiEdit2, FiTrash2, FiX } from "react-icons/fi";
 import { Course } from "../grades/helpers/grades.type";
+import { gradeScale } from "../grades/helpers/grade";
 
 interface TranscriptProps {
   studentName: string | undefined;
@@ -15,7 +16,7 @@ interface TranscriptProps {
   enrollmentNo: string | undefined;
   printDate: string;
   courses: CsvRow[];
-  selectedProgram:Course[];
+  selectedProgram: Course[];
 }
 
 const GradeTranscript: React.FC<TranscriptProps> = ({
@@ -25,7 +26,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
   enrollmentNo,
   printDate,
   courses,
-  selectedProgram
+  selectedProgram,
 }) => {
   const toInputDate = (dateStr: string | null) => {
     if (!dateStr) return "";
@@ -37,14 +38,15 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editedRow, setEditedRow] = useState<CsvRow | undefined>();
   const [totalCredits, setTotalCredits] = useState<number>(0);
-    const [creditsEarned, setCreditsEarned] = useState<number>(0);
-    const [cumulativeGpa, setCumulativeGpa] = useState<number>(0);
-    
+  const [creditsEarned, setCreditsEarned] = useState<number>(0);
+  const [cumulativeGpa, setCumulativeGpa] = useState<number>(0);
+
   const transcriptRef = useRef<HTMLDivElement>(null);
-  const reactToPrintFn = useReactToPrint({ contentRef:transcriptRef,
+  const reactToPrintFn = useReactToPrint({
+    contentRef: transcriptRef,
     onAfterPrint: () => setHideActions(false),
-   });
-   const handlePrint = async () => {
+  });
+  const handlePrint = async () => {
     setHideActions(true); // Hide before printing
     await new Promise((resolve) => setTimeout(resolve, 0)); // Let React update the UI
     reactToPrintFn();
@@ -63,7 +65,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
   }, [courses]);
   useEffect(() => {
     calculateScores(coursesTranscript);
-  },[coursesTranscript])
+  }, [coursesTranscript]);
   const generatePDF = () => {
     setHideActions(true);
     if (!transcriptRef.current) return;
@@ -147,40 +149,46 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
   };
 
   const handleSave = (index: number) => {
-    const updated = [...courses];
+    const updated = [...coursesTranscript];
     if (editedRow) updated[index] = editedRow;
     setCoursesTranscript(updated);
     setEditingIndex(null);
   };
   const calculateScores = (users: any[]) => {
-      let totalCredits = 0;
-      if (program) {
-        totalCredits = selectedProgram?.reduce(
-          (sum, course) => sum + (course.credits || 0),
-          0
-        );
-      }
-      let totalGPA = 0;
-      let creditsEarned = 0;
-      let processedusers = users.map((user: any) => {
+    let totalCredits = 0;
+    if (program) {
+      totalCredits = selectedProgram?.reduce(
+        (sum, course) => sum + (course.credits || 0),
+        0
+      );
+    }
+    let totalGPA = 0;
+    let creditsEarned = 0;
+    let processedusers = users.map((user: any) => {
+      if (user["Grade Point"] != 0) creditsEarned += user["Credits"];
+      totalGPA += user["Credits"] * user["Grade Point"];
+      // console.log(user["Program Start Date"])
+      return user;
+    });
 
-        if (user["Grade Point"] != 0) creditsEarned += user["Credits"] ;
-        totalGPA += user["Credits"] * user["Grade Point"];
-        // console.log(user["Program Start Date"])
-        return user;
-      });
-      
-      setTotalCredits(totalCredits);
-      setCumulativeGpa(totalGPA / totalCredits);
-      setCreditsEarned(creditsEarned);
-      return processedusers;
-    };
+    setTotalCredits(totalCredits);
+    setCumulativeGpa(totalGPA / totalCredits);
+    setCreditsEarned(creditsEarned);
+    return processedusers;
+  };
   type CsvField = keyof CsvRow;
 
   const handleChange = (field: CsvField, value: string) => {
     setEditedRow((prev) => {
       if (!prev) return prev; // or throw error if it should never be undefined here
-      return { ...prev, [field]: value };
+      let updatedRow = { ...prev, [field]: value };
+      if (field === "Grade") {
+        const gradeInfo = gradeScale.find((g) => g.grade === value);
+        if (gradeInfo) {
+          updatedRow["Grade Point"] = gradeInfo.gpa.toFixed(1); // or keep it as number
+        }
+      }
+      return updatedRow;
     });
   };
 
@@ -190,7 +198,9 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
       style={{ width: "100%", maxWidth: "572pt" }}
     >
       <div>
-        <button onClick={handlePrint} className="export-button">Print</button>
+        <button onClick={handlePrint} className="export-button">
+          Print
+        </button>
         <div ref={transcriptRef} className="printable-content"></div>
       </div>
       {/* <button onClick={generatePDF} className="export-button">
@@ -325,7 +335,9 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
                       {isEditing ? (
                         <input
                           value={
-                            isEditing && editedRow ? editedRow["Last Attempt"] : ""
+                            isEditing && editedRow
+                              ? editedRow["Last Attempt"]
+                              : ""
                           }
                           onChange={(e) =>
                             handleChange("Last Attempt", e.target.value)
@@ -351,34 +363,26 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
                     </td>
                     <td className="letter-grade">
                       {isEditing ? (
-                        <input
-                          value={
-                            isEditing && editedRow ? editedRow["Grade"] : ""
-                          }
+                        <select
+                          className="grade-select"
+                          value={editedRow ? editedRow["Grade"] : ""}
                           onChange={(e) =>
                             handleChange("Grade", e.target.value)
                           }
-                        />
+                        >
+                          <option value="">Select Grade</option>
+                          {gradeScale.map((item) => (
+                            <option key={item.grade} value={item.grade}>
+                              {item.grade}
+                            </option>
+                          ))}
+                        </select>
                       ) : (
                         row["Grade"]
                       )}
                     </td>
-                    <td className="grade-point">
-                      {isEditing ? (
-                        <input
-                          value={
-                            isEditing && editedRow
-                              ? editedRow["Grade Point"]
-                              : ""
-                          }
-                          onChange={(e) =>
-                            handleChange("Grade Point", e.target.value)
-                          }
-                        />
-                      ) : (
-                        row["Grade Point"]
-                      )}
-                    </td>
+
+                    <td className="grade-point">{row["Grade Point"]}</td>
                     {!hideActions && (
                       <td>
                         {isEditing ? (

@@ -1,4 +1,4 @@
-const gradeScale = [
+export const gradeScale = [
   { min: 90, max: 100, grade: 'A+', gpa: 4.0, description: 'Excellent' },
   { min: 85, max: 89, grade: 'A', gpa: 4.0, description: '' },
   { min: 80, max: 84, grade: 'A-', gpa: 3.7, description: '' },
