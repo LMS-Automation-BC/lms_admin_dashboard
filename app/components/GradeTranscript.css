@@ -2,7 +2,7 @@
   /* width: 8.5in;
   height: 11in; */
   box-sizing: border-box;
-   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Times New Roman', Times, serif;
   font-size: 10pt;
   position: relative;
   color: #000;
@@ -33,8 +33,9 @@
 }
 
 .institution-name {
-  font-size: 16pt;
+  font-size: 18pt;
   font-weight: bold;
+  
 }
 
 
@@ -43,22 +44,23 @@
 }
 
 .institution-name.college {
-  color: #ff7f00; /* Orange */
+  color: #e6b03a; /* Orange */
 }
 
 
 .title {
   text-align: center;
   text-decoration: underline;
-  font-size: 12pt;
-  font-weight: bold;
+  font-size: 17pt;
+   font-weight: bold;
+  
 }
 
 .info-row {
   display: flex;
   justify-content: space-between;
   margin-bottom: 1px;
-  font-size: 10pt;
+  font-size: 13pt;
 }
 
 .info-row .left {
@@ -119,13 +121,14 @@
 .grade-table {
   width: 100%;
   border-collapse: collapse;
+  border: 1.5px solid black;
+  border-collapse: collapse;
   table-layout: fixed; /* Ensures columns respect the widths */
   
 }
 .grade-table th, .grade-table td {
   font-size: 10pt;
-  border: 1px solid #ddd;
-  padding: 2px;
+  border: 1.5px solid black;
   text-align: left;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -140,8 +143,8 @@
 }
 
 .grade-table th, .grade-table td {
-  border: 1px solid #ddd;
-  padding: 3px;
+  border: 1.5px solid black;
+  padding: 2px;
   text-align: left;
   word-wrap: break-word;     /* Ensures long words break correctly */
   word-break: break-word;    /* Break words at any point if needed */
@@ -255,8 +258,11 @@ width: 10%;
   .printable-content {
     margin-left: 20mm;
     max-height: 1056px;
+    font-family: 'Times New Roman', Times, serif !important;
   }
-
+   .print-area {
+    font-family: 'Times New Roman', Times, serif;
+  }
   /* Optional: hide buttons/actions when printing */
   button {
     display: none;

@@ -43,6 +43,24 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
 
   const transcriptRef = useRef<HTMLDivElement>(null);
   const reactToPrintFn = useReactToPrint({
+    pageStyle: `
+    @page {
+      size: auto;
+      margin: 7mm;
+    }
+      .institution-name {
+        font-family: "Times New Roman", Times, serif;
+        font-size: 15pt !important;
+      }
+      .title {
+        font-family: "Times New Roman", Times, serif;
+        font-size: 15pt !important;
+      }
+    body {
+      font-family: 'Times New Roman', Times, serif;
+      -webkit-print-color-adjust: exact;
+    }
+  `,
     contentRef: transcriptRef,
     onAfterPrint: () => setHideActions(false),
   });
@@ -201,7 +219,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
         <button onClick={handlePrint} className="export-button">
           Print
         </button>
-        <div ref={transcriptRef} className="printable-content"></div>
+        <div ref={transcriptRef} className="printable-content print-area "></div>
       </div>
       {/* <button onClick={generatePDF} className="export-button">
         Export to PDF
@@ -229,17 +247,17 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
         {/* Student Information */}
         <div className="info-row">
           <div className="left">
-            <span style={{ fontWeight: "bold" }}>Student Name</span>:{" "}
+            <span style={{ fontWeight: "550" }}>Student Name</span>:{" "}
             {studentName}
           </div>
           <div className="right">
-            <span style={{ fontWeight: "bold" }}>Program:</span> {program}
+            <span style={{ fontWeight: "550" }}>Program:</span> {program}
           </div>
         </div>
         <div className="info-row">
           {hideActions ? (
             <div className="right">
-              <span style={{ fontWeight: "bold" }}>Program Start Date</span>:{" "}
+              <span style={{ fontWeight: "550" }}>Program Start Date</span>:{" "}
               {programStart}
             </div>
           ) : (
@@ -256,13 +274,13 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
         </div>
         <div className="info-row">
           <div className="left">
-            <span style={{ fontWeight: "bold" }}>Enrollment No:</span>{" "}
+            <span style={{ fontWeight: "550" }}>Enrollment No:</span>{" "}
             {enrollmentNo}
           </div>
           <div className="right">
             {hideActions ? (
               <div className="right">
-                <span style={{ fontWeight: "bold" }}>
+                <span style={{ fontWeight: "550" }}>
                   {" "}
                   Transcript Print Date:
                 </span>{" "}
@@ -281,9 +299,10 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
             )}
           </div>
         </div>
+        <br></br>
         {coursesTranscript.length > 0 && (
           <table className="grade-table">
-            <thead style={{ fontWeight: "10px" }}>
+            <thead >
               <tr>
                 <th className="course-code">Course Code</th>
                 <th className="course-name">Course Name</th>
@@ -469,10 +488,16 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
           </table>
         )}
         <div className="note">
-          <p style={{ textDecoration: "underline", fontWeight: "bold" }}>
+          <p
+            style={{
+              textDecoration: "underline",
+              fontWeight: "bold",
+              fontStyle: "italic",
+            }}
+          >
             Note:
           </p>
-          <ol>
+          <ol style={{ fontStyle: "italic" }}>
             <li>
               1. The document is official only if original and bears an
               authorized signature with a college stamp.
