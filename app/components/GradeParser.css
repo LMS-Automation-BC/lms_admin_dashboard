@@ -15,7 +15,10 @@
   margin-bottom: 20px;
   transition: background-color 0.3s ease;
 }
-
+.president{
+  font-weight: bold;
+  font-size: 10pt;
+}
 .file-upload-label:hover {
   background-color: #0056b3;
 }

@@ -219,12 +219,18 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
         <button onClick={handlePrint} className="export-button">
           Print
         </button>
-        <div ref={transcriptRef} className="printable-content print-area "></div>
+        <div
+          ref={transcriptRef}
+          className="printable-content print-area "
+        ></div>
       </div>
       {/* <button onClick={generatePDF} className="export-button">
         Export to PDF
       </button> */}
-      <div ref={transcriptRef} style={{ width: "100%", padding: "5mm" }}>
+      <div
+        ref={transcriptRef} className="transcript-container"
+        
+      >
         {/* Header: Logo and Institution Name */}
         <div className="header">
           <img
@@ -299,10 +305,9 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
             )}
           </div>
         </div>
-        <br></br>
         {coursesTranscript.length > 0 && (
-          <table className="grade-table">
-            <thead >
+          <table className="grade-table transcript-body" >
+            <thead>
               <tr>
                 <th className="course-code">Course Code</th>
                 <th className="course-name">Course Name</th>
@@ -506,7 +511,6 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
               2. Information to assist in evaluating the transcript is overleaf.
             </li>
           </ol>
-          <br></br>
           <ContactColumns></ContactColumns>
         </div>
       </div>

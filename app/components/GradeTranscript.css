@@ -2,25 +2,43 @@
   /* width: 8.5in;
   height: 11in; */
   box-sizing: border-box;
-  font-family: 'Times New Roman', Times, serif;
-  font-size: 10pt;
+  font-family: "Times New Roman", Times, serif;
   position: relative;
   color: #000;
   background-color: #fff;
+}
+.transcript-container {
+  width: 724px;
+  height: 1041px;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  font-family: "Times New Roman", Times, serif;
 }
 .header {
   display: flex;
   align-items: center;
   gap: 10px; /* spacing between items */
 }
-
+.transcript-header {
+  height: 20%;
+  flex-shrink: 0;
+  padding: 10px;
+  box-sizing: border-box;
+}
+.transcript-body {
+  height: 60%;
+  flex-shrink: 0;
+  overflow: auto; /* allow scroll if needed */
+  box-sizing: border-box;
+}
 .logo {
   width: 60px;
   height: auto;
 }
 
 .vertical-line {
-  width: 1px;
+  width: 2px;
   height: 50px;
   background-color: #000;
 }
@@ -35,9 +53,7 @@
 .institution-name {
   font-size: 18pt;
   font-weight: bold;
-  
 }
-
 
 .institution-name.brookes {
   color: #063d78; /* Blue */
@@ -47,13 +63,11 @@
   color: #e6b03a; /* Orange */
 }
 
-
 .title {
   text-align: center;
   text-decoration: underline;
   font-size: 17pt;
-   font-weight: bold;
-  
+  font-weight: bold;
 }
 
 .info-row {
@@ -120,18 +134,19 @@
 }
 .grade-table {
   width: 100%;
+  padding: 10px;
   border-collapse: collapse;
   border: 1.5px solid black;
   border-collapse: collapse;
   table-layout: fixed; /* Ensures columns respect the widths */
-  
 }
-.grade-table th, .grade-table td {
+.grade-table th,
+.grade-table td {
   font-size: 10pt;
   border: 1.5px solid black;
   text-align: left;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  /* overflow: hidden;
+  text-overflow: ellipsis; */
   white-space: nowrap;
 }
 /* styles.css */
@@ -142,32 +157,31 @@
   table-layout: fixed; /* Ensures columns respect the widths */
 }
 
-.grade-table th, .grade-table td {
+.grade-table th,
+.grade-table td {
   border: 1.5px solid black;
   padding: 2px;
   text-align: left;
-  word-wrap: break-word;     /* Ensures long words break correctly */
-  word-break: break-word;    /* Break words at any point if needed */
+  word-wrap: break-word; /* Ensures long words break correctly */
+  word-break: break-word; /* Break words at any point if needed */
   white-space: normal;
 }
 
-.grade-table th.course-code{
+.grade-table th.course-code {
   text-align: center;
-width: 10%;
+  width: 10%;
 }
 .grade-table td.course-code {
   width: 10%;
   text-align: center;
 }
 
-
 .grade-table td.course-name {
   width: 50%;
-  word-wrap: break-word;     /* Ensures long words break correctly */
+  word-wrap: break-word; /* Ensures long words break correctly */
   word-break: break-word;
 }
-.grade-table th.course-name
-{
+.grade-table th.course-name {
   width: 50%;
 }
 
@@ -194,16 +208,18 @@ width: 10%;
   text-align: center;
 }
 .contact-columns {
+  /* position: fixed; */
   display: flex;
-  gap: 20px; /* space between columns */
-  flex-wrap: wrap; /* wrap on smaller screens */
+  justify-content: space-around;
+  width: 100%;
+  padding: 5px;
+  font-size: 8pt !important;
 }
 
-.column {
-  flex: 1; /* equal width */
-  min-width: 150px; /* optional: minimum width to keep readable */
+.contact-columns .column {
+  flex: 1;
+  min-width: 150px;
 }
-
 
 .email a {
   color: blue;
@@ -257,15 +273,38 @@ width: 10%;
 @media print {
   .printable-content {
     margin-left: 20mm;
-    max-height: 1056px;
-    font-family: 'Times New Roman', Times, serif !important;
+    width: 100%;
+    height: 100%;
+    max-width: 8.5in;
+    max-height: 11in;
+    transform: scale(0.94);
   }
-   .print-area {
-    font-family: 'Times New Roman', Times, serif;
+  @page {
+    size: 8.5in 11in; /* Ensure page matches */
+    margin-left: 0.5in;
+    margin-right: 0.5in;
+    margin-bottom: 0in;
+  }
+  .print-area {
+    font-family: "Times New Roman", Times, serif;
   }
   /* Optional: hide buttons/actions when printing */
   button {
     display: none;
+  }
+  .contact-columns {
+    position: static; /* Let it be part of the normal flow */
+    display: flex;
+    justify-content: space-around;
+    border-top: 1px solid #ccc;
+    font-size: 10pt;
+  }
+
+  .president {
+    font-weight: bold;
+    font-family: "Times New Roman", Times, serif;
+    font-size: 11pt;
+    margin-bottom: 5px; /* space before footer */
   }
 }
 .grade-select {

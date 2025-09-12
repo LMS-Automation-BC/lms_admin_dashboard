@@ -29,7 +29,7 @@ export default function ContactColumns() {
   if (!orgData) return <p>No organization data found.</p>;
 
   return (<div>
-    <p style={{ fontWeight: "bold !important" }}>
+    <p className='president'>
             {orgData.president}
             <br />
             President
