@@ -305,8 +305,9 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
             )}
           </div>
         </div>
+        <div className="transcript-body">
         {coursesTranscript.length > 0 && (
-          <table className="grade-table transcript-body" >
+          <table className="grade-table" >
             <thead>
               <tr>
                 <th className="course-code">Course Code</th>
@@ -491,18 +492,19 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
               </tr>
             </tbody>
           </table>
-        )}
+        )}</div>
         <div className="note">
           <p
             style={{
               textDecoration: "underline",
               fontWeight: "bold",
               fontStyle: "italic",
+              fontSize:"10pt"
             }}
           >
             Note:
           </p>
-          <ol style={{ fontStyle: "italic" }}>
+          <ol style={{ fontStyle: "italic", paddingBottom:"10px" }}>
             <li>
               1. The document is official only if original and bears an
               authorized signature with a college stamp.

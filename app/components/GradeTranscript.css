@@ -27,10 +27,8 @@
   box-sizing: border-box;
 }
 .transcript-body {
-  height: 60%;
-  flex-shrink: 0;
-  overflow: auto; /* allow scroll if needed */
-  box-sizing: border-box;
+   width: 100%;
+  text-align: center;
 }
 .logo {
   width: 60px;
@@ -133,11 +131,13 @@
   border-radius: 4px;
 }
 .grade-table {
-  width: 100%;
+  width: 90%;
+  height: 90%;
   padding: 10px;
   border-collapse: collapse;
   border: 1.5px solid black;
   border-collapse: collapse;
+  display: inline-table;
   table-layout: fixed; /* Ensures columns respect the widths */
 }
 .grade-table th,
@@ -151,11 +151,6 @@
 }
 /* styles.css */
 
-.grade-table {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed; /* Ensures columns respect the widths */
-}
 
 .grade-table th,
 .grade-table td {
@@ -296,7 +291,6 @@
     position: static; /* Let it be part of the normal flow */
     display: flex;
     justify-content: space-around;
-    border-top: 1px solid #ccc;
     font-size: 10pt;
   }
 
@@ -304,7 +298,8 @@
     font-weight: bold;
     font-family: "Times New Roman", Times, serif;
     font-size: 11pt;
-    margin-bottom: 5px; /* space before footer */
+    margin-top:2px;
+    margin-bottom: 2px; /* space before footer */
   }
 }
 .grade-select {
