@@ -460,7 +460,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
                   <td colSpan={4} style={{ textAlign: "center" }}>
                     Credits Earned
                   </td>
-                  <td colSpan={3} style={{ textAlign: "center" }}>{creditsEarned}</td>
+                  <td colSpan={!hideActions? 3 :2} style={{ textAlign: "center" }}>{creditsEarned}</td>
                 </tr>
               ) : (
                 <></>
@@ -469,19 +469,19 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
                 <td colSpan={4} style={{ textAlign: "center" }}>
                   Total Credits
                 </td>
-                <td colSpan={3} style={{ textAlign: "center" }}>{totalCredits}</td>
+                <td colSpan={!hideActions? 3 :2} style={{ textAlign: "center" }}>{totalCredits}</td>
               </tr>
               <tr>
                 <td colSpan={4} style={{ textAlign: "center" }}>
                   Cumulative Grade Point Average (CGPA)
                 </td>
-                <td colSpan={3} style={{ textAlign: "center" }}>{cumulativeGpa.toFixed(1)}</td>
+                <td colSpan={!hideActions? 3 :2} style={{ textAlign: "center" }}>{cumulativeGpa.toFixed(1)}</td>
               </tr>
               <tr>
                 <td colSpan={4} style={{ textAlign: "center" }}>
                   Program Status
                 </td>
-                <td colSpan={3} style={{ textAlign: "center" }}>
+                <td colSpan={!hideActions? 3 :2} style={{ textAlign: "center" }}>
                   {hideActions ? (
                     programStatus || "Complete"
                   ) : (

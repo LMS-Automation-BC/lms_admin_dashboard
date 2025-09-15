@@ -195,19 +195,19 @@
 
 .grade-table th.credits,
 .grade-table td.credits {
-  width: 10%;
+  width: 7%;
   text-align: center;
 }
 
 .grade-table th.letter-grade,
 .grade-table td.letter-grade {
-  width: 10%;
+  width: 7%;
   text-align: center;
 }
 
 .grade-table th.grade-point,
 .grade-table td.grade-point {
-  width: 10%;
+  width: 7%;
   text-align: center;
 }
 .contact-columns {
