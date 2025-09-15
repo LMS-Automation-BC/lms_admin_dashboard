@@ -201,12 +201,16 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({ data }) => {
     URL.revokeObjectURL(url);
   };
   // Count appearances of each student by their ID
-  const studentAbsenceCounts = data.reduce((acc, row) => {
-    if (row.attendance === "0%") {
-      acc[row.id] = (acc[row.id] || 0) + 1;
+const studentAbsenceDates = data.reduce((acc, row) => {
+  if (row.attendance === "0%") {
+    if (!acc[row.id]) {
+      acc[row.id] = new Set<string>();
     }
-    return acc;
-  }, {} as Record<string, number>);
+    acc[row.id].add(row.date); // Make sure Date is a string or consistently formatted
+  }
+  return acc;
+}, {} as Record<string, Set<string>>);
+
 
   return (
     <div className="table-wrapper">
@@ -243,7 +247,7 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({ data }) => {
           </thead>
           <tbody>
             {sortedData.map((row, index) => {
-              const isOverLimit = studentAbsenceCounts[row.id] > 5;
+              const isOverLimit = studentAbsenceDates[row.id]?.size > 5;
 
               const isChecked = selectedIds.has(row.id + row.course_id);
               return (

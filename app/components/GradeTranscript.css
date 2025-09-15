@@ -2,18 +2,19 @@
   /* width: 8.5in;
   height: 11in; */
   box-sizing: border-box;
-  font-family: "Times New Roman", Times, serif;
+  font-family: 'Book Antiqua';
   position: relative;
   color: #000;
   background-color: #fff;
 }
 .transcript-container {
-  width: 724px;
-  height: 1041px;
+  width: 8.5in;
+  height: 11in;
   display: flex;
+  border: 1px solid #ccc; 
   flex-direction: column;
   box-sizing: border-box;
-  font-family: "Times New Roman", Times, serif;
+  font-family: 'Book Antiqua';
 }
 .header {
   display: flex;
@@ -27,8 +28,9 @@
   box-sizing: border-box;
 }
 .transcript-body {
-   width: 100%;
+  width: 100%;
   text-align: center;
+  margin: 0 auto 1px auto; /* Center horizontally */
 }
 .logo {
   width: 60px;
@@ -45,43 +47,48 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  line-height: 1.2;
+  line-height: 1;
 }
 
 .institution-name {
-  font-size: 18pt;
-  font-weight: bold;
+  font-size: 21pt;
 }
 
 .institution-name.brookes {
-  color: #063d78; /* Blue */
+  color: #02264d; /* Blue */
 }
 
 .institution-name.college {
-  color: #e6b03a; /* Orange */
+  color: #d2a136; /* Orange */
 }
 
 .title {
   text-align: center;
   text-decoration: underline;
-  font-size: 17pt;
+  font-size: 18pt;
   font-weight: bold;
+  font-family: 'Book Antiqua';
+  margin-bottom: 5px;
 }
 
 .info-row {
+  /* width: 90%; */
   display: flex;
   justify-content: space-between;
-  margin-bottom: 1px;
+ /*  margin: 0 auto 1px auto; Center horizontally */
   font-size: 13pt;
 }
 
 .info-row .left {
-  text-align: left;
+   text-align: left;
+  width: 50%;
+
 }
 
 .info-row .right {
   text-align: right;
-  margin-left: auto;
+  width: 50%;
+   white-space: nowrap
 }
 .icon-button {
   display: inline-flex;
@@ -131,31 +138,32 @@
   border-radius: 4px;
 }
 .grade-table {
-  width: 90%;
-  height: 90%;
-  padding: 10px;
+   margin: 0 auto;
+   margin: 20px 0;
+  /* width: 90%; */
+  /* height: 90%; */
   border-collapse: collapse;
   border: 1.5px solid black;
   border-collapse: collapse;
   display: inline-table;
   table-layout: fixed; /* Ensures columns respect the widths */
+  font-family: 'Times New Roman', Times, serif;
 }
 .grade-table th,
 .grade-table td {
-  font-size: 10pt;
+  font-size: 11pt;
   border: 1.5px solid black;
   text-align: left;
   /* overflow: hidden;
   text-overflow: ellipsis; */
-  white-space: nowrap;
+  white-space:wrap;
+  margin-left: 2px;
 }
 /* styles.css */
-
 
 .grade-table th,
 .grade-table td {
   border: 1.5px solid black;
-  padding: 2px;
   text-align: left;
   word-wrap: break-word; /* Ensures long words break correctly */
   word-break: break-word; /* Break words at any point if needed */
@@ -212,13 +220,25 @@
 }
 
 .contact-columns .column {
-  flex: 1;
-  min-width: 150px;
+  flex: 1;                /* each column takes equal width */
+  box-sizing: border-box; /* prevents padding from affecting width */
 }
 
 .email a {
   color: blue;
   text-decoration: underline;
+
+}
+.contact-columns .address {
+  text-align: left;
+}
+
+.contact-columns .phone {
+  text-align: center;
+}
+
+.contact-columns .email {
+  text-align: right;
 }
 .export-button {
   margin: 1rem 0;
@@ -266,40 +286,44 @@
   white-space: normal;
 }
 @media print {
+  .transcript-container{
+    border:none
+  }
   .printable-content {
     margin-left: 20mm;
     width: 100%;
     height: 100%;
     max-width: 8.5in;
     max-height: 11in;
-    transform: scale(0.94);
   }
   @page {
     size: 8.5in 11in; /* Ensure page matches */
-    margin-left: 0.5in;
-    margin-right: 0.5in;
-    margin-bottom: 0in;
+    margin:0.5in;
   }
   .print-area {
-    font-family: "Times New Roman", Times, serif;
+    font-family: 'Book Antiqua';
   }
   /* Optional: hide buttons/actions when printing */
-  button {
+  .gradebutton {
     display: none;
   }
   .contact-columns {
     position: static; /* Let it be part of the normal flow */
     display: flex;
-    justify-content: space-around;
-    font-size: 10pt;
+    justify-content: space-between; /* spreads the three columns evenly */
+    align-items: flex-start;
+    text-align: left;
+    width: 100%;
+    padding-top: 2px;
+    font-family: 'Book Antiqua';
   }
 
   .president {
     font-weight: bold;
-    font-family: "Times New Roman", Times, serif;
+    font-family: 'Book Antiqua';
     font-size: 11pt;
-    margin-top:2px;
-    margin-bottom: 2px; /* space before footer */
+    margin-top: 2px;
+    margin-bottom: 5px; /* space before footer */
   }
 }
 .grade-select {
@@ -319,3 +343,7 @@
   outline: none;
   background-color: #fff;
 }
+/* .note{
+  width: 90%;
+  margin:0 auto;
+} */

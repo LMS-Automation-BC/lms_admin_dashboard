@@ -43,24 +43,24 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
 
   const transcriptRef = useRef<HTMLDivElement>(null);
   const reactToPrintFn = useReactToPrint({
-    pageStyle: `
-    @page {
-      size: auto;
-      margin: 7mm;
-    }
-      .institution-name {
-        font-family: "Times New Roman", Times, serif;
-        font-size: 15pt !important;
-      }
-      .title {
-        font-family: "Times New Roman", Times, serif;
-        font-size: 15pt !important;
-      }
-    body {
-      font-family: 'Times New Roman', Times, serif;
-      -webkit-print-color-adjust: exact;
-    }
-  `,
+  //   pageStyle: `
+  //   @page {
+  //     size: auto;
+  //     margin: 7mm;
+  //   }
+  //     .institution-name {
+  //       font-family: "Times New Roman", Times, serif;
+  //       font-size: 15pt !important;
+  //     }
+  //     .title {
+  //       font-family: "Times New Roman", Times, serif;
+  //       font-size: 15pt !important;
+  //     }
+  //   body {
+  //     font-family: 'Times New Roman', Times, serif;
+  //     -webkit-print-color-adjust: exact;
+  //   }
+  // `,
     contentRef: transcriptRef,
     onAfterPrint: () => setHideActions(false),
   });
@@ -209,7 +209,13 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
       return updatedRow;
     });
   };
-
+  const formatDateWithHyphen =(dateStr:string) => {
+  const date = new Date(dateStr);
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = date.toLocaleString('en-US', { month: 'long' });
+  const year = date.getFullYear();
+  return `${day}-${month}-${year}`;
+}
   return (
     <div
       className="transcript-page"
@@ -261,10 +267,11 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
           </div>
         </div>
         <div className="info-row">
+          <div className="left"></div>
           {hideActions ? (
             <div className="right">
               <span style={{ fontWeight: "550" }}>Program Start Date</span>:{" "}
-              {programStart}
+              {formatDateWithHyphen(programStart)}
             </div>
           ) : (
             <label htmlFor="programStartDate" className="right">
@@ -285,12 +292,12 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
           </div>
           <div className="right">
             {hideActions ? (
-              <div className="right">
+              <div>
                 <span style={{ fontWeight: "550" }}>
                   {" "}
                   Transcript Print Date:
                 </span>{" "}
-                {transcriptPrint}
+                {formatDateWithHyphen(transcriptPrint)}
               </div>
             ) : (
               <label htmlFor="programStartDate" className="right">
@@ -450,31 +457,31 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
               })}
               {programStatus != "Complete" ? (
                 <tr>
-                  <td colSpan={4} style={{ textAlign: "right" }}>
+                  <td colSpan={4} style={{ textAlign: "center" }}>
                     Credits Earned
                   </td>
-                  <td colSpan={3}>{creditsEarned}</td>
+                  <td colSpan={3} style={{ textAlign: "center" }}>{creditsEarned}</td>
                 </tr>
               ) : (
                 <></>
               )}
               <tr>
-                <td colSpan={4} style={{ textAlign: "right" }}>
+                <td colSpan={4} style={{ textAlign: "center" }}>
                   Total Credits
                 </td>
-                <td colSpan={3}>{totalCredits}</td>
+                <td colSpan={3} style={{ textAlign: "center" }}>{totalCredits}</td>
               </tr>
               <tr>
-                <td colSpan={4} style={{ textAlign: "right" }}>
+                <td colSpan={4} style={{ textAlign: "center" }}>
                   Cumulative Grade Point Average (CGPA)
                 </td>
-                <td colSpan={3}>{cumulativeGpa.toFixed(1)}</td>
+                <td colSpan={3} style={{ textAlign: "center" }}>{cumulativeGpa.toFixed(1)}</td>
               </tr>
               <tr>
-                <td colSpan={4} style={{ textAlign: "right" }}>
+                <td colSpan={4} style={{ textAlign: "center" }}>
                   Program Status
                 </td>
-                <td colSpan={3}>
+                <td colSpan={3} style={{ textAlign: "center" }}>
                   {hideActions ? (
                     programStatus || "Complete"
                   ) : (
@@ -499,12 +506,12 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
               textDecoration: "underline",
               fontWeight: "bold",
               fontStyle: "italic",
-              fontSize:"10pt"
+              fontSize:"11pt"
             }}
           >
             Note:
           </p>
-          <ol style={{ fontStyle: "italic", paddingBottom:"10px" }}>
+          <ol style={{ fontStyle: "italic", paddingBottom:"10px",   fontSize:"11pt" }}>
             <li>
               1. The document is official only if original and bears an
               authorized signature with a college stamp.
@@ -513,7 +520,10 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
               2. Information to assist in evaluating the transcript is overleaf.
             </li>
           </ol>
-          <ContactColumns></ContactColumns>
+          
+        </div>
+        <div style={{position: "absolute", bottom:0, width:"100%", margin:"0 auto"}}>
+        <ContactColumns ></ContactColumns>
         </div>
       </div>
     </div>
