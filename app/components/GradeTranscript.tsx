@@ -43,27 +43,27 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
 
   const transcriptRef = useRef<HTMLDivElement>(null);
   const reactToPrintFn = useReactToPrint({
-  //   pageStyle: `
-  //   @page {
-  //     size: auto;
-  //     margin: 7mm;
-  //   }
-  //     .institution-name {
-  //       font-family: "Times New Roman", Times, serif;
-  //       font-size: 15pt !important;
-  //     }
-  //     .title {
-  //       font-family: "Times New Roman", Times, serif;
-  //       font-size: 15pt !important;
-  //     }
-  //   body {
-  //     font-family: 'Times New Roman', Times, serif;
-  //     -webkit-print-color-adjust: exact;
-  //   }
-  // `,
+    //   pageStyle: `
+    //   @page {
+    //     size: auto;
+    //     margin: 7mm;
+    //   }
+    //     .institution-name {
+    //       font-family: "Times New Roman", Times, serif;
+    //       font-size: 15pt !important;
+    //     }
+    //     .title {
+    //       font-family: "Times New Roman", Times, serif;
+    //       font-size: 15pt !important;
+    //     }
+    //   body {
+    //     font-family: 'Times New Roman', Times, serif;
+    //     -webkit-print-color-adjust: exact;
+    //   }
+    // `,
     contentRef: transcriptRef,
     onAfterPrint: () => setHideActions(false),
-    documentTitle: `${studentName}-Transcript`
+    documentTitle: `${studentName}-Transcript`,
   });
   const handlePrint = async () => {
     setHideActions(true); // Hide before printing
@@ -139,13 +139,13 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
       return updatedRow;
     });
   };
-  const formatDateWithHyphen =(dateStr:string) => {
-  const date = new Date(dateStr);
-  const day = date.getDate().toString().padStart(2, '0');
-  const month = date.toLocaleString('en-US', { month: 'long' });
-  const year = date.getFullYear();
-  return `${day}-${month}-${year}`;
-}
+  const formatDateWithHyphen = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = date.toLocaleString("en-US", { month: "long" });
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
   return (
     <div
       className="transcript-page"
@@ -163,10 +163,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
       {/* <button onClick={generatePDF} className="export-button">
         Export to PDF
       </button> */}
-      <div
-        ref={transcriptRef} className="transcript-container"
-        
-      >
+      <div ref={transcriptRef} className="transcript-container">
         {/* Header: Logo and Institution Name */}
         <div className="header">
           <img
@@ -197,7 +194,10 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
           </div>
         </div>
         <div className="info-row">
-          <div className="left"></div>
+          <div className="left">
+            <span style={{ fontWeight: "550" }}>Enrollment No:</span>{" "}
+            {enrollmentNo}
+          </div>
           {hideActions ? (
             <div className="right">
               <span style={{ fontWeight: "550" }}>Program Start Date</span>:{" "}
@@ -216,10 +216,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
           )}
         </div>
         <div className="info-row">
-          <div className="left">
-            <span style={{ fontWeight: "550" }}>Enrollment No:</span>{" "}
-            {enrollmentNo}
-          </div>
+          <div className="left"></div>
           <div className="right">
             {hideActions ? (
               <div>
@@ -243,205 +240,230 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
           </div>
         </div>
         <div className="transcript-body">
-        {coursesTranscript.length > 0 && (
-          <table className="grade-table" >
-            <thead>
-              <tr>
-                <th className="course-code">Course Code</th>
-                <th className="course-name">Course Name</th>
-                <th className="last-attempt">Last Attempt</th>
-                <th className="credits">Credits</th>
-                <th className="letter-grade">Letter Grade</th>
-                <th className="grade-point">Grade Point</th>
-                {!hideActions && <th className="grade-point">Actions</th>}
-              </tr>
-            </thead>
-            <tbody>
-              {coursesTranscript.map((row, index) => {
-                const isEditing = index === editingIndex;
-                return (
-                  <tr key={index}>
-                    <td className="course-code">
-                      {isEditing ? (
-                        <input
-                          value={
-                            isEditing && editedRow
-                              ? editedRow["Course code"]
-                              : ""
-                          }
-                          onChange={(e) =>
-                            handleChange("Course code", e.target.value)
-                          }
-                        />
-                      ) : (
-                        row["Course code"]
-                      )}
-                    </td>
-                    <td className="course-name">
-                      {isEditing ? (
-                        <input
-                          value={
-                            isEditing && editedRow
-                              ? editedRow["Default Class Name"]
-                              : ""
-                          }
-                          onChange={(e) =>
-                            handleChange("Default Class Name", e.target.value)
-                          }
-                        />
-                      ) : (
-                        row["Default Class Name"]
-                      )}
-                    </td>
-                    <td className="last-attempt">
-                      {isEditing ? (
-                        <input
-                          value={
-                            isEditing && editedRow
-                              ? editedRow["Last Attempt"]
-                              : ""
-                          }
-                          onChange={(e) =>
-                            handleChange("Last Attempt", e.target.value)
-                          }
-                        />
-                      ) : (
-                        row["Last Attempt"]
-                      )}
-                    </td>
-                    <td className="credits">
-                      {isEditing ? (
-                        <input
-                          value={
-                            isEditing && editedRow ? editedRow["Credits"] : ""
-                          }
-                          onChange={(e) =>
-                            handleChange("Credits", e.target.value)
-                          }
-                        />
-                      ) : (
-                        row["Credits"]
-                      )}
-                    </td>
-                    <td className="letter-grade">
-                      {isEditing ? (
-                        <select
-                          className="grade-select"
-                          value={editedRow ? editedRow["Grade"] : ""}
-                          onChange={(e) =>
-                            handleChange("Grade", e.target.value)
-                          }
-                        >
-                          <option value="">Select Grade</option>
-                          {gradeScale.map((item) => (
-                            <option key={item.grade} value={item.grade}>
-                              {item.grade}
-                            </option>
-                          ))}
-                        </select>
-                      ) : (
-                        row["Grade"]
-                      )}
-                    </td>
-
-                    <td className="grade-point">{row["Grade Point"]}</td>
-                    {!hideActions && (
-                      <td>
+          {coursesTranscript.length > 0 && (
+            <table className="grade-table">
+              <thead>
+                <tr>
+                  <th className="course-code">Course Code</th>
+                  <th className="course-name">Course Name</th>
+                  <th className="last-attempt">Last Attempt</th>
+                  <th className="credits">Credits</th>
+                  <th className="letter-grade">Letter Grade</th>
+                  <th className="grade-point">Grade Point</th>
+                  {!hideActions && <th className="grade-point">Actions</th>}
+                </tr>
+              </thead>
+              <tbody>
+                {coursesTranscript.map((row, index) => {
+                  const isEditing = index === editingIndex;
+                  return (
+                    <tr key={index}>
+                      <td className="course-code">
                         {isEditing ? (
-                          <>
-                            <button
-                              onClick={() => handleSave(index)}
-                              className="button small"
-                            >
-                              <FiCheck />
-                            </button>
-                            <button
-                              onClick={() => setEditingIndex(null)}
-                              className="button small danger"
-                            >
-                              <FiX />
-                            </button>
-                          </>
+                          <input
+                            value={
+                              isEditing && editedRow
+                                ? editedRow["Course code"]
+                                : ""
+                            }
+                            onChange={(e) =>
+                              handleChange("Course code", e.target.value)
+                            }
+                          />
                         ) : (
-                          <>
-                            <button
-                              onClick={() => handleEdit(index)}
-                              className="button small"
-                              title="Edit course"
-                            >
-                              <FiEdit2 />
-                            </button>
-                            <button
-                              onClick={() => handleRemove(index)}
-                              className="button small danger"
-                              title="Delete course"
-                            >
-                              <FiTrash2 />
-                            </button>
-                          </>
+                          row["Course code"]
                         )}
                       </td>
-                    )}
+                      <td className="course-name">
+                        {isEditing ? (
+                          <input
+                            value={
+                              isEditing && editedRow
+                                ? editedRow["Default Class Name"]
+                                : ""
+                            }
+                            onChange={(e) =>
+                              handleChange("Default Class Name", e.target.value)
+                            }
+                          />
+                        ) : (
+                          row["Default Class Name"]
+                        )}
+                      </td>
+                      <td className="last-attempt">
+                        {isEditing ? (
+                          <input
+                            value={
+                              isEditing && editedRow
+                                ? editedRow["Last Attempt"]
+                                : ""
+                            }
+                            onChange={(e) =>
+                              handleChange("Last Attempt", e.target.value)
+                            }
+                          />
+                        ) : (
+                          row["Last Attempt"]
+                        )}
+                      </td>
+                      <td className="credits">
+                        {isEditing ? (
+                          <input
+                            value={
+                              isEditing && editedRow ? editedRow["Credits"] : ""
+                            }
+                            onChange={(e) =>
+                              handleChange("Credits", e.target.value)
+                            }
+                          />
+                        ) : (
+                          Number(row["Credits"]).toFixed(1)
+                        )}
+                      </td>
+                      <td className="letter-grade">
+                        {isEditing ? (
+                          <select
+                            className="grade-select"
+                            value={editedRow ? editedRow["Grade"] : ""}
+                            onChange={(e) =>
+                              handleChange("Grade", e.target.value)
+                            }
+                          >
+                            <option value="">Select Grade</option>
+                            {gradeScale.map((item) => (
+                              <option key={item.grade} value={item.grade}>
+                                {item.grade}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          row["Grade"]
+                        )}
+                      </td>
+
+                      <td className="grade-point">{row["Grade Point"]}</td>
+                      {!hideActions && (
+                        <td>
+                          {isEditing ? (
+                            <>
+                              <button
+                                onClick={() => handleSave(index)}
+                                className="button small"
+                              >
+                                <FiCheck />
+                              </button>
+                              <button
+                                onClick={() => setEditingIndex(null)}
+                                className="button small danger"
+                              >
+                                <FiX />
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <button
+                                onClick={() => handleEdit(index)}
+                                className="button small"
+                                title="Edit course"
+                              >
+                                <FiEdit2 />
+                              </button>
+                              <button
+                                onClick={() => handleRemove(index)}
+                                className="button small danger"
+                                title="Delete course"
+                              >
+                                <FiTrash2 />
+                              </button>
+                            </>
+                          )}
+                        </td>
+                      )}
+                    </tr>
+                  );
+                })}
+                {programStatus != "Complete" ? (
+                  <tr>
+                    <td colSpan={4} style={{ textAlign: "center" }}>
+                      Credits Earned
+                    </td>
+                    <td
+                      colSpan={!hideActions ? 3 : 2}
+                      style={{ textAlign: "center" }}
+                    >
+                      {creditsEarned}
+                    </td>
                   </tr>
-                );
-              })}
-              {programStatus != "Complete" ? (
+                ) : (
+                  <></>
+                )}
                 <tr>
                   <td colSpan={4} style={{ textAlign: "center" }}>
-                    Credits Earned
+                    Total Credits
                   </td>
-                  <td colSpan={!hideActions? 3 :2} style={{ textAlign: "center" }}>{creditsEarned}</td>
+                  <td
+                    colSpan={!hideActions ? 3 : 2}
+                    style={{ textAlign: "center" }}
+                  >
+                    {totalCredits}
+                  </td>
                 </tr>
-              ) : (
-                <></>
-              )}
-              <tr>
-                <td colSpan={4} style={{ textAlign: "center" }}>
-                  Total Credits
-                </td>
-                <td colSpan={!hideActions? 3 :2} style={{ textAlign: "center" }}>{totalCredits}</td>
-              </tr>
-              <tr>
-                <td colSpan={4} style={{ textAlign: "center" }}>
-                  Cumulative Grade Point Average (CGPA)
-                </td>
-                <td colSpan={!hideActions? 3 :2} style={{ textAlign: "center" }}>{cumulativeGpa.toFixed(1)}</td>
-              </tr>
-              <tr>
-                <td colSpan={4} style={{ textAlign: "center" }}>
-                  Program Status
-                </td>
-                <td colSpan={!hideActions? 3 :2} style={{ textAlign: "center" }}>
-                  {hideActions ? (
-                    programStatus || "Complete"
-                  ) : (
-                    <select
-                      value={programStatus}
-                      onChange={(e) => setProgramStatus(e.target.value)}
-                      style={{ width: "100%" }}
-                    >
-                      <option value="">-- Select status --</option>
-                      <option value="Complete">Complete</option>
-                      <option value="Incomplete">Incomplete</option>
-                    </select>
-                  )}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        )}</div>
+                <tr>
+                  <td colSpan={4} style={{ textAlign: "center" }}>
+                    Cumulative Grade Point Average (CGPA)
+                  </td>
+                  <td
+                    colSpan={!hideActions ? 3 : 2}
+                    style={{ textAlign: "center" }}
+                  >
+                    {cumulativeGpa.toFixed(1)}
+                  </td>
+                </tr>
+                <tr>
+                  <td colSpan={4} style={{ textAlign: "center" }}>
+                    Program Status
+                  </td>
+                  <td
+                    colSpan={!hideActions ? 3 : 2}
+                    style={{ textAlign: "center" }}
+                  >
+                    {hideActions ? (
+                      programStatus || "Complete"
+                    ) : (
+                      <select
+                        value={programStatus}
+                        onChange={(e) => setProgramStatus(e.target.value)}
+                        style={{ width: "100%" }}
+                      >
+                        <option value="">-- Select status --</option>
+                        <option value="Complete">Complete</option>
+                        <option value="Incomplete">Incomplete</option>
+                      </select>
+                    )}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          )}
+        </div>
         <div className="note">
           <p
             style={{
               textDecoration: "underline",
               fontWeight: "bold",
               fontStyle: "italic",
-              fontSize:"11pt"
+              fontSize: "11pt",
             }}
           >
             Note:
           </p>
-          <ol style={{ fontStyle: "italic", paddingBottom:"10px",   fontSize:"11pt" }}>
+          <ol
+            style={{
+              fontStyle: "italic",
+              paddingBottom: "10px",
+              fontSize: "11pt",
+            }}
+          >
             <li>
               1. The document is official only if original and bears an
               authorized signature with a college stamp.
@@ -450,10 +472,16 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
               2. Information to assist in evaluating the transcript is overleaf.
             </li>
           </ol>
-          
         </div>
-        <div style={{position: "absolute", bottom:0, width:"100%", margin:"0 auto"}}>
-        <ContactColumns ></ContactColumns>
+        <div
+          style={{
+            position: "absolute",
+            bottom: 0,
+            width: "100%",
+            margin: "0 auto",
+          }}
+        >
+          <ContactColumns></ContactColumns>
         </div>
       </div>
     </div>
