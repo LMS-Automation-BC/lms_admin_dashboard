@@ -63,6 +63,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
   // `,
     contentRef: transcriptRef,
     onAfterPrint: () => setHideActions(false),
+    documentTitle: `${studentName}-Transcript`
   });
   const handlePrint = async () => {
     setHideActions(true); // Hide before printing
@@ -84,77 +85,6 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
   useEffect(() => {
     calculateScores(coursesTranscript);
   }, [coursesTranscript]);
-  const generatePDF = () => {
-    setHideActions(true);
-    if (!transcriptRef.current) return;
-    const doc = new jsPDF({
-      orientation: "portrait",
-      unit: "pt",
-      format: "letter",
-    });
-    transcriptRef.current.classList.add("pdf-export");
-
-    doc.html(transcriptRef.current, {
-      callback: function (doc) {
-        doc.save(studentName + "-Transcript.pdf");
-        setHideActions(false);
-      },
-      x: 20,
-      y: 20,
-      html2canvas: {
-        scale: 0.7,
-      },
-    });
-  };
-  const exportToPdf = async () => {
-    if (!transcriptRef.current) return;
-
-    setHideActions(true);
-
-    // Wait for the DOM to update after hiding actions column
-    await new Promise((r) => setTimeout(r, 100));
-
-    // Capture the transcript div as canvas
-    const canvas = await html2canvas(transcriptRef.current, {
-      scale: 2, // Higher scale for better resolution
-      scrollY: -window.scrollY,
-    });
-
-    const imgData = canvas.toDataURL("image/png");
-
-    // jsPDF settings for US Letter size in points (1 pt = 1/72 inch)
-    const pdf = new jsPDF({
-      unit: "pt",
-      format: "letter", // US Letter 612 x 792 pts
-      orientation: "portrait",
-    });
-
-    // Margins in points (e.g., 40pt = ~0.56 inches)
-    const margin = 40;
-
-    // Calculate available width and height inside margins
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-
-    const maxWidth = pageWidth - 2 * margin;
-    const maxHeight = pageHeight - 2 * margin;
-
-    // Calculate image width and height maintaining aspect ratio
-    const imgWidth = canvas.width;
-    const imgHeight = canvas.height;
-    const ratio = Math.min(maxWidth / imgWidth, maxHeight / imgHeight);
-
-    const pdfWidth = imgWidth * ratio;
-    const pdfHeight = imgHeight * ratio;
-
-    // Add image to PDF with margin offsets
-    pdf.addImage(imgData, "PNG", margin, margin, pdfWidth, pdfHeight);
-
-    pdf.save("transcript.pdf");
-
-    setHideActions(false);
-  };
-
   const handleRemove = (index: number) => {
     const updated = [...coursesTranscript];
     updated.splice(index, 1);
