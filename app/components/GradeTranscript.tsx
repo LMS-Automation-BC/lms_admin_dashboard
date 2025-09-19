@@ -317,7 +317,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
                             }
                           />
                         ) : (
-                          Number(row["Credits"]).toFixed(1)
+                          row["Credits"]
                         )}
                       </td>
                       <td className="letter-grade">
@@ -341,7 +341,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
                         )}
                       </td>
 
-                      <td className="grade-point">{row["Grade Point"]}</td>
+                      <td className="grade-point">{Number(row["Grade Point"]).toFixed(1)}</td>
                       {!hideActions && (
                         <td>
                           {isEditing ? (
