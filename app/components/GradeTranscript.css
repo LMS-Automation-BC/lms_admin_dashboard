@@ -168,6 +168,8 @@
   word-wrap: break-word; /* Ensures long words break correctly */
   word-break: break-word; /* Break words at any point if needed */
   white-space: normal;
+  padding: 2px 6px;         /* Reduce padding (top/bottom, left/right) */
+  line-height: 1; 
 }
 
 .grade-table th.course-code {
@@ -191,6 +193,7 @@
 .grade-table th.last-attempt,
 .grade-table td.last-attempt {
   width: 10%;
+  text-align: center;
 }
 
 .grade-table th.credits,

@@ -39,8 +39,7 @@ export default function ContactColumns() {
         {/* assuming address is multiline string or you can split by \n if needed */}
         {orgData.address.split('\n').map((line, i) => (
           <React.Fragment key={i}>
-            {line}
-            <br />
+            {line} {' '}
           </React.Fragment>
         ))}
       </div>
