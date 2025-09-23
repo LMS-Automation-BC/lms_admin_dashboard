@@ -8,6 +8,7 @@ import ContactColumns from "./GradeOrganization";
 import { FiCheck, FiEdit2, FiTrash2, FiX } from "react-icons/fi";
 import { Course } from "../grades/helpers/grades.type";
 import { gradeScale } from "../grades/helpers/grade";
+import TranscriptDate from "./TranscriptDate";
 
 interface TranscriptProps {
   studentName: string | undefined;
@@ -40,7 +41,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
   const [totalCredits, setTotalCredits] = useState<number>(0);
   const [creditsEarned, setCreditsEarned] = useState<number>(0);
   const [cumulativeGpa, setCumulativeGpa] = useState<number>(0);
-
+  const [rePrint, setRePrint] = useState<boolean>(false);
   const transcriptRef = useRef<HTMLDivElement>(null);
   const reactToPrintFn = useReactToPrint({
     //   pageStyle: `
@@ -76,6 +77,9 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
     toInputDate(programStartDate)
   );
   const [transcriptPrint, setTranscriptPrint] = useState(
+    toInputDate(new Date().toISOString())
+  );
+  const [transcriptRePrint, setTranscriptRePrint] = useState(
     toInputDate(new Date().toISOString())
   );
   useEffect(() => {
@@ -151,6 +155,14 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
       className="transcript-page"
       style={{ width: "100%", maxWidth: "572pt" }}
     >
+      <label style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <input
+          type="checkbox"
+          checked={rePrint}
+          onChange={() => setRePrint(!rePrint)}
+        />
+        Reprint
+      </label>
       <div>
         <button onClick={handlePrint} className="export-button">
           Print
@@ -189,9 +201,18 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
             <span style={{ fontWeight: "550" }}>Student Name</span>:{" "}
             {studentName}
           </div>
-          <div className="right">
-            <span style={{ fontWeight: "550" }}>Program:</span> {program}
-          </div>
+          {rePrint ? (
+            <TranscriptDate
+              label="Program Start Date"
+              hideActions={hideActions}
+              programStart={programStart}
+              setProgramStart={setProgramStart}
+            />
+          ) : (
+            <div className="right">
+              <span style={{ fontWeight: "550" }}>Program:</span> {program}
+            </div>
+          )}
         </div>
         <div className="info-row">
           <div className="left">
@@ -200,44 +221,51 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
           </div>
           {hideActions ? (
             <div className="right">
-              <span style={{ fontWeight: "550" }}>Program Start Date</span>:{" "}
-              {formatDateWithHyphen(programStart)}
+              <span style={{ fontWeight: 550 }}>
+                {rePrint ? "Transcript Print Date" : "Program Start Date"}
+              </span>
+              :{" "}
+              {formatDateWithHyphen(
+                rePrint ? transcriptPrint : programStart
+              )}
             </div>
           ) : (
-            <label htmlFor="programStartDate" className="right">
-              Program Start Date:{" "}
-              <input
-                type="date"
-                id="programStartDate"
-                value={programStart}
-                onChange={(e) => setProgramStart(e.target.value)}
-              />
-            </label>
+            <TranscriptDate
+              label={rePrint ? "Transcript Print Date" : "Program Start Date"}
+              hideActions={hideActions}
+              programStart={rePrint ? transcriptPrint : programStart}
+              setProgramStart={
+                rePrint ? setTranscriptPrint : setProgramStart
+              }
+            />
           )}
         </div>
         <div className="info-row">
-          <div className="left"></div>
-          <div className="right">
+          <div className="left">{rePrint? (<div className="right">
+              <span style={{ fontWeight: "550" }}>Program:</span> {program}
+            </div>):(<></>)}</div>
+        
             {hideActions ? (
-              <div>
-                <span style={{ fontWeight: "550" }}>
-                  {" "}
-                  Transcript Print Date:
-                </span>{" "}
-                {formatDateWithHyphen(transcriptPrint)}
-              </div>
-            ) : (
-              <label htmlFor="programStartDate" className="right">
-                Transcript Print Date:{" "}
-                <input
-                  type="date"
-                  id="programStartDate"
-                  value={transcriptPrint}
-                  onChange={(e) => setTranscriptPrint(e.target.value)}
-                />
-              </label>
-            )}
-          </div>
+            <div className="right">
+              <span style={{ fontWeight: 550 }}>
+                {rePrint ? "Transcript RePrint Date" : "Transcript Print Date"}
+              </span>
+              :{" "}
+              {formatDateWithHyphen(
+                rePrint ? transcriptRePrint : transcriptPrint
+              )}
+            </div>
+          ) : (
+            <TranscriptDate
+              label={rePrint ? "Transcript RePrint Date" : "Transcript Print Date"}
+              hideActions={hideActions}
+              programStart={rePrint ? transcriptRePrint : transcriptPrint}
+              setProgramStart={
+                rePrint ? setTranscriptRePrint : setTranscriptPrint
+              }
+            />
+          )}
+          
         </div>
         <div className="transcript-body">
           {coursesTranscript.length > 0 && (
@@ -341,7 +369,9 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
                         )}
                       </td>
 
-                      <td className="grade-point">{Number(row["Grade Point"]).toFixed(1)}</td>
+                      <td className="grade-point">
+                        {Number(row["Grade Point"]).toFixed(1)}
+                      </td>
                       {!hideActions && (
                         <td>
                           {isEditing ? (

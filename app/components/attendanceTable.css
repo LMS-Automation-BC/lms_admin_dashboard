@@ -1,8 +1,7 @@
-table {
+.attendancetable {
   width: 100%;
   border-collapse: collapse;
   margin-top: 30px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
   border-radius: 6px;
   overflow: hidden;
 }

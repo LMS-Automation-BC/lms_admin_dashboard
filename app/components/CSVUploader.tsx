@@ -629,7 +629,7 @@ const CsvUpload: React.FC = () => {
                 Export CSV
               </button>
 
-              <table>
+              <table className="csvtable">
                 <thead>
                   <tr>
                     <th>Name</th>
