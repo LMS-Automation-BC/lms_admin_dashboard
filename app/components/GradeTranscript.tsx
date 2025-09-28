@@ -460,7 +460,7 @@ const formatDateWithHyphen = (dateStr: string) => {
                     style={{ textAlign: "center" }}
                   >
                     {hideActions ? (
-                      programStatus || "Complete"
+                      programStatus || "Completed"
                     ) : (
                       <select
                         value={programStatus}
@@ -468,7 +468,7 @@ const formatDateWithHyphen = (dateStr: string) => {
                         style={{ width: "100%" }}
                       >
                         <option value="">-- Select status --</option>
-                        <option value="Complete">Complete</option>
+                        <option value="Completed">Completed</option>
                         <option value="Incomplete">Incomplete</option>
                       </select>
                     )}
