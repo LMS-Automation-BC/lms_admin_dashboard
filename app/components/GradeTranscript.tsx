@@ -9,6 +9,8 @@ import { FiCheck, FiEdit2, FiTrash2, FiX } from "react-icons/fi";
 import { Course } from "../grades/helpers/grades.type";
 import { gradeScale } from "../grades/helpers/grade";
 import TranscriptDate from "./TranscriptDate";
+import { parseISO, format } from "date-fns";
+
 
 interface TranscriptProps {
   studentName: string | undefined;
@@ -125,6 +127,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
 
     setTotalCredits(totalCredits);
     setCumulativeGpa(totalGPA / totalCredits);
+    console.log(cumulativeGpa);
     setCreditsEarned(creditsEarned);
     return processedusers;
   };
@@ -143,13 +146,12 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
       return updatedRow;
     });
   };
-  const formatDateWithHyphen = (dateStr: string) => {
-    const date = new Date(dateStr);
-    const day = date.getDate().toString().padStart(2, "0");
-    const month = date.toLocaleString("en-US", { month: "long" });
-    const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
-  };
+ 
+const formatDateWithHyphen = (dateStr: string) => {
+  const date = parseISO(dateStr);
+  return format(date, "dd-MMMM-yyyy");
+};
+
   return (
     <div
       className="transcript-page"
@@ -446,7 +448,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
                     colSpan={!hideActions ? 3 : 2}
                     style={{ textAlign: "center" }}
                   >
-                    {cumulativeGpa.toFixed(1)}
+                    {(Math.floor(cumulativeGpa*10)/10).toFixed(1)}
                   </td>
                 </tr>
                 <tr>
