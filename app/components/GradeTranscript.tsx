@@ -529,20 +529,22 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
           </div>
           <div
             style={{
-              position: "absolute",
+               position:"absolute",
               bottom: 0,
+              left: 0,
               width: "100%",
-              margin: "0 auto",
+              margin: 0,
             }}
             className="footer"
           >
-            <ContactColumns></ContactColumns>
+            <ContactColumns  showPresident={true}></ContactColumns>
           </div>
         </div>
 
         <div className="transcript-container">
           <SecondPage></SecondPage>
           {/* <div className="html-wrapper" dangerouslySetInnerHTML={{ __html: html }} /> */}
+          
         </div>
       </div>
     </div>

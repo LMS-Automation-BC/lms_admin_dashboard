@@ -9,8 +9,12 @@ export interface OrgData {
   email: string;
   website: string;
 }
-
-export default function ContactColumns() {
+interface ContactColumnsProps{
+  showPresident: boolean
+}
+const ContactColumns: React.FC<ContactColumnsProps> = ({
+  showPresident
+}) => {
   const [orgData, setOrgData] = useState<OrgData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -28,12 +32,12 @@ export default function ContactColumns() {
   if (loading) return <p>Loading contact info...</p>;
   if (!orgData) return <p>No organization data found.</p>;
 
-  return (<div>
+  return (<div>{showPresident?
     <p className='president'>
             {orgData.president}
             <br />
             President
-          </p>
+          </p> : <></>}
     <div className="contact-columns">
       <div className="column address">
         {/* assuming address is multiline string or you can split by \n if needed */}
@@ -57,3 +61,4 @@ export default function ContactColumns() {
     </div></div>
   );
 }
+export default ContactColumns

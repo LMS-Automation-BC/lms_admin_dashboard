@@ -2,27 +2,29 @@
   /* width: 8.5in;
   height: 11in; */
   box-sizing: border-box;
-  font-family: 'Book Antiqua';
+  font-family: "Book Antiqua";
   position: relative;
   color: #000;
   background-color: #fff;
 }
 .transcript-container {
+  position: relative;
   width: 210mm;
   height: 297mm;
- display: flex;
+  display: flex;
   flex-direction: column;
-  border: 1px solid #ccc; 
+  border: 1px solid #ccc;
   flex-direction: column;
   box-sizing: border-box;
-  font-family: 'Book Antiqua';
+  font-family: "Book Antiqua";
+  margin: 0;
+  padding: 0;
 }
 .html-wrapper {
   width: 100%;
   height: 100%;
   overflow: hidden;
   position: relative;
-  
 }
 
 .header {
@@ -76,7 +78,7 @@
   text-decoration: underline;
   font-size: 18pt;
   font-weight: bold;
-  font-family: 'Book Antiqua';
+  font-family: "Book Antiqua";
   margin-bottom: 7px;
 }
 
@@ -84,20 +86,19 @@
   /* width: 90%; */
   display: flex;
   justify-content: space-between;
- /*  margin: 0 auto 1px auto; Center horizontally */
+  /*  margin: 0 auto 1px auto; Center horizontally */
   font-size: 13pt;
 }
 
 .info-row .left {
-   text-align: left;
+  text-align: left;
   width: 50%;
-
 }
 
 .info-row .right {
   text-align: right;
   width: 50%;
-   white-space: nowrap
+  white-space: nowrap;
 }
 .icon-button {
   display: inline-flex;
@@ -147,8 +148,8 @@
   border-radius: 4px;
 }
 .grade-table {
-   margin: 0 auto;
-   margin: 20px 0;
+  margin: 0 auto;
+  margin: 20px 0;
   /* width: 90%; */
   /* height: 90%; */
   border-collapse: collapse;
@@ -156,7 +157,7 @@
   border-collapse: collapse;
   display: inline-table;
   table-layout: fixed; /* Ensures columns respect the widths */
-  font-family: 'Times New Roman', Times, serif;
+  font-family: "Times New Roman", Times, serif;
 }
 .grade-table th,
 .grade-table td {
@@ -165,7 +166,7 @@
   text-align: left;
   /* overflow: hidden;
   text-overflow: ellipsis; */
-  white-space:wrap;
+  white-space: wrap;
   margin-left: 2px;
 }
 /* styles.css */
@@ -177,8 +178,8 @@
   word-wrap: break-word; /* Ensures long words break correctly */
   word-break: break-word; /* Break words at any point if needed */
   white-space: normal;
-  padding: 2px 6px;         /* Reduce padding (top/bottom, left/right) */
-  line-height: 1; 
+  padding: 2px 6px; /* Reduce padding (top/bottom, left/right) */
+  line-height: 1;
 }
 
 .grade-table th.course-code {
@@ -232,14 +233,13 @@
 }
 
 .contact-columns .column {
-  flex: 1;                /* each column takes equal width */
+  flex: 1; /* each column takes equal width */
   box-sizing: border-box; /* prevents padding from affecting width */
 }
 
 .email a {
   color: blue;
   text-decoration: underline;
-
 }
 .contact-columns .address {
   text-align: left;
@@ -298,47 +298,47 @@
   white-space: normal;
 }
 @media print {
-  .transcript-container{
-    border:none
+  .transcript-container {
+    border: none;
+    height:100vh;
+    position: relative;
+    padding: 0;
+    margin-bottom: 0;
   }
 
   .page-break {
     page-break-before: always;
   }
-  .printable-content {
-    margin-left: 20mm;
-    width: 100%;
-    height: 100%;
-      max-width: 210mm;
-  max-height: 297mm;
-  }
+  
   @page {
-    size:   210mm 297mm;
-    
-    margin:0.5in;
+    size: 210mm 297mm;
+
+    margin-left: 0.5in;
+    margin-right: 0.5in;
+    margin-top: 0.5in;
     margin-bottom: 0;
   }
-  .print-area {
-    font-family: 'Book Antiqua';
-  }
+
   /* Optional: hide buttons/actions when printing */
   .gradebutton {
     display: none;
   }
   .contact-columns {
-    position: static; /* Let it be part of the normal flow */
+    position: absolute; /* positions relative to .page */
+    bottom: 0; /* sticks to bottom */
+    left: 0; /* full width */
+    width: 100%;
     display: flex;
-    justify-content: space-between; /* spreads the three columns evenly */
+    justify-content: space-between;
     align-items: flex-start;
     text-align: left;
-    width: 100%;
-    padding-top: 2px;
-    font-family: 'Book Antiqua';
+    font-family: "Book Antiqua";
+    padding: 2px 0; /* small padding top/bottom */
   }
 
   .president {
     font-weight: bold;
-    font-family: 'Book Antiqua';
+    font-family: "Book Antiqua";
     font-size: 11pt;
     margin-top: 2px;
     margin-bottom: 5px; /* space before footer */

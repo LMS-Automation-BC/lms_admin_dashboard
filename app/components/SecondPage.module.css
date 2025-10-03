@@ -4,7 +4,6 @@
      display: flex;
   flex-direction: column;
   min-height: 100vh; 
-  border:red 2px solid;
 }
 .title-sp {
   text-align: center;
@@ -25,7 +24,7 @@
 .grading-table {
   width: 100%;
   border-collapse: collapse;
-  font-family: Arial, sans-serif;
+  font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
   margin: 1rem 0;
 }
 .logo {
@@ -65,7 +64,7 @@
   width: 100%;                /* narrower table */
   margin: 2rem auto;          /* centers the table */
   border-collapse: collapse;  /* merge borders */
-  font-family: Arial, sans-serif;
+  font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
   text-align: center;
 }
 
