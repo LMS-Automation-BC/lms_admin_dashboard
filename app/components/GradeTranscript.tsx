@@ -511,7 +511,7 @@ const formatDateWithHyphen = (dateStr: string) => {
             bottom: 0,
             width: "100%",
             margin: "0 auto",
-          }}
+          }} className="footer"
         >
           <ContactColumns></ContactColumns>
         </div>
