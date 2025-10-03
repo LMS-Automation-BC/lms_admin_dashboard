@@ -4,7 +4,7 @@ import "./GradeTranscript.css";
 import { useReactToPrint } from "react-to-print";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-import ContactColumns from "./GradeOrganization";
+import ContactColumns, { OrgData } from "./GradeOrganization";
 import { FiCheck, FiEdit2, FiTrash2, FiX } from "react-icons/fi";
 import { Course } from "../grades/helpers/grades.type";
 import { gradeScale } from "../grades/helpers/grade";
@@ -151,6 +151,16 @@ const formatDateWithHyphen = (dateStr: string) => {
   const date = parseISO(dateStr);
   return format(date, "dd-MMMM-yyyy");
 };
+const [orgData, setOrgData] = useState<OrgData | null>(null);
+useEffect(() => {
+    fetch("/api/organization")
+      .then((res) => {
+        if (!res.ok) throw new Error("Not found");
+        return res.json();
+      })
+      .then((data) => setOrgData(data))
+      .catch((err) => console.error(err))
+  }, []);
 
   return (
     <div
@@ -505,6 +515,12 @@ const formatDateWithHyphen = (dateStr: string) => {
             </li>
           </ol>
         </div>
+        <div>
+    <p className='president' style={{paddingTop:30}}>
+           {orgData?.president}
+            <br />
+            President
+          </p></div>
         <div
           style={{
             position: "absolute",
