@@ -1,6 +1,10 @@
 .secondPage{
     font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
     font-size: 10pt;
+     display: flex;
+  flex-direction: column;
+  min-height: 100vh; 
+  border:red 2px solid;
 }
 .title-sp {
   text-align: center;
@@ -13,6 +17,10 @@
 .secondPage p {
     font-weight: 16pt;
     text-align: justify;
+}
+.footer {
+  border:blue 1px solid !important;
+  margin-top: auto;
 }
 .grading-table {
   width: 100%;

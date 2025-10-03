@@ -29,11 +29,11 @@ export default function ContactColumns() {
   if (!orgData) return <p>No organization data found.</p>;
 
   return (<div>
-    {/* <p className='president'>
+    <p className='president'>
             {orgData.president}
             <br />
             President
-          </p> */}
+          </p>
     <div className="contact-columns">
       <div className="column address">
         {/* assuming address is multiline string or you can split by \n if needed */}
