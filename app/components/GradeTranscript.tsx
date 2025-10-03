@@ -10,6 +10,7 @@ import { Course } from "../grades/helpers/grades.type";
 import { gradeScale } from "../grades/helpers/grade";
 import TranscriptDate from "./TranscriptDate";
 import { parseISO, format } from "date-fns";
+import SecondPage from "./SecondPage";
 
 
 interface TranscriptProps {
@@ -46,24 +47,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
   const [rePrint, setRePrint] = useState<boolean>(false);
   const transcriptRef = useRef<HTMLDivElement>(null);
   const reactToPrintFn = useReactToPrint({
-    //   pageStyle: `
-    //   @page {
-    //     size: auto;
-    //     margin: 7mm;
-    //   }
-    //     .institution-name {
-    //       font-family: "Times New Roman", Times, serif;
-    //       font-size: 15pt !important;
-    //     }
-    //     .title {
-    //       font-family: "Times New Roman", Times, serif;
-    //       font-size: 15pt !important;
-    //     }
-    //   body {
-    //     font-family: 'Times New Roman', Times, serif;
-    //     -webkit-print-color-adjust: exact;
-    //   }
-    // `,
+  
     contentRef: transcriptRef,
     onAfterPrint: () => setHideActions(false),
     documentTitle: `${studentName}-Transcript`,
@@ -73,6 +57,14 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
     await new Promise((resolve) => setTimeout(resolve, 0)); // Let React update the UI
     reactToPrintFn();
   };
+  const [html, setHtml] = useState('');
+
+  useEffect(() => {
+    fetch('/static/second-page.html')
+      .then(response => response.text())
+      .then(setHtml)
+      .catch(error => console.error('Error loading HTML:', error));
+  }, []);
   const [hideActions, setHideActions] = useState(false);
   const [programStatus, setProgramStatus] = useState<string>("");
   const [programStart, setProgramStart] = useState(
@@ -187,7 +179,8 @@ useEffect(() => {
       {/* <button onClick={generatePDF} className="export-button">
         Export to PDF
       </button> */}
-      <div ref={transcriptRef} className="transcript-container">
+      <div ref={transcriptRef}>
+        <div   className="transcript-container" style={{pageBreakAfter:"always"}}>
         {/* Header: Logo and Institution Name */}
         <div className="header">
           <img
@@ -531,6 +524,13 @@ useEffect(() => {
         >
           <ContactColumns></ContactColumns>
         </div>
+      </div>
+     
+      <div className="transcript-container"
+     >
+      <SecondPage></SecondPage>
+       {/* <div className="html-wrapper" dangerouslySetInnerHTML={{ __html: html }} /> */}
+     </div>
       </div>
     </div>
   );
