@@ -37,14 +37,14 @@
   overflow: hidden;
 }
 
-.csvtable,th {
+.csvtable th {
   background-color: #4caf50;
   color: white;
   padding: 12px 15px;
   text-align: left;
 }
 
-td {
+.csvtable td {
   padding: 12px 15px;
   border-bottom: 1px solid #ddd;
 }
