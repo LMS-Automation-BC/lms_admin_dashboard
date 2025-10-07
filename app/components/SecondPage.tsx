@@ -62,7 +62,7 @@ const SecondPage: React.FC = () => {
         <tbody>
           {Object.entries(grouped).map(([desc, rows]) =>
             rows.map((row, index) => (
-              <tr key={`${row.grade}-${index}`}>
+              <tr key={`${row.grade}-${index}`}  className={row.grade === "D" ? styles.boldgrade : ""}>
                 <td>
                   {row.min} – {row.max}
                 </td>

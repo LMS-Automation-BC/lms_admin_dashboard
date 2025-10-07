@@ -1,6 +1,6 @@
 .secondPage{
     font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-    font-size: 10pt;
+    font-size: 12pt;
      display: flex;
   flex-direction: column;
   min-height: 100vh; 
@@ -9,8 +9,7 @@
   text-align: center;
   text-decoration: underline;
   font-size: 18pt;
-  font-weight: bold;
-  
+   
   margin-bottom: 5px;
 }
 .secondPage p {
@@ -47,6 +46,7 @@
 .header {
   display: flex;
   align-items: center;
+  font-family: "Times New Roman", Times, serif;
   gap: 10px; /* spacing between items */
 }
 .institution-name {
@@ -62,15 +62,16 @@
 }
 .gradingTable {
   width: 100%;                /* narrower table */
-  margin: 2rem auto;          /* centers the table */
+  margin: 1rem auto;          /* centers the table */
   border-collapse: collapse;  /* merge borders */
   font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
   text-align: center;
-}
+} 
 
 .gradingTable th,
 .gradingTable td {
   border: 1px solid black;
+  padding-left: 2px;
 }
 
 .gradingTable thead th {
@@ -115,4 +116,7 @@
 .sum .bottom {
   font-size: 0.7em;
   line-height: 1;
+}
+.boldgrade {
+  font-weight: bold;
 }
