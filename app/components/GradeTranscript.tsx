@@ -36,6 +36,16 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
     const date = new Date(dateStr);
     return date.toISOString().split("T")[0]; // "2025-09-01"
   };
+   useEffect(() => {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "/styles/GradeTranscript.css"; // path in public/
+    document.head.appendChild(link);
+
+    return () => {
+      document.head.removeChild(link); // cleanup when navigating away
+    };
+  }, []);
 
   const [coursesTranscript, setCoursesTranscript] = useState(courses);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -428,10 +438,10 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
                       </tr>
                     );
                   })}
-                  {programStatus != "Complete" ? (
+                  {programStatus != "Completed" ? (
                     <tr>
                       <td colSpan={4} style={{ textAlign: "center" }}>
-                        Credits Earned
+                        Credits Earned 
                       </td>
                       <td
                         colSpan={!hideActions ? 3 : 2}

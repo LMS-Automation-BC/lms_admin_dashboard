@@ -71,16 +71,20 @@ const SidebarLinks = ({ isLoggedIn }: Props) => {
         LMS Data Processor
       </h2>
 
-      {menuItems.map(({ name, path, icon: Icon }) => (
-        <Link
-          key={path}
-          href={path}
-          style={pathname === path ? activeItemStyle : itemStyle}
-        >
-          <Icon size={18} />
-          {name}
-        </Link>
-      ))}
+   {menuItems.map(({ name, path, icon: Icon }) => (
+  <Link
+    key={path}
+    href={path}
+     onClick={(e) => {
+    e.preventDefault();
+    window.location.href = path;
+  }}
+    style={pathname === path ? activeItemStyle : itemStyle}
+  >
+    <Icon size={18} />
+    {name}
+  </Link>
+))}
 
       {isLoggedIn && (
         <form action="/api/logout" method="POST" style={{ marginTop: '20px' }}>
