@@ -63,7 +63,7 @@ const SpecialGradesTable: React.FC = () => {
     <table className={styles.gradingTable} style={{width:"100% !important"}}>
       <thead>
         <tr>
-          <th>Symbol</th>
+          <th style={{width:"10%"}}>Symbol</th>
           <th>Term</th>
           <th>Description</th>
         </tr>

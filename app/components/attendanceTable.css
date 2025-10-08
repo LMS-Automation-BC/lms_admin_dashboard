@@ -1,27 +1,115 @@
-.attendancetable {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 30px;
-  border-radius: 6px;
+.table-responsive {
+  background-color: #ffffff;
+  border-radius: 12px;
   overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  margin-top: 1rem;
 }
 
-.attendancetable th {
-  background-color: #4caf50;
-  color: white;
-  padding: 12px 15px;
-  text-align: left;
+.table-responsive table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 0.95rem;
 }
 
-.attendancetable td {
-  padding: 12px 15px;
-  border-bottom: 1px solid #ddd;
+.table-responsive thead {
+  background: linear-gradient(90deg, #217044, #4b6584);
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-tbody tr:hover {
-  background-color: #f1f1f1;
-  cursor: default;
+.table-responsive thead th {
+  padding: 0.9rem;
+  vertical-align: middle;
+  border: none !important;
 }
+
+.table-responsive tbody td {
+  padding: 0.8rem;
+  vertical-align: middle;
+}
+
+.table-responsive tbody tr {
+  transition: all 0.2s ease-in-out;
+}
+
+.table-responsive tbody tr:hover {
+  background-color: #f1f5f9 !important;
+  transform: scale(1.005);
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: #fafafa;
+}
+
+.table-bordered {
+  border: 1px solid #dee2e6;
+  border-radius: 12px;
+}
+
+.table-bordered th,
+.table-bordered td {
+  border: 1px solid #dee2e6 !important;
+}
+
+/* Checkbox alignment */
+.table-responsive input[type="checkbox"] {
+  transform: scale(1.2);
+  cursor: pointer;
+}
+
+/* Attendance styles */
+.table-responsive td span {
+  font-weight: 500;
+  margin-left: 4px;
+}
+
+.table-responsive td span.present {
+  color: #28a745;
+}
+
+.table-responsive td span.absent {
+  color: #dc3545;
+}
+
+.table-responsive td span.partial {
+  color: #ffc107;
+}
+
+/* Highlight rows where absence limit exceeded */
+.table-responsive tbody tr.over-limit {
+  background-color: #fff3cd !important;
+}
+
+/* Sort indicator column hover */
+.table-responsive th[style*="cursor"] {
+  transition: color 0.2s;
+}
+
+.table-responsive th[style*="cursor"]:hover {
+  color: #ffd166;
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+  .table-responsive {
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  .table-responsive thead {
+    font-size: 0.85rem;
+  }
+
+  .table-responsive tbody td {
+    font-size: 0.85rem;
+    padding: 0.6rem;
+  }
+}
+
 .submit-btn {
   background-color: #28a745; /* Bootstrap green */
   color: white;

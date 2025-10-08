@@ -50,12 +50,12 @@ const SecondPage: React.FC = () => {
         </p>
       </div>
 
-      <table className={styles.gradingTable} style={{ width: "60%" }}>
+      <table className={styles.gradingTable} style={{ width: "70%" }}>
         <thead>
           <tr>
-            <th>Percentage Range</th>
-            <th>Letter Grade</th>
-            <th>Grade Points</th>
+            <th>Percentage <br></br>Range</th>
+            <th>Letter <br></br> Grade</th>
+            <th>Grade <br></br> Points</th>
             <th>Description</th>
           </tr>
         </thead>

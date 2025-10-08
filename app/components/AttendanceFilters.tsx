@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useMemo, useEffect } from "react";
 import "./csvUpload.css";
 import Select from "react-select";
@@ -129,6 +130,7 @@ const allDates = useMemo(() => {
         <div>
           <label>Start Date</label>
           <Select
+            instanceId="start-date"
             options={allDates}
             value={allDates.find((opt) => opt.value === startDate) || null}
             onChange={(opt) => setStartDate(opt ? opt.value : null)}
@@ -143,6 +145,7 @@ const allDates = useMemo(() => {
             options={allDates.filter(
               (opt) => !startDate || opt.value >= startDate
             )}
+             instanceId="end-date"
             value={allDates.find((opt) => opt.value === endDate) || null}
             onChange={(opt) => setEndDate(opt ? opt.value : null)}
             isClearable

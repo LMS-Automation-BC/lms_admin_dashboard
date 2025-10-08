@@ -299,7 +299,7 @@ const studentAbsenceDates = data.reduce((acc, row) => {
         <div className="modal-overlay">
           <div className="modal">
             <h4>Attendance Notes</h4>
-            <table className="attendanceTable">
+            <table className="table-responsive">
               <thead>
                 <tr>
                   <th>Name</th>
