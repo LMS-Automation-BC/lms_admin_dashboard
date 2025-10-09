@@ -1,13 +1,11 @@
+import { format, parseISO } from 'date-fns';
 import React from 'react';
 
 // Utility function to format the date with hyphen (you can modify as needed)
-  const formatDateWithHyphen = (dateStr: string) => {
-    const date = new Date(dateStr);
-    const day = date.getDate().toString().padStart(2, "0");
-    const month = date.toLocaleString("en-US", { month: "long" });
-    const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
-  };
+   const formatDateWithHyphen = (dateStr: string) => {
+      const date = parseISO(dateStr);
+      return format(date, "dd-MMMM-yyyy");
+    };
   // Define the props interface
 interface TranscriptDateProps {
   hideActions: boolean;
