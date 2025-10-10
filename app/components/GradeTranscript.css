@@ -365,3 +365,7 @@
   width: 90%;
   margin:0 auto;
 } */
+.duplicate-highlight {
+  background-color: #d8b3b3; /* light red background */
+  font-weight: bold;
+}

@@ -36,7 +36,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
     const date = new Date(dateStr);
     return date.toISOString().split("T")[0]; // "2025-09-01"
   };
-   useEffect(() => {
+  useEffect(() => {
     const link = document.createElement("link");
     link.rel = "stylesheet";
     link.href = "/styles/GradeTranscript.css"; // path in public/
@@ -55,6 +55,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
   const [cumulativeGpa, setCumulativeGpa] = useState<number>(0);
   const [rePrint, setRePrint] = useState<boolean>(false);
   const transcriptRef = useRef<HTMLDivElement>(null);
+  const [hasFail, setHasFail] = useState(false);
   const reactToPrintFn = useReactToPrint({
     contentRef: transcriptRef,
     onAfterPrint: () => setHideActions(false),
@@ -87,9 +88,14 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
   useEffect(() => {
     calculateScores(courses);
     setCoursesTranscript(courses);
+    
   }, [courses]);
+ const checkFail = () => {
+  setHasFail(coursesTranscript.some(row => row.Grade === "F"));
+};
   useEffect(() => {
     calculateScores(coursesTranscript);
+    checkFail();
   }, [coursesTranscript]);
   const handleRemove = (index: number) => {
     const updated = [...coursesTranscript];
@@ -107,6 +113,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
     if (editedRow) updated[index] = editedRow;
     setCoursesTranscript(updated);
     setEditingIndex(null);
+    
   };
   const calculateScores = (users: any[]) => {
     let totalCredits = 0;
@@ -161,7 +168,19 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
       .then((data) => setOrgData(data))
       .catch((err) => console.error(err));
   }, []);
+  const defaultClassCount = coursesTranscript.reduce<Record<string, number>>(
+    (acc, row) => {
+      const className = row["Default Class Name"];
+      if (className) acc[className] = (acc[className] || 0) + 1;
+      return acc;
+    },
+    {}
+  );
 
+  // Function to check if a row is duplicate
+  const isDuplicate = (row: CsvRow) =>
+    row["Default Class Name"] &&
+    defaultClassCount[row["Default Class Name"]] > 1;
   return (
     <div
       className="transcript-page"
@@ -323,7 +342,11 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
                             row["Course code"]
                           )}
                         </td>
-                        <td className="course-name">
+                        <td
+                          className={`course-name ${
+                            isDuplicate(row) ? "duplicate-highlight" : ""
+                          }`}
+                        >
                           {isEditing ? (
                             <input
                               value={
@@ -441,7 +464,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
                   {programStatus != "Completed" ? (
                     <tr>
                       <td colSpan={4} style={{ textAlign: "center" }}>
-                        Credits Earned 
+                        Credits Earned
                       </td>
                       <td
                         colSpan={!hideActions ? 3 : 2}
@@ -477,7 +500,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
                   </tr>
                   <tr>
                     <td colSpan={4} style={{ textAlign: "center" }}>
-                      Program Status
+                      Program Status {hasFail}
                     </td>
                     <td
                       colSpan={!hideActions ? 3 : 2}
@@ -492,7 +515,9 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
                           style={{ width: "100%" }}
                         >
                           <option value="">-- Select status --</option>
-                          <option value="Completed">Completed</option>
+                          <option value="Completed" disabled={hasFail}>
+                            Completed
+                          </option>
                           <option value="Incomplete">Incomplete</option>
                         </select>
                       )}
@@ -539,7 +564,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
           </div>
           <div
             style={{
-               position:"absolute",
+              position: "absolute",
               bottom: 0,
               left: 0,
               width: "100%",
@@ -547,14 +572,13 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
             }}
             className="footer"
           >
-            <ContactColumns  showPresident={true}></ContactColumns>
+            <ContactColumns showPresident={true}></ContactColumns>
           </div>
         </div>
 
         <div className="transcript-container">
           <SecondPage></SecondPage>
           {/* <div className="html-wrapper" dangerouslySetInnerHTML={{ __html: html }} /> */}
-          
         </div>
       </div>
     </div>
