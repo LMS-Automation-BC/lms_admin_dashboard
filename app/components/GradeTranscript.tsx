@@ -127,6 +127,8 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
     let creditsEarned = 0;
     let processedusers = users.map((user: any) => {
       if (user["Grade Point"] != 0) creditsEarned += user["Credits"];
+      //if tr detect from total credits
+      if (user["Grade"] == 'TR') totalCredits -= user["Credits"];
       totalGPA += user["Credits"] * user["Grade Point"];
       // console.log(user["Program Start Date"])
       return user;
@@ -411,7 +413,11 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
                                 <option key={item.grade} value={item.grade}>
                                   {item.grade}
                                 </option>
+                              
                               ))}
+                                <option key={'TR'} value={'TR'}>
+                                  {'TR'}
+                                </option>
                             </select>
                           ) : (
                             row["Grade"]

@@ -49,7 +49,7 @@ const specialGrades = [
   {
     symbol: "TR",
     term: "Transfer",
-    description: "Assigned when the course is transferred from another institution",
+    description: "Assigned when the course is transferred from another institution or an alternate Brookes College program.",
   },
   {
     symbol: "W",
