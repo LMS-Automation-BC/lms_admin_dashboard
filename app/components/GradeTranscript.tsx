@@ -125,17 +125,22 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
     }
     let totalGPA = 0;
     let creditsEarned = 0;
+    let creditsToConsider=totalCredits;
     let processedusers = users.map((user: any) => {
-      if (user["Grade Point"] != 0) creditsEarned += user["Credits"];
+      
+      if (user["Grade Point"] != 0 && user["Grade"] !== 'TR') creditsEarned += user["Credits"];
       //if tr detect from total credits
-      if (user["Grade"] == 'TR') totalCredits -= user["Credits"];
-      totalGPA += user["Credits"] * user["Grade Point"];
+      if (user["Grade"] == 'TR') {
+        user['Grade Point'] = 'NA';
+        creditsToConsider -= user["Credits"];
+      }
+      if(user["Grade"] !== 'TR')totalGPA += user["Credits"] * user["Grade Point"];
       // console.log(user["Program Start Date"])
       return user;
     });
 
     setTotalCredits(totalCredits);
-    setCumulativeGpa(totalGPA / totalCredits);
+    setCumulativeGpa(totalGPA / creditsToConsider);
     console.log(cumulativeGpa);
     setCreditsEarned(creditsEarned);
     return processedusers;
@@ -425,7 +430,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
                         </td>
 
                         <td className="grade-point">
-                          {Number(row["Grade Point"]).toFixed(1)}
+                          {row['Grade'] !== 'TR'? Number(row["Grade Point"]).toFixed(1) : row["Grade Point"]}
                         </td>
                         {!hideActions && (
                           <td>
