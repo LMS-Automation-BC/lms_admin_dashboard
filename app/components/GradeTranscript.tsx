@@ -128,13 +128,13 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
     let creditsToConsider=totalCredits;
     let processedusers = users.map((user: any) => {
       
-      if (user["Grade Point"] != 0 && user["Grade"] !== 'TR') creditsEarned += user["Credits"];
+      if (user["Grade Point"] != 0 && user["Grade"] !== 'TR' && user["Grade"] !== 'RW') creditsEarned += user["Credits"];
       //if tr detect from total credits
-      if (user["Grade"] == 'TR') {
+      if (user["Grade"] == 'TR' || user["Grade"] == 'RW') {
         user['Grade Point'] = 'NA';
         creditsToConsider -= user["Credits"];
       }
-      if(user["Grade"] !== 'TR')totalGPA += user["Credits"] * user["Grade Point"];
+      if(user["Grade"] !== 'TR'&& user["Grade"] !== 'RW')totalGPA += user["Credits"] * user["Grade Point"];
       // console.log(user["Program Start Date"])
       return user;
     });
@@ -423,6 +423,9 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
                                 <option key={'TR'} value={'TR'}>
                                   {'TR'}
                                 </option>
+                                <option key={'RW'} value={'RW'}>
+                                  {'RW'}
+                                </option>
                             </select>
                           ) : (
                             row["Grade"]
@@ -430,7 +433,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
                         </td>
 
                         <td className="grade-point">
-                          {row['Grade'] !== 'TR'? Number(row["Grade Point"]).toFixed(1) : row["Grade Point"]}
+                          {row['Grade'] !== 'TR' && row['Grade'] !== 'RW'? Number(row["Grade Point"]).toFixed(1) : row["Grade Point"]}
                         </td>
                         {!hideActions && (
                           <td>
