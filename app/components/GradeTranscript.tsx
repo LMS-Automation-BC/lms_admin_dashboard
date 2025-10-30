@@ -509,7 +509,9 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
                       colSpan={!hideActions ? 3 : 2}
                       style={{ textAlign: "center" }}
                     >
-                      {(Math.trunc(cumulativeGpa * 100) / 100).toFixed(2)}
+                      {(Math.round(cumulativeGpa * 1000) / 1000).toFixed(2)}
+                      
+                      {/* {(Math.trunc(cumulativeGpa * 100) / 100).toFixed(2)} */}
                     </td>
                   </tr>
                   <tr>

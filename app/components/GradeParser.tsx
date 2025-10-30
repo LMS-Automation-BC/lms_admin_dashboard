@@ -70,7 +70,7 @@ const GradeParser: React.FC = () => {
         matches.forEach((match) => {
           filtered.push({
             ...match,
-            "Course code": match["Course code"] || course.courseCode,
+            "Course code":  course.courseCode || match["Course code"],
             Credits: match["Credit"] || course.credits,
             "Default Class Name": course.courseName,
           });
