@@ -3,7 +3,8 @@ import './GradeTranscript.css';
 import React, { useEffect, useState } from "react";
 
 export interface OrgData {
-  president: string;
+  name: string;
+  role:string;
   address: string;
   phone: string;
   email: string;
@@ -34,9 +35,9 @@ const ContactColumns: React.FC<ContactColumnsProps> = ({
 
   return (<div>{showPresident?
     <p className='president'>
-            {orgData.president}
+            {orgData.name}
             <br />
-            President
+            {orgData.role}
           </p> : <></>}
     <div className="contact-columns">
       <div className="column address">

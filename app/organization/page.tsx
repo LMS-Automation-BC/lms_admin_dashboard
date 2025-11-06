@@ -5,7 +5,8 @@ import "./organization.css";
 
 export default function OrgPage() {
   const [formData, setFormData] = useState({
-    president: "",
+    name: "",
+    role:"",
     address: "",
     phone: "",
     email: "",
@@ -50,12 +51,23 @@ export default function OrgPage() {
       <h2 className="heading">Edit Organization Info</h2>
       <form onSubmit={handleSubmit} className="form">
         <label className="label">
-          President
+          Role
           <input
             className="input"
-            name="president"
-            placeholder="President"
-            value={formData.president}
+            name="role"
+            placeholder="role"
+            value={formData.role}
+            onChange={handleChange}
+            required
+          />
+        </label>
+        <label className="label">
+          Name
+          <input
+            className="input"
+            name="name"
+            placeholder="name"
+            value={formData.name}
             onChange={handleChange}
             required
           />

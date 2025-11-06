@@ -13,10 +13,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   if (req.method === 'POST' || req.method === 'PUT') {
-    const { president, address, phone, email, website } = req.body;
+    const { name,role, address, phone, email, website } = req.body;
 
     const orgData = {
-      president,
+      name,
+      role,
       address,
       phone,
       email,
