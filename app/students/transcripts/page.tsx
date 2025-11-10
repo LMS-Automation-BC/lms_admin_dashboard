@@ -9,6 +9,7 @@ export default function TranscriptPage() {
   const searchParams = useSearchParams();
   const studentId = searchParams?.get("studentId");
   const program = searchParams?.get("program");
+  const name = searchParams?.get("studentName");
 
   const [grades, setGrades] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,11 +36,7 @@ export default function TranscriptPage() {
     });
     return processedusers;
   };
-  const cached = localStorage.getItem("programs");
-    if (cached && program) {
-      let programs = JSON.parse(cached);
-      let selectedProgram = programs[program]
-    } 
+ 
   useEffect(() => {
     if (!studentId) return;
 
@@ -88,11 +85,11 @@ export default function TranscriptPage() {
   if (!studentId) return <p>❌ Missing student ID in query params.</p>;
   if (loading) return <p>Loading transcript...</p>;
   if (error) return <p>Error: {error}</p>;
-
+ if(name && program)
   return (
     <GradeTranscript
-      studentName="John Doe"
-      program="Computer Science"
+      studentName={name}
+      program={program}
       programStartDate="2024-09-01"
       enrollmentNo={studentId}
       printDate={new Date().toLocaleDateString("en-US", {
