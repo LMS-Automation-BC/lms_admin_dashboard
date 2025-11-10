@@ -1,19 +1,25 @@
-// app/transcript/page.tsx
+// app/students/transcripts/page.tsx
 import { Suspense } from "react";
 import TranscriptPageClient from "./Transcript";
 
-export default function TranscriptPage({
+export default async function TranscriptPage({
   searchParams,
 }: {
-  searchParams?: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const studentId = searchParams?.studentId as string;
-  const program = searchParams?.program as string;
-  const name = searchParams?.studentName as string;
+  // ✅ Await searchParams before using it
+  const resolvedParams = await searchParams;
+  const studentId = resolvedParams.studentId as string;
+  const program = resolvedParams.program as string;
+  const name = resolvedParams.studentName as string;
 
   return (
     <Suspense fallback={<p>Loading transcript...</p>}>
-      <TranscriptPageClient studentId={studentId} program={program} name={name} />
+      <TranscriptPageClient
+        studentId={studentId}
+        program={program}
+        name={name}
+      />
     </Suspense>
   );
 }
