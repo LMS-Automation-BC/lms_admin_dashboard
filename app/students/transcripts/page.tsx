@@ -1,5 +1,4 @@
 // app/transcript/page.tsx or pages/transcript.tsx
-"use client";
 import GradeTranscript from "@/app/components/GradeTranscript";
 import { getGrade } from "@/app/grades/helpers/grade";
 import { useSearchParams } from "next/navigation";
@@ -87,7 +86,7 @@ export default function TranscriptPage() {
   if (error) return <p>Error: {error}</p>;
  if(name && program)
   return (
- <Suspense fallback={<p>Loading transcript...</p>}>
+
     <GradeTranscript
       studentName={name}
       program={program}
@@ -100,6 +99,6 @@ export default function TranscriptPage() {
       })}
       selectedProgram={selectedProgram}
       courses={grades}
-    /></Suspense>
+    />
   );
 }
