@@ -13,6 +13,7 @@ interface MenuItem {
   name: string;
   path: string;
   icon: any;
+  isNew?:boolean;
 }
 
 const menuItems: MenuItem[] = [
@@ -20,6 +21,11 @@ const menuItems: MenuItem[] = [
   { name: 'Programs & Courses', path: '/programs', icon: FiFolder },
   { name: 'Attendance Processor', path: '/attendance', icon: FiCalendar },
   { name: 'Grades to Transcripts', path: '/grades', icon: FiAward },
+  { name: 'Organization*', path: '/dborganization', icon: FiHome , isNew:true },
+  { name: 'Programs & Courses*', path: '/dbprograms', icon: FiFolder, isNew:true },
+  { name: 'Attendance*', path: '/dbattendance', icon: FiCalendar, isNew:true },
+  { name: 'Students*', path: '/students', icon: FiAward, isNew:true },
+  
 ];
 
 const SidebarLinks = ({ isLoggedIn }: Props) => {
@@ -71,7 +77,13 @@ const SidebarLinks = ({ isLoggedIn }: Props) => {
         LMS Data Processor
       </h2>
 
-   {menuItems.map(({ name, path, icon: Icon }) => (
+   {menuItems.map(({ name, path, icon: Icon, isNew }) => {
+     const baseStyle = pathname === path ? activeItemStyle : itemStyle;
+  const newItemStyle = isNew
+    ? { ...baseStyle, backgroundColor: "#72e372ff" } // light green highlight
+    : baseStyle;
+    return (
+    
   <Link
     key={path}
     href={path}
@@ -79,12 +91,12 @@ const SidebarLinks = ({ isLoggedIn }: Props) => {
     e.preventDefault();
     window.location.href = path;
   }}
-    style={pathname === path ? activeItemStyle : itemStyle}
+   style={newItemStyle}
   >
     <Icon size={18} />
     {name}
   </Link>
-))}
+)})}
 
       {isLoggedIn && (
         <form action="/api/logout" method="POST" style={{ marginTop: '20px' }}>

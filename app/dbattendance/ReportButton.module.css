@@ -1,0 +1,110 @@
+.btnPrimary {
+  background-color:#28a745;;
+  color: white;
+  padding: 10px 18px;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 16px;
+  transition: background 0.2s ease;
+}
+
+.btnPrimary:hover {
+  background-color: #333;
+}
+
+.modalBackdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  min-width: 320px;
+  max-width: 90%;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.field {
+  margin-bottom: 16px;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.modalActions button {
+  padding: 8px 14px;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+.modalActions button:first-child {
+  background-color:#28a745;;
+  color: white;
+}
+
+.modalActions button:first-child:hover {
+  background-color: #333;
+}
+
+.modalActions button:last-child {
+  background-color: #ccc;
+}
+
+.modalActions button:last-child:hover {
+  background-color: #bbb;
+}
+/* Modal Header in Green */
+.modalHeader {
+  color: #2e7d32; /* nice dark green */
+  font-size: 20px;
+  margin-bottom: 16px;
+  text-align: center;
+  font-weight: 600;
+}
+
+/* Field container spacing */
+.field {
+  margin-bottom: 16px;
+}
+
+/* Label styling */
+.label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 500;
+  color: #2e7d32; /* match header green */
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+/* Input styling */
+.input {
+  padding: 8px 10px;
+  border: 1px solid #a5d6a7; /* light green border */
+  border-radius: 4px;
+  font-size: 14px;
+  margin-top: 4px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #2e7d32; /* dark green on focus */
+  box-shadow: 0 0 5px rgba(46, 125, 50, 0.5);
+}
