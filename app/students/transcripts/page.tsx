@@ -5,13 +5,12 @@ import TranscriptPageClient from "./Transcript";
 export default function TranscriptPage({
   searchParams,
 }: {
-  searchParams?: { [key: string]: string | undefined };
+  searchParams?: { [key: string]: string | string[] | undefined };
 }) {
+  const studentId = searchParams?.studentId as string;
+  const program = searchParams?.program as string;
+  const name = searchParams?.studentName as string;
 
-  const studentId = searchParams?.studentId;
-  const program = searchParams?.program;
-  const name = searchParams?.studentName;
-  if(studentId && program && name)
   return (
     <Suspense fallback={<p>Loading transcript...</p>}>
       <TranscriptPageClient studentId={studentId} program={program} name={name} />
