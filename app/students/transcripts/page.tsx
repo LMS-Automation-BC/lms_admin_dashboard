@@ -2,16 +2,16 @@
 import { Suspense } from "react";
 import TranscriptPageClient from "./Transcript";
 
-
 export default function TranscriptPage({
   searchParams,
 }: {
-  searchParams: Record<string, string>;
+  searchParams?: { [key: string]: string | undefined };
 }) {
-  const studentId = searchParams.studentId;
-  const program = searchParams.program;
-  const name = searchParams.studentName;
 
+  const studentId = searchParams?.studentId;
+  const program = searchParams?.program;
+  const name = searchParams?.studentName;
+  if(studentId && program && name)
   return (
     <Suspense fallback={<p>Loading transcript...</p>}>
       <TranscriptPageClient studentId={studentId} program={program} name={name} />
