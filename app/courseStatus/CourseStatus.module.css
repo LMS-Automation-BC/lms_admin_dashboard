@@ -1,0 +1,35 @@
+/* CourseMatrix.module.css */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-family: Arial, sans-serif;
+}
+
+.thead th {
+  background-color: #f3f3f3;
+  padding: 8px;
+  text-align: center;
+  border: 1px solid #ccc;
+}
+
+.tbody td {
+  padding: 8px;
+  text-align: center;
+  border: 1px solid #ccc;
+}
+
+.tbody td.courseName {
+  text-align: left;
+  font-weight: 500;
+}
+
+.tbody td.taken {
+  background-color: #d4edda; /* light green for ✅ */
+  color: #155724;
+}
+
+.tbody td.notTaken {
+  background-color: #f8d7da; /* light red for ❌ */
+  color: #721c24;
+}

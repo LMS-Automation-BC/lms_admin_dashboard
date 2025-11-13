@@ -25,6 +25,7 @@ const menuItems: MenuItem[] = [
   { name: 'Programs & Courses*', path: '/dbprograms', icon: FiFolder, isNew:true },
   { name: 'Attendance*', path: '/dbattendance', icon: FiCalendar, isNew:true },
   { name: 'Students*', path: '/students', icon: FiAward, isNew:true },
+  { name: 'ProgramStatus', path:'/courseStatus', icon:FiHome, isNew:true}
   
 ];
 
