@@ -22,7 +22,9 @@ export default function CourseStatus() {
   }, []);
   useEffect(() => {
     setLoading(true);
-    fetch(`https://brookes-jobs-hxgbhghvajeyefb7.canadacentral-01.azurewebsites.net/api/grade?program=${selectedProgram}`)
+    fetch(
+      `https://brookes-jobs-hxgbhghvajeyefb7.canadacentral-01.azurewebsites.net/api/grade?program=${selectedProgram}`
+    )
       .then((res) => res.json())
       .then((data) => {
         setLoading(false);
@@ -53,38 +55,57 @@ export default function CourseStatus() {
         </select>
 
         <table className={styles.table}>
-      <thead className={styles.thead}>
-        <tr>
-          <th>Course Name</th>
-          {students &&
-            Object.keys(students).map((student) => (
-              <th key={student}>{student}</th>
-            ))}
-        </tr>
-      </thead>
-      <tbody className={styles.tbody}>
-        {selectedProgram &&
-          programs[selectedProgram].map((program) => (
-            <tr key={program.Course_Code}>
-              <td className={styles.courseName}>{program.Course_Name}</td>
+          <thead className={styles.thead}>
+            <tr>
+              <th>Course Name</th>
               {students &&
-                Object.keys(students).map((student) => {
-                  const taken = students[student].some(
-                    (x:any) => x.Default_Course_Name === program.Course_Name
-                  );
-                  return (
-                    <td
-                      key={student + program.Course_Name}
-                      className={taken ? styles.taken : styles.notTaken}
-                    >
-                      {taken ? "✅" : "❌"}
-                    </td>
-                  );
-                })}
+                Object.keys(students).map((student) => (
+                  <th key={student}>{student}</th>
+                ))}
             </tr>
-          ))}
-      </tbody>
-    </table>
+          </thead>
+          <tbody className={styles.tbody}>
+            {selectedProgram &&
+              programs[selectedProgram].map((program) => (
+                <tr key={program.Course_Code}>
+                  <td className={styles.courseName}>{program.Course_Name}</td>
+                  {students &&
+                    Object.keys(students).map((student) => {
+                      const taken = students[student].some(
+                        (x: any) =>
+                          x.Default_Course_Name === program.Course_Name
+                      );
+                      return (
+                        <td
+                          key={student + program.Course_Name}
+                          className={
+                            students[student].find(
+                              (x: any) =>
+                                x.Default_Course_Name === program.Course_Name
+                            )
+                              ? styles.taken
+                              : styles.notTaken
+                          }
+                        >
+                          {students[student].find(
+                            (x: any) =>
+                              x.Default_Course_Name === program.Course_Name
+                          )?.Grade
+                            ? `✅ ${
+                                students[student].find(
+                                  (x: any) =>
+                                    x.Default_Course_Name ===
+                                    program.Course_Name
+                                )?.Grade
+                              }`
+                            : "❌"}
+                        </td>
+                      );
+                    })}
+                </tr>
+              ))}
+          </tbody>
+        </table>
       </>
     );
   }
