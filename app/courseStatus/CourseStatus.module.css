@@ -30,6 +30,11 @@
 }
 
 .tbody td.notTaken {
-  background-color: #f8d7da; /* light red for ❌ */
+  
   color: #721c24;
+}
+.tbody td.fail {
+  background-color: #ffcccc;   /* stronger red for FAIL */
+  color: #e82b2b;
+  font-weight: bold;
 }

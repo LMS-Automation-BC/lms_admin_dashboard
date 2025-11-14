@@ -53,8 +53,55 @@ export default function CourseStatus() {
             </option>
           ))}
         </select>
-
         <table className={styles.table}>
+          <thead className={styles.thead}>
+            <tr>
+              <th>Course Name</th>
+              {selectedProgram &&
+                programs[selectedProgram].map((program) => (
+                  <th key={program.Course_Name}>{program.Course_Name}</th>
+                ))}
+            </tr>
+          </thead>
+          <tbody className={styles.tbody}>
+            {students &&
+              Object.keys(students).map((student: string) => (
+                <tr key={student}>
+                  <td>{student}</td>
+                  {selectedProgram &&
+                    programs[selectedProgram].map((program) => {
+                      const taken = students[student].some(
+                        (x: any) =>
+                          x.Default_Course_Name === program.Course_Name
+                      );
+                      const record = students[student].find(
+                        (x: any) =>
+                          x.Default_Course_Name === program.Course_Name
+                      );
+                      return (
+                        <td
+                          key={student + program.Course_Name}
+                          className={
+                            !record
+                              ? styles.notTaken // ❌ not taken
+                              : record.Grade === "F"
+                              ? styles.fail // ⚠️ failed
+                              : styles.taken // ✅ passed
+                          }
+                        >
+                          {!record
+                            ? "❌"
+                            : record.Grade === "F"
+                            ? `⚠️ ${record.Grade}`
+                            : `✅ ${record.Grade}`}
+                        </td>
+                      );
+                    })}
+                </tr>
+              ))}
+          </tbody>
+        </table>
+        {/* <table className={styles.table}>
           <thead className={styles.thead}>
             <tr>
               <th>Course Name</th>
@@ -105,7 +152,7 @@ export default function CourseStatus() {
                 </tr>
               ))}
           </tbody>
-        </table>
+        </table> */}
       </>
     );
   }

@@ -16,13 +16,16 @@ function StudentsComponent() {
   // Filters
   const [programs, setPrograms] = useState<ProgramsMap>({});
   const [programsFilter, setProgramsFilter] = useState<string[]>([]);
+  const [statusFilter, setStatusFilter] = useState<string[]>([]);
 
   const [searchNameInput, setSearchNameInput] = useState("");
   const [selectedProgramInput, setSelectedProgramInput] = useState("");
+  const [selectedStatusInput, setSelectedStatusInput] = useState("");
 
   // applied filter states (used in fetch)
   const [searchName, setSearchName] = useState("");
   const [selectedProgram, setSelectedProgram] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("");
 
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState<"add" | "edit">("add");
@@ -40,6 +43,7 @@ function StudentsComponent() {
       limit: limit.toString(),
       ...(searchName && { name: searchName }),
       ...(selectedProgram && { program: selectedProgram }),
+      ...(selectedStatus && { status: selectedStatus }),
     });
 
     fetch(`https://brookes-jobs-hxgbhghvajeyefb7.canadacentral-01.azurewebsites.net/api/student?${params.toString()}`)
@@ -58,14 +62,15 @@ function StudentsComponent() {
   // Fetch students when page or filters change
   useEffect(() => {
     fetchStudents();
-  }, [page, searchName, selectedProgram]);
+  }, [page, searchName, selectedProgram, selectedStatus]);
 
   // Fetch program list once
   useEffect(() => {
-    fetch("https://brookes-jobs-hxgbhghvajeyefb7.canadacentral-01.azurewebsites.net/api/student?type=programs")
+    fetch("https://brookes-jobs-hxgbhghvajeyefb7.canadacentral-01.azurewebsites.net/api/student?type=filters")
       .then((res) => res.json())
       .then((data) => {
-        setProgramsFilter(data);
+        setProgramsFilter(data.programs);
+        setStatusFilter(data.status)
         fetch("https://brookes-jobs-hxgbhghvajeyefb7.canadacentral-01.azurewebsites.net/api/program")
           .then((res) => res.json())
           .then((data) => {
@@ -85,9 +90,15 @@ function StudentsComponent() {
   const handleProgramChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedProgramInput(e.target.value);
   };
+    const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedStatusInput(e.target.value);
+  };
+  //value={selectedStatusInput}
+          //onChange={handleStatusChange}
   const handleApplyFilters = () => {
     setSearchName(searchNameInput);
     setSelectedProgram(selectedProgramInput);
+    setSelectedStatus(selectedStatusInput);
     setPage(1); // reset pagination when applying filters
   };
   const nextPage = () => {
@@ -189,6 +200,18 @@ function StudentsComponent() {
             </option>
           ))}
         </select>
+         <select
+          value={selectedStatusInput}
+          onChange={handleStatusChange}
+          className={styles.select}
+        >
+          <option value="">All Status</option>
+          {statusFilter.map((prog) => (
+            <option key={prog} value={prog}>
+              {prog}
+            </option>
+          ))}
+        </select>
         <button className={styles.searchButton} onClick={handleApplyFilters}>
           Search
         </button>
@@ -211,9 +234,9 @@ function StudentsComponent() {
             <th className={styles.th}>Full Name</th>
             <th className={styles.th}>Student ID</th>
             <th className={styles.th}>Program</th>
-            <th className={styles.th}>Last Name</th>
+            <th className={styles.th}>Status</th>
             <th className={styles.th}>First Name</th>
-            <th className={styles.th}>Grades</th>
+            <th className={styles.th}>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -230,7 +253,7 @@ function StudentsComponent() {
               <td className={styles.td}>{student.Full_Name || ""}</td>
               <td className={styles.td}>{student.Student_ID || ""}</td>
               <td className={styles.td}>{student.Program || ""}</td>
-              <td className={styles.td}>{student.Last_Name || ""}</td>
+              <td className={styles.td}>{student.Current_Status || ""}</td>
               <td className={styles.td}>{student.First_Name_Legal || ""}</td>
               {/* Action Buttons */}
               <td className={styles.td}>
