@@ -1,0 +1,72 @@
+.container {
+  width: 100%;
+  height: 95vh;          
+  overflow-y: auto;       
+  overflow-x: auto;       
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;    
+}
+
+.cell {
+  padding: 4px 6px;      /* reduced padding */
+  border: 1px solid #ccc;
+  white-space: normal;         
+  word-break: break-word;
+  overflow-wrap: break-word;
+  text-align: center;
+  font-size: 0.85rem;     /* slightly smaller font */
+}
+
+/* Sticky header (top row) */
+.stickyHeader {
+  position: sticky;
+  top: 0;
+  background-color: #f7f7f7;
+  z-index: 10;          
+  text-align: center;
+  padding: 4px 6px;      /* match reduced padding */
+  font-size: 0.85rem;    /* smaller header font */
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Sticky first column */
+.stickyCol {
+  position: sticky;
+  left: 0;
+  background-color: #f7f7f7;
+  z-index: 5;           
+  text-align: left;
+  padding: 4px 6px;      /* reduce padding */
+  font-size: 0.85rem;
+}
+
+/* Top-left cell (intersection of sticky row & column) */
+.stickyHeader.stickyCol {
+  z-index: 20;           
+}
+
+/* Table body cell states */
+.taken {
+  background-color: #d4edda; 
+  color: #155724;
+}
+
+.notTaken {
+  color: #721c24;           
+}
+
+.fail {
+  background-color: #ffcccc;
+  color: #e82b2b;
+  font-weight: bold;
+}

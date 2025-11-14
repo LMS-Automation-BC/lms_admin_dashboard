@@ -38,3 +38,53 @@
   color: #e82b2b;
   font-weight: bold;
 }
+.container {
+  width: 100%;
+  /* height: 100%; */
+ /* height: 95vh;             use fixed viewport height */
+  overflow-y: auto;        /* vertical scroll */
+  overflow-x: hidden;      /* no horizontal scroll */
+  box-sizing: border-box;  /* include padding/border in height */
+  margin: 0;
+  padding: 0;
+}
+
+
+
+/* Sticky header */
+.stickyHeader {
+  position: sticky;
+  top: 0;
+  background: #f7f7f7;
+  z-index: 10;
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: break-word;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 2; 
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-align: center;
+}
+.table {
+  width: 100%;
+  table-layout: fixed; /* prevent horizontal overflow */
+  border-collapse: collapse;
+}
+
+.cell {
+  padding: 8px;
+  border: 1px solid #ccc;
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: break-word;
+}
+
+.stickyCol {
+  position: sticky;
+  left: 0;
+  background: white;
+  z-index: 5;
+}
+
