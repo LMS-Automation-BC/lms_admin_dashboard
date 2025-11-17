@@ -40,7 +40,7 @@ export default function ProgramsPage() {
   // Fetch programs on mount
   useEffect(() => {
     setLoading(true);
-    fetch("https://brookes-jobs-hxgbhghvajeyefb7.canadacentral-01.azurewebsites.net/api/program")
+    fetch(`${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/program`)
       .then((res) => res.json())
       .then(data => {
         setLoading(false);
@@ -54,7 +54,7 @@ export default function ProgramsPage() {
     if (!trimmedName) return alert("Program name can't be empty");
     if (programs[trimmedName]) return alert("Program already exists");
     
-    const res = await fetch("https://brookes-jobs-hxgbhghvajeyefb7.canadacentral-01.azurewebsites.net/api/program", {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/program`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify( { program: trimmedName, courseCode,courseName,credits}),
@@ -85,7 +85,7 @@ export default function ProgramsPage() {
 
     const updatedCourses = [...(programs[selectedProgram] || []), newCourse];
 
-    const res = await fetch("https://brookes-jobs-hxgbhghvajeyefb7.canadacentral-01.azurewebsites.net/api/program", {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/program`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -118,7 +118,7 @@ export default function ProgramsPage() {
     const updatedPrograms = { ...programs };
     delete updatedPrograms[selectedProgram];
 
-    const res = await fetch("https://brookes-jobs-hxgbhghvajeyefb7.canadacentral-01.azurewebsites.net/api/program?name="+selectedProgram, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/program?name=`+selectedProgram, {
       method: "delete",
       headers: { "Content-Type": "application/json" },
     });
@@ -164,7 +164,7 @@ export default function ProgramsPage() {
   };
 
   // Send only the updated course to the backend
-  const res = await fetch("https://brookes-jobs-hxgbhghvajeyefb7.canadacentral-01.azurewebsites.net/api/program", {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/program`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -197,7 +197,7 @@ export default function ProgramsPage() {
       (course) => course.Course_Code !== courseCodeToDelete
     );
 
-    const res = await fetch("https://brookes-jobs-hxgbhghvajeyefb7.canadacentral-01.azurewebsites.net/api/program?courseid="+id, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/program?courseid=`+id, {
       method: "delete",
       headers: { "Content-Type": "application/json" }
     });
@@ -356,7 +356,7 @@ export default function ProgramsPage() {
             }
           });
 
-          const res = await fetch("https://brookes-jobs-hxgbhghvajeyefb7.canadacentral-01.azurewebsites.net/api/program", {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/program`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(updatedPrograms),

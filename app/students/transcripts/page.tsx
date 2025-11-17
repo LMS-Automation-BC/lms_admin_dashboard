@@ -12,6 +12,7 @@ export default async function TranscriptPage({
   const studentId = resolvedParams.studentId as string;
   const program = resolvedParams.program as string;
   const name = resolvedParams.studentName as string;
+  const programStartDate = resolvedParams.programStartDate as string;
 
   return (
     <Suspense fallback={<p>Loading transcript...</p>}>
@@ -19,6 +20,7 @@ export default async function TranscriptPage({
         studentId={studentId}
         program={program}
         name={name}
+        startDate={programStartDate}
       />
     </Suspense>
   );

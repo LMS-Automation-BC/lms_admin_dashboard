@@ -46,7 +46,7 @@ function StudentsComponent() {
       ...(selectedStatus && { status: selectedStatus }),
     });
 
-    fetch(`https://brookes-jobs-hxgbhghvajeyefb7.canadacentral-01.azurewebsites.net/api/student?${params.toString()}`)
+    fetch(`${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/student?${params.toString()}`)
       .then((res) => res.json())
       .then((data) => {
         setStudents(data.data || []);
@@ -66,12 +66,12 @@ function StudentsComponent() {
 
   // Fetch program list once
   useEffect(() => {
-    fetch("https://brookes-jobs-hxgbhghvajeyefb7.canadacentral-01.azurewebsites.net/api/student?type=filters")
+    fetch(`${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/student?type=filters`)
       .then((res) => res.json())
       .then((data) => {
         setProgramsFilter(data.programs);
         setStatusFilter(data.status)
-        fetch("https://brookes-jobs-hxgbhghvajeyefb7.canadacentral-01.azurewebsites.net/api/program")
+        fetch(`${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/program`)
           .then((res) => res.json())
           .then((data) => {
             localStorage.setItem("programs", JSON.stringify(data)); 
@@ -112,8 +112,8 @@ function StudentsComponent() {
     const method = modalMode === "add" ? "POST" : "PUT";
     const url =
       modalMode === "add"
-        ? "https://brookes-jobs-hxgbhghvajeyefb7.canadacentral-01.azurewebsites.net/api/student"
-        : `https://brookes-jobs-hxgbhghvajeyefb7.canadacentral-01.azurewebsites.net/api/student`;
+        ? `${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/student`
+        : `${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/student`;
 
     fetch(url, {
       method,
@@ -149,7 +149,7 @@ function StudentsComponent() {
   const handleGetGrades = async (student: any) => {
     try {
       const res = await fetch(
-        `https://brookes-jobs-hxgbhghvajeyefb7.canadacentral-01.azurewebsites.net/api/grade?studentId=${student.Student_ID}`
+        `${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/grade?studentId=${student.Student_ID}`
       );
       const data = await res.json();
     //   setGrades(data ? calculateGradePoint(data) : []);
@@ -159,7 +159,7 @@ function StudentsComponent() {
       const query = new URLSearchParams({
         studentName: gradeStudent?.Full_Name,
         program: gradeStudent.Program,
-        programStartDate: gradeStudent.ProgramStartDate,
+        programStartDate: gradeStudent.CurrentStatus_Start_Date,
         studentId: gradeStudent.Student_ID,
         // selectedProgram: JSON.stringify(transformCourse(gradeStudent.Program)),
         // courses: JSON.stringify(grades),

@@ -12,7 +12,7 @@ export default function CourseStatus() {
   useEffect(() => {
     setLoading(true);
     fetch(
-      "https://brookes-jobs-hxgbhghvajeyefb7.canadacentral-01.azurewebsites.net/api/program"
+      `${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/program`
     )
       .then((res) => res.json())
       .then((data) => {
@@ -24,7 +24,7 @@ export default function CourseStatus() {
   useEffect(() => {
     setLoading(true);
     fetch(
-      `https://brookes-jobs-hxgbhghvajeyefb7.canadacentral-01.azurewebsites.net/api/grade?program=${selectedProgram}`
+      `${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/grade?program=${selectedProgram}`
     )
       .then((res) => res.json())
       .then((data) => {

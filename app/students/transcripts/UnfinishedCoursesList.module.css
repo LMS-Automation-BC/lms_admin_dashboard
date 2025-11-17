@@ -1,0 +1,63 @@
+.unfinishedcontainer {
+  backgroundcolor: #fff4e5;
+  border: 1px solid #ffa500;
+  borderradius: 8px;
+  padding: 16px;
+  maxwidth: 500px;
+  margin: 16px auto;
+  boxshadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.unfinishedcontainer h3 {
+  color: #ff6f00;
+  marginbottom: 12px;
+  fontsize: 1.4rem;
+  textalign: center;
+}
+
+.unfinishedlist {
+  liststyletype: none;
+  padding: 0;
+  margin: 0;
+}
+
+.unfinisheditem {
+  display: flex;
+  justifycontent: spacebetween;
+  backgroundcolor: #fff8e1;
+  padding: 10px 12px;
+  borderbottom: 1px solid #ffd180;
+  borderradius: 4px;
+  marginbottom: 6px;
+  fontweight: 500;
+  transition: transform 0.2s, backgroundcolor 0.2s;
+}
+
+.unfinisheditem:hover {
+  backgroundcolor: #ffe0b2;
+  transform: scale(1.02);
+}
+
+.coursename {
+  flex: 2;
+}
+
+.coursecode {
+  flex: 1;
+  textalign: center;
+  color: #ff8f00;
+  fontweight: 600;
+}
+
+.coursecredits {
+  flex: 1;
+  textalign: right;
+  color: #ff6f00;
+}
+
+.allcompleted {
+  textalign: center;
+  color: #4caf50;
+  fontsize: 1.2rem;
+  fontweight: bold;
+}

@@ -43,7 +43,7 @@ export default function AttendanceReport() {
      const params = new URLSearchParams({
       type:"options"})
       setLoading(true)
-    fetch(`https://brookes-jobs-hxgbhghvajeyefb7.canadacentral-01.azurewebsites.net/api/attendance?${params.toString()}`)
+    fetch(`${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/attendance?${params.toString()}`)
       .then((res) => res.json())
       .then((data) => {
         
@@ -78,7 +78,7 @@ export default function AttendanceReport() {
     });
     setLoading(true)
     // Fetch paginated attendance
-    fetch(`https://brookes-jobs-hxgbhghvajeyefb7.canadacentral-01.azurewebsites.net/api/attendance?${params.toString()}`)
+    fetch(`${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/attendance?${params.toString()}`)
       .then((res) => res.json())
       .then((response: any) => {
         setAttendanceData(response.data);
@@ -94,7 +94,7 @@ export default function AttendanceReport() {
     // Fetch dropdown options for current date range
     setLoading(true)
     fetch(
-      `https://brookes-jobs-hxgbhghvajeyefb7.canadacentral-01.azurewebsites.net/api/attendance?${paramsCurrent.toString()}`
+      `${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/attendance?${paramsCurrent.toString()}`
     )
       .then((res) => res.json())
       .then((data) => {

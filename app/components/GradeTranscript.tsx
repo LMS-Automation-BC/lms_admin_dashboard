@@ -189,7 +189,12 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
   const isDuplicate = (row: CsvRow) =>
     row["Default Class Name"] &&
     defaultClassCount[row["Default Class Name"]] > 1;
-  return (
+  return (<> <div style = {{border: "1px solid", width:"30%"}}><p style={{fontSize:"20", fontWeight:"bold"}}>Course Discrepancy Highlight codes</p>
+    <ul >
+      <li className="duplicate-highlight"> (Duplicate)</li>
+      <li>Program course</li>
+      <li className="notinprogram">Random Elective Course - XYZ123 (Not in Program)</li>
+    </ul></div>
     <div
       className="transcript-page"
       style={{ width: "100%", maxWidth: "572pt" }}
@@ -352,7 +357,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
                         </td>
                         <td
                           className={`course-name ${
-                            isDuplicate(row) ? "duplicate-highlight" : ""
+                            isDuplicate(row) ? "duplicate-highlight" : row.isInProgram === false ? "notinprogram":""
                           }`}
                         >
                           {isEditing ? (
@@ -598,7 +603,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
           {/* <div className="html-wrapper" dangerouslySetInnerHTML={{ __html: html }} /> */}
         </div>
       </div>
-    </div>
+    </div></>
   );
 };
 

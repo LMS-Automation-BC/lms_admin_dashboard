@@ -28,7 +28,7 @@ export const OrganizationProvider = ({ children }: { children: ReactNode }) => {
   const refreshOrganization = async () => {
   setLoading(true);
   try {
-    const response = await fetch('https://brookes-jobs-hxgbhghvajeyefb7.canadacentral-01.azurewebsites.net/api/organization'); // Adjust if deployed
+    const response = await fetch(`${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/organization`); // Adjust if deployed
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }

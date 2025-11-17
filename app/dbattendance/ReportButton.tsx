@@ -28,7 +28,7 @@ const ReportButton: React.FC = () => {
         end: endDate,
       });
       const response = await fetch(
-        `https://brookes-jobs-hxgbhghvajeyefb7.canadacentral-01.azurewebsites.net/api/attendance?${params.toString()}`,
+        `${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/attendance?${params.toString()}`,
         {
           method: "GET",
           headers: { "Content-Type": "application/json" },

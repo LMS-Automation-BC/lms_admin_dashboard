@@ -28,7 +28,7 @@ export default function OrganizationComponent() {
 
   try {
     organization.id=1
-    const response = await fetch('https://brookes-jobs-hxgbhghvajeyefb7.canadacentral-01.azurewebsites.net/api/organization', {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/organization`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
