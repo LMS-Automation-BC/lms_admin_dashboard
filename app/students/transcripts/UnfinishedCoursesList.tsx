@@ -44,7 +44,7 @@ const UnfinishedCoursesList: React.FC<Props> = ({
 };
 
 export default UnfinishedCoursesList;
-function getUnfinishedCourses(
+export function getUnfinishedCourses(
   programCourses: any[],
   userGrades: any[]
 ): any[] {

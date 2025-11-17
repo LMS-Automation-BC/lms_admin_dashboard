@@ -2,9 +2,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import GradeTranscript from "@/app/components/GradeTranscript";
+import GradeTranscript from "@/app/students/transcripts/GradeTranscript";
 import { getGrade } from "@/app/grades/helpers/grade";
-import UnfinishedCoursesList from "./UnfinishedCoursesList";
+import UnfinishedCoursesList, { getUnfinishedCourses } from "./UnfinishedCoursesList";
 
 interface Props {
   studentId: string;
@@ -112,6 +112,7 @@ export default function TranscriptPageClient({
         })}
         selectedProgram={selectedProgram}
         courses={grades}
+        unfinishedCourses={getUnfinishedCourses(selectedProgram, grades)}
       />
     </>
   );
