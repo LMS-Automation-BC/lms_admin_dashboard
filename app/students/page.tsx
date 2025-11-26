@@ -33,7 +33,6 @@ function StudentsComponent() {
   const [grades, setGrades] = useState<any[]>([]);
   const [gradeStudent, setGradeStudent] = useState<any>(null);
   const [showGrades, setShowGrades] = useState(false);
-  
 
   const fetchStudents = () => {
     setLoading(true);
@@ -46,7 +45,11 @@ function StudentsComponent() {
       ...(selectedStatus && { status: selectedStatus }),
     });
 
-    fetch(`${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/student?${params.toString()}`)
+    fetch(
+      `${
+        process.env.NEXT_PUBLIC_FUNCTION_APP_URL
+      }/api/student?${params.toString()}`
+    )
       .then((res) => res.json())
       .then((data) => {
         setStudents(data.data || []);
@@ -66,15 +69,17 @@ function StudentsComponent() {
 
   // Fetch program list once
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/student?type=filters`)
+    fetch(
+      `${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/student?type=filters`
+    )
       .then((res) => res.json())
       .then((data) => {
         setProgramsFilter(data.programs);
-        setStatusFilter(data.status)
+        setStatusFilter(data.status);
         fetch(`${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/program`)
           .then((res) => res.json())
           .then((data) => {
-            localStorage.setItem("programs", JSON.stringify(data)); 
+            localStorage.setItem("programs", JSON.stringify(data));
           });
       })
       .catch((err) => {
@@ -90,11 +95,11 @@ function StudentsComponent() {
   const handleProgramChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedProgramInput(e.target.value);
   };
-    const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedStatusInput(e.target.value);
   };
   //value={selectedStatusInput}
-          //onChange={handleStatusChange}
+  //onChange={handleStatusChange}
   const handleApplyFilters = () => {
     setSearchName(searchNameInput);
     setSelectedProgram(selectedProgramInput);
@@ -152,11 +157,12 @@ function StudentsComponent() {
         `${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/grade?studentId=${student.Student_ID}`
       );
       const data = await res.json();
-    //   setGrades(data ? calculateGradePoint(data) : []);
+      //   setGrades(data ? calculateGradePoint(data) : []);
 
       setGradeStudent(student);
-    //   setShowGrades(true);
+      //   setShowGrades(true);
       const query = new URLSearchParams({
+        sisId: gradeStudent?.sisId,
         studentName: gradeStudent?.Full_Name,
         program: gradeStudent.Program,
         programStartDate: gradeStudent.CurrentStatus_Start_Date,
@@ -200,7 +206,7 @@ function StudentsComponent() {
             </option>
           ))}
         </select>
-         <select
+        <select
           value={selectedStatusInput}
           onChange={handleStatusChange}
           className={styles.select}
@@ -250,7 +256,17 @@ function StudentsComponent() {
               }}
               className={styles.clickableRow}
             >
-              <td className={styles.td}>{student.Full_Name || ""}</td>
+              <td className={styles.td}>
+                <a
+                  href={`https://brookescollege.classe365.com/1/admin/students/view/${student.sisId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.link}
+                >
+                  {student.Full_Name || ""}
+                </a>
+              </td>
+
               <td className={styles.td}>{student.Student_ID || ""}</td>
               <td className={styles.td}>{student.Program || ""}</td>
               <td className={styles.td}>{student.Current_Status || ""}</td>

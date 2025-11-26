@@ -10,6 +10,7 @@ export default async function TranscriptPage({
   // ✅ Await searchParams before using it
   const resolvedParams = await searchParams;
   const studentId = resolvedParams.studentId as string;
+  const sisId = resolvedParams.sisId as string;
   const program = resolvedParams.program as string;
   const name = resolvedParams.studentName as string;
   const programStartDate = resolvedParams.programStartDate as string;
@@ -18,6 +19,7 @@ export default async function TranscriptPage({
     <Suspense fallback={<p>Loading transcript...</p>}>
       <TranscriptPageClient
         studentId={studentId}
+        sisId= {sisId}
         program={program}
         name={name}
         startDate={programStartDate}

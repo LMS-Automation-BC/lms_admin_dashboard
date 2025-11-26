@@ -8,6 +8,7 @@ import UnfinishedCoursesList, { getUnfinishedCourses } from "./UnfinishedCourses
 
 interface Props {
   studentId: string;
+  sisId:string;
   program: string;
   name: string;
   startDate: string;
@@ -15,6 +16,7 @@ interface Props {
 
 export default function TranscriptPageClient({
   studentId,
+  sisId,
   program,
   name,
   startDate,
@@ -101,6 +103,7 @@ export default function TranscriptPageClient({
       />
      
       <GradeTranscript
+        sisId= {sisId}
         studentName={name}
         program={program}
         programStartDate={startDate || "2025-01-09"}
@@ -112,7 +115,6 @@ export default function TranscriptPageClient({
         })}
         selectedProgram={selectedProgram}
         courses={grades}
-        unfinishedCourses={getUnfinishedCourses(selectedProgram, grades)}
       />
     </>
   );

@@ -1,7 +1,8 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import CreatableSelect from "react-select/creatable";
-
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 import "@/app/components/GradeTranscript.css";
 import { useReactToPrint } from "react-to-print";
 import ContactColumns, { OrgData } from "@/app/components/GradeOrganization";
@@ -11,6 +12,7 @@ import TranscriptDate from "@/app/components/TranscriptDate";
 import { gradeScale } from "@/app/grades/helpers/grade";
 import { parseISO, format } from "date-fns";
 import { FiCheck, FiX, FiEdit2, FiTrash2 } from "react-icons/fi";
+import { getUnfinishedCourses } from "./UnfinishedCoursesList";
 
 interface TranscriptProps {
   studentName: string | undefined;
@@ -20,7 +22,8 @@ interface TranscriptProps {
   printDate: string;
   courses: CsvRow[];
   selectedProgram: Course[];
-  unfinishedCourses: Course[];
+  sisId:string
+  // unfinishedCourses: Course[];
 }
 
 const GradeTranscript: React.FC<TranscriptProps> = ({
@@ -31,8 +34,10 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
   printDate,
   courses,
   selectedProgram,
-  unfinishedCourses,
+  sisId
+  // unfinishedCourses,
 }) => {
+  const unfinishedCourses=getUnfinishedCourses(selectedProgram, courses)
   const courseoptions = unfinishedCourses.map((course) => ({
     value: course.Course_Name,
     label: course.Course_Name,
@@ -63,14 +68,40 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
   const [rePrint, setRePrint] = useState<boolean>(false);
   const transcriptRef = useRef<HTMLDivElement>(null);
   const [hasFail, setHasFail] = useState(false);
+  const [viewOnly, setViewOnly] = useState(false);
   const reactToPrintFn = useReactToPrint({
     contentRef: transcriptRef,
     onAfterPrint: () => setHideActions(false),
     documentTitle: `${studentName}-Transcript`,
   });
+  const generatePdfFromDom = async (element:any) => {
+  const canvas = await html2canvas(element, { scale: 2 });
+  const imgData = canvas.toDataURL("image/png");
+
+  const pdf = new jsPDF("p", "pt", "a4");
+  const pdfWidth = pdf.internal.pageSize.getWidth();
+  const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+  pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+
+  // Return Base64 without prefix
+  return pdf.output("datauristring").split(",")[1];
+};
   const handlePrint = async () => {
     setHideActions(true); // Hide before printing
     await new Promise((resolve) => setTimeout(resolve, 0)); // Let React update the UI
+     const pdfBase64 = await generatePdfFromDom(transcriptRef.current);
+      // Send to backend  
+  // await fetch(`${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/grade`, {
+  //   method: "POST",
+  //   headers: { "Content-Type": "application/json" },
+  //   body: JSON.stringify({
+  //     id: sisId,
+  //     filename: `${studentName}-Transcript.pdf`,
+  //     file_type: "pdf",
+  //     file: pdfBase64,
+  //   }),
+  // });
     reactToPrintFn();
   };
   const [html, setHtml] = useState("");
@@ -237,7 +268,6 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
             className="printable-content print-area "
           ></div>
         </div>
-        <p>{JSON.stringify(unfinishedCourses)}</p>
         {/* <button onClick={generatePDF} className="export-button">
         Export to PDF
       </button> */}
