@@ -12,7 +12,8 @@ import TranscriptDate from "@/app/components/TranscriptDate";
 import { gradeScale } from "@/app/grades/helpers/grade";
 import { parseISO, format } from "date-fns";
 import { FiCheck, FiX, FiEdit2, FiTrash2 } from "react-icons/fi";
-import { getUnfinishedCourses } from "./UnfinishedCoursesList";
+import UnfinishedCoursesList, { getUnfinishedCourses } from "./UnfinishedCoursesList";
+import TranscriptHistory from "./TranscriptHistory";
 
 interface TranscriptProps {
   studentName: string | undefined;
@@ -37,7 +38,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
   sisId
   // unfinishedCourses,
 }) => {
-  const unfinishedCourses=getUnfinishedCourses(selectedProgram, courses)
+  const [unfinishedCourses, setUnfinishedCourses] = useState(getUnfinishedCourses(selectedProgram, courses));
   const courseoptions = unfinishedCourses.map((course) => ({
     value: course.Course_Name,
     label: course.Course_Name,
@@ -105,7 +106,38 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
     reactToPrintFn();
   };
   const [html, setHtml] = useState("");
+  const handleGetReport = async() => {
+     //setLoading(true);
+    fetch(
+      `${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/grade?type=getfromlms&studentId=${enrollmentNo}`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        
+        setCoursesTranscript([...data]);
+      })
+      .catch(console.error);
+  }
+  const markAsTranscriptCreated = async() => {
+     try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/transcript?action=create`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        Student_ID: enrollmentNo,
+        Transcript_Data: JSON.stringify(coursesTranscript),
+        CreatedDate: new Date().toISOString(),
+      }),
+    });
 
+    const newTranscript = await res.json();
+    console.log("Created transcript:", newTranscript);
+    // Optionally refresh transcript table
+    // fetchTranscripts();
+  } catch (err) {
+    console.error("Error creating transcript:", err);
+  }
+  }
   useEffect(() => {
     fetch("/static/second-page.html")
       .then((response) => response.text())
@@ -131,6 +163,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
     setHasFail(coursesTranscript.some((row) => row.Grade === "F"));
   };
   useEffect(() => {
+    setUnfinishedCourses(getUnfinishedCourses(selectedProgram, coursesTranscript))
     calculateScores(coursesTranscript);
     checkFail();
   }, [coursesTranscript]);
@@ -164,18 +197,18 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
     let creditsToConsider = totalCredits;
     let processedusers = users.map((user: any) => {
       if (
-        user["Grade Point"] != 0 &&
+        user["Grade_Point"] != 0 &&
         user["Grade"] !== "TR" &&
         user["Grade"] !== "RW"
       )
         creditsEarned += user["Credits"];
       //if tr detect from total credits
       if (user["Grade"] == "TR" || user["Grade"] == "RW") {
-        user["Grade Point"] = "NA";
+        user["Grade_Point"] = "NA";
         creditsToConsider -= user["Credits"];
       }
       if (user["Grade"] !== "TR" && user["Grade"] !== "RW")
-        totalGPA += user["Credits"] * user["Grade Point"];
+        totalGPA += user["Credits"] * user["Grade_Point"];
       // console.log(user["Program Start Date"])
       return user;
     });
@@ -192,13 +225,13 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
     setEditedRow((prev) => {
       if (!prev) return prev; // or throw error if it should never be undefined here
       let updatedRow = { ...prev, [field]: value };
-      if (field === 'Default Class Name'){
-        updatedRow = {...prev , "Course code": unfinishedCourses.find(x => x.Course_Name === value)?.Course_Code ||  prev["Course code"]}
+      if (field === 'Default_Course_Name'){
+        updatedRow = {...prev , "Course_Code": unfinishedCourses.find(x => x.Course_Name === value)?.Course_Code ||  prev["Course_Code"]}
       }
       if (field === "Grade") {
         const gradeInfo = gradeScale.find((g) => g.grade === value);
         if (gradeInfo) {
-          updatedRow["Grade Point"] = gradeInfo.gpa.toFixed(1); // or keep it as number
+          updatedRow["Grade_Point"] = gradeInfo.gpa.toFixed(1); // or keep it as number
         }
       }
       return updatedRow;
@@ -221,7 +254,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
   }, []);
   const defaultClassCount = coursesTranscript.reduce<Record<string, number>>(
     (acc, row) => {
-      const className = row["Default Class Name"];
+      const className = row["Default_Course_Name"];
       if (className) acc[className] = (acc[className] || 0) + 1;
       return acc;
     },
@@ -230,11 +263,13 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
 
   // Function to check if a row is duplicate
   const isDuplicate = (row: CsvRow) =>
-    row["Default Class Name"] &&
-    defaultClassCount[row["Default Class Name"]] > 1;
+    row["Default_Course_Name"] &&
+    defaultClassCount[row["Default_Course_Name"]] > 1;
   return (
     <>
-      {" "}
+      <UnfinishedCoursesList
+       unfinishedCourses={unfinishedCourses}
+      />
       <div style={{ border: "1px solid", width: "30%" }}>
         <p style={{ fontSize: "20", fontWeight: "bold" }}>
           Course Discrepancy Highlight codes
@@ -246,7 +281,9 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
             Random Elective Course - XYZ123 (Not in Program)
           </li>
         </ul>
+        
       </div>
+      {enrollmentNo && <TranscriptHistory studentId={enrollmentNo} />}
       <div
         className="transcript-page"
         style={{ width: "100%", maxWidth: "572pt" }}
@@ -262,6 +299,10 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
         <div>
           <button onClick={handlePrint} className="export-button">
             Print
+          </button> <button onClick={handleGetReport} className="export-button">
+            Get Report From LMS
+          </button> <button onClick={markAsTranscriptCreated} className="export-button">
+            Transcript Created
           </button>
           <div
             ref={transcriptRef}
@@ -405,15 +446,15 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
                               <input
                                 value={
                                   isEditing && editedRow
-                                    ? editedRow["Course code"]
+                                    ? editedRow["Course_Code"]
                                     : ""
                                 }
                                 onChange={(e) =>
-                                  handleChange("Course code", e.target.value)
+                                  handleChange("Course_Code", e.target.value)
                                 }
                               />
                             ) : (
-                              row["Course code"]
+                              row["Course_Code"] || row["Course_Code"]
                             )}
                           </td>
                           <td
@@ -430,14 +471,14 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
                                 value={
                                   isEditing && editedRow
                                     ? {
-                                        value: editedRow["Default Class Name"],
-                                        label: editedRow["Default Class Name"],
+                                        value: editedRow["Default_Course_Name"],
+                                        label: editedRow["Default_Course_Name"],
                                       }
                                     : null
                                 }
                                 onChange={(selectedOption: any) =>
                                   handleChange(
-                                    "Default Class Name",
+                                    "Default_Course_Name",
                                     selectedOption?.value || ""
                                   )
                                 }
@@ -446,7 +487,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
                                 placeholder="Select or type a course"
                               />
                             ) : (
-                              row["Default Class Name"]
+                              row["Default_Course_Name"]
                             )}
                           </td>
                           <td className="last-attempt">
@@ -454,15 +495,15 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
                               <input
                                 value={
                                   isEditing && editedRow
-                                    ? editedRow["Last Attempt"]
+                                    ? editedRow["Last_Attempt"]
                                     : ""
                                 }
                                 onChange={(e) =>
-                                  handleChange("Last Attempt", e.target.value)
+                                  handleChange("Last_Attempt", e.target.value)
                                 }
                               />
                             ) : (
-                              row["Last Attempt"]
+                              row["Last_Attempt"]
                             )}
                           </td>
                           <td className="credits">
@@ -510,8 +551,8 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
 
                           <td className="grade-point">
                             {row["Grade"] !== "TR" && row["Grade"] !== "RW"
-                              ? Number(row["Grade Point"]).toFixed(1)
-                              : row["Grade Point"]}
+                              ? Number(row["Grade_Point"]).toFixed(1)
+                              : row["Grade_Point"]}
                           </td>
                           {!hideActions && (
                             <td>

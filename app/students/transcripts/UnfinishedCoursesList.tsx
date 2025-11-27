@@ -1,27 +1,15 @@
 import React from "react";
 import styles from './UnfinishedCoursesList.module.css';
-interface ProgramCourse {
-  Course_Name: string;
-  Course_Code: string;
-  Credits: number;
-}
 
-interface Grade {
-  Default_Course_Name: string;
-  Course_Code?: string;
-  Grade?: string;
-}
 
 interface Props {
-  programCourses: ProgramCourse[];
-  studentGrades: Grade[];
+  unfinishedCourses: any[];
 }
 
 const UnfinishedCoursesList: React.FC<Props> = ({
-  programCourses,
-  studentGrades,
+  unfinishedCourses
 }) => {
-  const unfinishedCourses = getUnfinishedCourses(programCourses, studentGrades);
+  
 
   if (!unfinishedCourses.length) {
     return <p>All courses are completed! 🎉</p>;
@@ -49,7 +37,7 @@ export function getUnfinishedCourses(
   userGrades: any[]
 ): any[] {
   const completedCourses = new Set(
-    userGrades.map(grade => grade["Default Class Name"]?.toLowerCase()?.trim())
+    userGrades.map(grade => grade["Default_Course_Name"]?.toLowerCase()?.trim())
   );
 
   return programCourses.filter(course => {

@@ -44,12 +44,12 @@ export default function TranscriptPageClient({
           )
         : false;
       return {
-        "Course code": user.Course_Code,
-        "Default Class Name": user.Default_Course_Name || user.Course_Name,
+        "Course_Code": user.Course_Code,
+        "Default_Course_Name": user.Default_Course_Name || user.Course_Name,
         Credits: user.Credits,
-        "Last Attempt": user.Last_Attempt || undefined,
+        "Last_Attempt": user.Last_Attempt || undefined,
         Grade: user.Grade || undefined,
-        "Grade Point": gradePoint,
+        "Grade_Point": gradePoint,
         isInProgram,
       };
     });
@@ -97,10 +97,7 @@ export default function TranscriptPageClient({
 
   return (
     <>
-      <UnfinishedCoursesList
-        programCourses={selectedProgram} // your program course list
-        studentGrades={grades} // student's grades
-      />
+      
      
       <GradeTranscript
         sisId= {sisId}
