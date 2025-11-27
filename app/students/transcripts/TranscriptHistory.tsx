@@ -11,7 +11,7 @@ interface Transcript {
 }
 
 interface TranscriptHistoryProps {
-  studentId: number;
+  studentId: string;
 }
 
 const TranscriptHistory: React.FC<TranscriptHistoryProps> = ({ studentId }) => {
