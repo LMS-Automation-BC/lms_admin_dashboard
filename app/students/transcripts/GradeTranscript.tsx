@@ -12,8 +12,13 @@ import TranscriptDate from "@/app/components/TranscriptDate";
 import { gradeScale } from "@/app/grades/helpers/grade";
 import { parseISO, format } from "date-fns";
 import { FiCheck, FiX, FiEdit2, FiTrash2 } from "react-icons/fi";
-import UnfinishedCoursesList, { getUnfinishedCourses } from "./UnfinishedCoursesList";
+import UnfinishedCoursesList, {
+  getUnfinishedCourses,
+} from "./UnfinishedCoursesList";
 import TranscriptHistory from "./TranscriptHistory";
+import TranscriptDiffModal, {
+  compareTranscriptArrays,
+} from "./TranscriptDiffModal";
 
 interface TranscriptProps {
   studentName: string | undefined;
@@ -23,7 +28,7 @@ interface TranscriptProps {
   printDate: string;
   courses: CsvRow[];
   selectedProgram: Course[];
-  sisId:string
+  sisId: string;
   // unfinishedCourses: Course[];
 }
 
@@ -35,10 +40,12 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
   printDate,
   courses,
   selectedProgram,
-  sisId
+  sisId,
   // unfinishedCourses,
 }) => {
-  const [unfinishedCourses, setUnfinishedCourses] = useState(getUnfinishedCourses(selectedProgram, courses));
+  const [unfinishedCourses, setUnfinishedCourses] = useState(
+    getUnfinishedCourses(selectedProgram, courses)
+  );
   const courseoptions = unfinishedCourses.map((course) => ({
     value: course.Course_Name,
     label: course.Course_Name,
@@ -75,69 +82,87 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
     onAfterPrint: () => setHideActions(false),
     documentTitle: `${studentName}-Transcript`,
   });
-  const generatePdfFromDom = async (element:any) => {
-  const canvas = await html2canvas(element, { scale: 2 });
-  const imgData = canvas.toDataURL("image/png");
+  const generatePdfFromDom = async (element: any) => {
+    const canvas = await html2canvas(element, { scale: 2 });
+    const imgData = canvas.toDataURL("image/png");
 
-  const pdf = new jsPDF("p", "pt", "a4");
-  const pdfWidth = pdf.internal.pageSize.getWidth();
-  const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+    const pdf = new jsPDF("p", "pt", "a4");
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
-  pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
 
-  // Return Base64 without prefix
-  return pdf.output("datauristring").split(",")[1];
-};
+    // Return Base64 without prefix
+    return pdf.output("datauristring").split(",")[1];
+  };
   const handlePrint = async () => {
     setHideActions(true); // Hide before printing
     await new Promise((resolve) => setTimeout(resolve, 0)); // Let React update the UI
-     const pdfBase64 = await generatePdfFromDom(transcriptRef.current);
-      // Send to backend  
-  // await fetch(`${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/grade`, {
-  //   method: "POST",
-  //   headers: { "Content-Type": "application/json" },
-  //   body: JSON.stringify({
-  //     id: sisId,
-  //     filename: `${studentName}-Transcript.pdf`,
-  //     file_type: "pdf",
-  //     file: pdfBase64,
-  //   }),
-  // });
+    const pdfBase64 = await generatePdfFromDom(transcriptRef.current);
+    // Send to backend
+    // await fetch(`${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/grade`, {
+    //   method: "POST",
+    //   headers: { "Content-Type": "application/json" },
+    //   body: JSON.stringify({
+    //     id: sisId,
+    //     filename: `${studentName}-Transcript.pdf`,
+    //     file_type: "pdf",
+    //     file: pdfBase64,
+    //   }),
+    // });
     reactToPrintFn();
   };
   const [html, setHtml] = useState("");
-  const handleGetReport = async() => {
-     //setLoading(true);
-    fetch(
-      `${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/grade?type=getfromlms&studentId=${enrollmentNo}`
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        
-        setCoursesTranscript([...data]);
-      })
-      .catch(console.error);
-  }
-  const markAsTranscriptCreated = async() => {
-     try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/transcript?action=create`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        Student_ID: enrollmentNo,
-        Transcript_Data: JSON.stringify(coursesTranscript),
-        CreatedDate: new Date().toISOString(),
-      }),
-    });
+  const [showDiffModal, setShowDiffModal] = useState(false);
+  const [diffData, setDiffData] = useState<any[]>([]);
+  const [reportLoading, setReportLoading] = useState(false);
+ const handleGetReport = async () => {
+  try {
+    setReportLoading(true);
 
-    const newTranscript = await res.json();
-    console.log("Created transcript:", newTranscript);
-    // Optionally refresh transcript table
-    // fetchTranscripts();
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/grade?type=getfromlms&studentId=${enrollmentNo}`
+    );
+
+    const data = await res.json();
+
+    setCoursesTranscript([...data]);
+
+    const diffs = compareTranscriptArrays(coursesTranscript, data);
+    setDiffData(diffs);
+
+    setShowDiffModal(true);
   } catch (err) {
-    console.error("Error creating transcript:", err);
+    console.error("Error fetching report:", err);
+  } finally {
+    setReportLoading(false); // now runs at the correct time
   }
-  }
+};
+
+  const [reloadTranscript, setReloadTranscript] = useState(0);
+  const markAsTranscriptCreated = async () => {
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/transcript?action=create`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            Student_ID: enrollmentNo,
+            Transcript_Data: JSON.stringify(coursesTranscript),
+            CreatedDate: new Date().toISOString(),
+          }),
+        }
+      );
+
+      const newTranscript = await res.json();
+      console.log("Created transcript:", newTranscript);
+      // Optionally refresh transcript table
+      setReloadTranscript((prev) => prev + 1);
+    } catch (err) {
+      console.error("Error creating transcript:", err);
+    }
+  };
   useEffect(() => {
     fetch("/static/second-page.html")
       .then((response) => response.text())
@@ -163,7 +188,9 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
     setHasFail(coursesTranscript.some((row) => row.Grade === "F"));
   };
   useEffect(() => {
-    setUnfinishedCourses(getUnfinishedCourses(selectedProgram, coursesTranscript))
+    setUnfinishedCourses([
+      ...getUnfinishedCourses(selectedProgram, coursesTranscript),
+    ]);
     calculateScores(coursesTranscript);
     checkFail();
   }, [coursesTranscript]);
@@ -223,17 +250,29 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
 
   const handleChange = (field: CsvField, value: string) => {
     setEditedRow((prev) => {
-      if (!prev) return prev; // or throw error if it should never be undefined here
+      if (!prev) return prev;
+
       let updatedRow = { ...prev, [field]: value };
-      if (field === 'Default_Course_Name'){
-        updatedRow = {...prev , "Course_Code": unfinishedCourses.find(x => x.Course_Name === value)?.Course_Code ||  prev["Course_Code"]}
+
+      if (field === "Default_Course_Name") {
+        const match = unfinishedCourses.find(
+          (x) =>
+            x.Course_Name.toLowerCase().trim() === value.toLowerCase().trim()
+        );
+
+        updatedRow = {
+          ...updatedRow, // <-- KEEP existing updates!
+          Course_Code: match?.Course_Code || prev["Course_Code"],
+        };
       }
+
       if (field === "Grade") {
         const gradeInfo = gradeScale.find((g) => g.grade === value);
         if (gradeInfo) {
-          updatedRow["Grade_Point"] = gradeInfo.gpa.toFixed(1); // or keep it as number
+          updatedRow["Grade_Point"] = gradeInfo.gpa.toFixed(1);
         }
       }
+
       return updatedRow;
     });
   };
@@ -267,9 +306,12 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
     defaultClassCount[row["Default_Course_Name"]] > 1;
   return (
     <>
-      <UnfinishedCoursesList
-       unfinishedCourses={unfinishedCourses}
+      <TranscriptDiffModal
+        isOpen={showDiffModal}
+        differences={diffData}
+        onClose={() => setShowDiffModal(false)}
       />
+      <UnfinishedCoursesList unfinishedCourses={unfinishedCourses} />
       <div style={{ border: "1px solid", width: "30%" }}>
         <p style={{ fontSize: "20", fontWeight: "bold" }}>
           Course Discrepancy Highlight codes
@@ -281,9 +323,10 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
             Random Elective Course - XYZ123 (Not in Program)
           </li>
         </ul>
-        
       </div>
-      {enrollmentNo && <TranscriptHistory studentId={enrollmentNo} />}
+      {enrollmentNo && (
+        <TranscriptHistory studentId={enrollmentNo} reload={reloadTranscript} />
+      )}
       <div
         className="transcript-page"
         style={{ width: "100%", maxWidth: "572pt" }}
@@ -299,9 +342,15 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
         <div>
           <button onClick={handlePrint} className="export-button">
             Print
-          </button> <button onClick={handleGetReport} className="export-button">
-            Get Report From LMS
-          </button> <button onClick={markAsTranscriptCreated} className="export-button">
+          </button>{" "}
+          <button
+            onClick={handleGetReport}
+            className="export-button"
+            disabled={reportLoading}
+          >
+            {reportLoading ? "Loading..." : "Get Report From LMS"}
+          </button>{" "}
+          <button onClick={markAsTranscriptCreated} className="export-button">
             Transcript Created
           </button>
           <div
@@ -458,6 +507,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
                             )}
                           </td>
                           <td
+                            title={row["Course_Name"]} // ← shows on hover
                             className={`course-name ${
                               isDuplicate(row)
                                 ? "duplicate-highlight"

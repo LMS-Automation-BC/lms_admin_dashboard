@@ -151,30 +151,32 @@ function StudentsComponent() {
       };
     });
   };
+  const [loadingStudentId, setLoadingStudentId] = useState<string | null>(null);
+
   const handleGetGrades = async (student: any) => {
     try {
+      setLoadingStudentId(student.Student_ID);
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/grade?studentId=${student.Student_ID}`
       );
       const data = await res.json();
-      //   setGrades(data ? calculateGradePoint(data) : []);
 
-      setGradeStudent(student);
-      //   setShowGrades(true);
+      setGradeStudent(student); // keep this if needed elsewhere
+
       const query = new URLSearchParams({
-        sisId: gradeStudent?.sisId,
-        studentName: gradeStudent?.Full_Name,
-        program: gradeStudent.Program,
-        programStartDate: gradeStudent.CurrentStatus_Start_Date,
-        studentId: gradeStudent.Student_ID,
-        // selectedProgram: JSON.stringify(transformCourse(gradeStudent.Program)),
-        // courses: JSON.stringify(grades),
+        sisId: student.sisId,
+        studentName: student.Full_Name,
+        program: student.Program,
+        programStartDate: student.CurrentStatus_Start_Date,
+        studentId: student.Student_ID,
       }).toString();
 
       window.open(`/students/transcripts?${query}`, "_blank");
     } catch (err) {
       console.error("Error fetching grades:", err);
       setGrades([]);
+    } finally {
+      setLoadingStudentId(null); // stop loading
     }
   };
 
@@ -282,9 +284,12 @@ function StudentsComponent() {
 
                 <button
                   className={styles.actionButton}
+                  disabled={loadingStudentId === student.Student_ID}
                   onClick={() => handleGetGrades(student)}
                 >
-                  Grades
+                  {loadingStudentId === student.Student_ID
+                    ? "Loading..."
+                    : "Grades"}
                 </button>
               </td>
             </tr>

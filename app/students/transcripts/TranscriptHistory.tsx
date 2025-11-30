@@ -12,9 +12,10 @@ interface Transcript {
 
 interface TranscriptHistoryProps {
   studentId: string;
+  reload:number;
 }
 
-const TranscriptHistory: React.FC<TranscriptHistoryProps> = ({ studentId }) => {
+const TranscriptHistory: React.FC<TranscriptHistoryProps> = ({ studentId,reload }) => {
   const [transcripts, setTranscripts] = useState<Transcript[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -39,7 +40,7 @@ const TranscriptHistory: React.FC<TranscriptHistoryProps> = ({ studentId }) => {
 
   useEffect(() => {
     if (studentId) fetchTranscripts();
-  }, [studentId]);
+  }, [studentId,reload]);
 
   const handleMarkDelivered = async (id: number) => {
     setUpdatingId(id);

@@ -45,6 +45,7 @@ export default function TranscriptPageClient({
         : false;
       return {
         "Course_Code": user.Course_Code,
+        "Course_Name":user.Course_Name,
         "Default_Course_Name": user.Default_Course_Name || user.Course_Name,
         Credits: user.Credits,
         "Last_Attempt": user.Last_Attempt || undefined,
