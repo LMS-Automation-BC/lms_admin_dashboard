@@ -29,6 +29,7 @@ interface TranscriptProps {
   courses: CsvRow[];
   selectedProgram: Course[];
   sisId: string;
+  viewOnly:boolean;
   // unfinishedCourses: Course[];
 }
 
@@ -41,6 +42,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
   courses,
   selectedProgram,
   sisId,
+  viewOnly
   // unfinishedCourses,
 }) => {
   const [unfinishedCourses, setUnfinishedCourses] = useState(
@@ -76,7 +78,6 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
   const [rePrint, setRePrint] = useState<boolean>(false);
   const transcriptRef = useRef<HTMLDivElement>(null);
   const [hasFail, setHasFail] = useState(false);
-  const [viewOnly, setViewOnly] = useState(false);
   const reactToPrintFn = useReactToPrint({
     contentRef: transcriptRef,
     onAfterPrint: () => setHideActions(false),
@@ -311,8 +312,8 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
         differences={diffData}
         onClose={() => setShowDiffModal(false)}
       />
-      <UnfinishedCoursesList unfinishedCourses={unfinishedCourses} />
-      <div style={{ border: "1px solid", width: "30%" }}>
+      {!viewOnly && <UnfinishedCoursesList unfinishedCourses={unfinishedCourses} />}
+      {!viewOnly && (<div style={{ border: "1px solid", width: "30%" }}>
         <p style={{ fontSize: "20", fontWeight: "bold" }}>
           Course Discrepancy Highlight codes
         </p>
@@ -323,9 +324,13 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
             Random Elective Course - XYZ123 (Not in Program)
           </li>
         </ul>
-      </div>
-      {enrollmentNo && (
-        <TranscriptHistory studentId={enrollmentNo} reload={reloadTranscript} />
+      </div>)}
+      {!viewOnly && enrollmentNo && studentName && program &&(
+        <TranscriptHistory studentId={enrollmentNo} 
+        student_name={studentName}
+        program={program}
+        selectedProgram={selectedProgram}
+        reload={reloadTranscript} />
       )}
       <div
         className="transcript-page"
@@ -344,13 +349,14 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
             Print
           </button>{" "}
           <button
+          hidden={viewOnly}
             onClick={handleGetReport}
             className="export-button"
             disabled={reportLoading}
           >
             {reportLoading ? "Loading..." : "Get Report From LMS"}
           </button>{" "}
-          <button onClick={markAsTranscriptCreated} className="export-button">
+          <button  hidden={viewOnly} onClick={markAsTranscriptCreated} className="export-button">
             Transcript Created
           </button>
           <div
@@ -463,7 +469,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
                       ? "Transcript RePrint Date"
                       : "Transcript Print Date"
                   }
-                  hideActions={hideActions}
+                  hideActions={hideActions || viewOnly}
                   programStart={rePrint ? transcriptRePrint : transcriptPrint}
                   setProgramStart={
                     rePrint ? setTranscriptRePrint : setTranscriptPrint

@@ -1,0 +1,45 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.content {
+  background: #fff;
+  width: 90vw;              /* wide modal */
+  height: 90vh;             /* tall modal */
+  max-width: 1400px;        /* optional max */
+  border-radius: 10px;
+  padding: 2rem;
+  overflow-y: auto;         /* vertical scrolling */
+  position: relative;
+
+  display: flex;
+  flex-direction: column;   /* keep children stacked */
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+.closeBtn {
+  position: absolute;
+  right: 15px;
+  top: 12px;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  font-size: 24px;
+}
+
+@keyframes fadeIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

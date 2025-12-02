@@ -101,6 +101,7 @@ export default function TranscriptPageClient({
       
      
       <GradeTranscript
+      viewOnly = {false}
         sisId= {sisId}
         studentName={name}
         program={program}
