@@ -1,0 +1,376 @@
+.transcript-page {
+  /* width: 8.5in;
+  height: 11in; */
+  box-sizing: border-box;
+  font-family: "Book Antiqua";
+  position: relative;
+  color: #000;
+  background-color: #fff;
+}
+.transcript-container {
+  position: relative;
+  width: 210mm;
+  height: 297mm;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #ccc;
+  flex-direction: column;
+  box-sizing: border-box;
+  font-family: "Book Antiqua";
+  margin: 0;
+  padding: 0;
+}
+.html-wrapper {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* spacing between items */
+}
+.transcript-header {
+  height: 20%;
+  flex-shrink: 0;
+  padding: 10px;
+  box-sizing: border-box;
+}
+.transcript-body {
+  width: 100%;
+  text-align: center;
+  margin: 0 auto 1px auto; /* Center horizontally */
+}
+.logo {
+  width: 60px;
+  height: auto;
+}
+
+.vertical-line {
+  width: 2px;
+  height: 50px;
+  background-color: #000;
+}
+
+.institution-name-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  line-height: 1;
+}
+
+.institution-name {
+  font-size: 21pt;
+}
+
+.institution-name.brookes {
+  color: #02264d; /* Blue */
+}
+
+.institution-name.college {
+  color: #d2a136; /* Orange */
+}
+
+.title {
+  text-align: center;
+  text-decoration: underline;
+  font-size: 18pt;
+  font-weight: bold;
+  font-family: "Book Antiqua";
+  margin-bottom: 7px;
+}
+
+.info-row {
+  /* width: 90%; */
+  display: flex;
+  justify-content: space-between;
+  /*  margin: 0 auto 1px auto; Center horizontally */
+  font-size: 13pt;
+}
+
+.info-row .left {
+  text-align: left;
+  /* width: 50%; */
+}
+
+.info-row .right {
+  text-align: right;
+  /* width: 50%; */
+  white-space: nowrap;
+}
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background-color: transparent;
+  border: none;
+  padding: 5px 8px;
+  margin: 0 4px;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.icon {
+  font-size: 16px;
+}
+
+/* Optional hover effects */
+.icon-button:hover {
+  background-color: #f0f0f0;
+}
+
+/* Custom button colors */
+.icon-button.edit {
+  color: #007bff;
+}
+
+.icon-button.save {
+  color: #28a745;
+}
+
+.icon-button.cancel {
+  color: #ff9800;
+}
+
+.icon-button.delete {
+  color: #dc3545;
+}
+.grade-table input {
+  width: 100%;
+  padding: 4px 6px;
+  box-sizing: border-box;
+  font-size: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.grade-table {
+  margin: 0 auto;
+  margin: 20px 0;
+  /* width: 90%; */
+  /* height: 90%; */
+  border-collapse: collapse;
+  border: 1.5px solid black;
+  border-collapse: collapse;
+  display: inline-table;
+  table-layout: fixed; /* Ensures columns respect the widths */
+  font-family: "Times New Roman", Times, serif;
+}
+.grade-table th,
+.grade-table td {
+  font-size: 11pt;
+  border: 1.5px solid black;
+  text-align: left;
+  /* overflow: hidden;
+  text-overflow: ellipsis; */
+  white-space: wrap;
+  margin-left: 2px;
+}
+/* styles.css */
+
+.grade-table th,
+.grade-table td {
+  border: 1.5px solid black;
+  text-align: left;
+  word-wrap: break-word; /* Ensures long words break correctly */
+  word-break: break-word; /* Break words at any point if needed */
+  white-space: normal;
+  padding: 2px 6px; /* Reduce padding (top/bottom, left/right) */
+  line-height: 1;
+}
+
+.grade-table th.course-code {
+  text-align: center;
+  width: 10%;
+}
+.grade-table td.course-code {
+  width: 10%;
+  text-align: center;
+}
+
+.grade-table td.course-name {
+  width: 50%;
+  word-wrap: break-word; /* Ensures long words break correctly */
+  word-break: break-word;
+}
+.grade-table th.course-name {
+  width: 50%;
+}
+
+.grade-table th.last-attempt,
+.grade-table td.last-attempt {
+  width: 10%;
+  text-align: center;
+}
+
+.grade-table th.credits,
+.grade-table td.credits {
+  width: 7%;
+  text-align: center;
+}
+
+.grade-table th.letter-grade,
+.grade-table td.letter-grade {
+  width: 7%;
+  text-align: center;
+}
+
+.grade-table th.grade-point,
+.grade-table td.grade-point {
+  width: 7%;
+  text-align: center;
+}
+.contact-columns {
+  /* position: fixed; */
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  padding: 5px;
+  font-size: 8pt !important;
+}
+
+.contact-columns .column {
+  flex: 1; /* each column takes equal width */
+  box-sizing: border-box; /* prevents padding from affecting width */
+}
+
+.email a {
+  color: blue;
+  text-decoration: underline;
+}
+.contact-columns .address {
+  text-align: left;
+}
+
+.contact-columns .phone {
+  text-align: center;
+}
+
+.contact-columns .email {
+  text-align: right;
+}
+.export-button {
+  margin: 1rem 0;
+  padding: 0.5rem 1rem;
+  font-weight: bold;
+  background-color: #0047ab;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.export-button:hover {
+  background-color: #003080;
+}
+.pdf-download-container {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.pdf-download-link {
+  display: inline-block;
+  background-color: #007bff;
+  color: white;
+  padding: 10px 16px;
+  font-size: 14px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+}
+
+.pdf-download-link:hover {
+  background-color: #0056b3;
+}
+
+.pdf-download-link:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+.pdf-export {
+  width: 572pt; /* 612 - 2*20 padding */
+  /* Optional: force wrap content */
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+@media print {
+  .transcript-container {
+    border: none;
+    height:100vh;
+    position: relative;
+    padding: 0;
+    margin-bottom: 0;
+  }
+
+  .page-break {
+    page-break-before: always;
+  }
+  
+  @page {
+    size: 210mm 297mm;
+
+    margin-left: 0.5in;
+    margin-right: 0.5in;
+    margin-top: 0.5in;
+    margin-bottom: 0;
+  }
+
+  /* Optional: hide buttons/actions when printing */
+  .gradebutton {
+    display: none;
+  }
+  .contact-columns {
+    position: absolute; /* positions relative to .page */
+    bottom: 0; /* sticks to bottom */
+    left: 0; /* full width */
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    text-align: left;
+    font-family: "Book Antiqua";
+    padding: 2px 0; /* small padding top/bottom */
+  }
+
+  
+}
+.president {
+    font-weight: bold;
+    font-family: "Book Antiqua";
+    font-size: 11pt;
+    margin-top: 2px;
+    margin-bottom: 5px; /* space before footer */
+  }
+.grade-select {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+  font-size: 14px;
+  color: #333;
+  width: 100%; /* or a fixed width if needed */
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+}
+
+.grade-select:focus {
+  border-color: #007bff;
+  outline: none;
+  background-color: #fff;
+}
+/* .note{
+  width: 90%;
+  margin:0 auto;
+} */
+.duplicate-highlight {
+  background-color: #d8b3b3; /* light red background */
+  font-weight: bold;
+}
+.notinprogram{
+   background-color: #b7d8b3; /* light red background */
+  font-weight: bold;
+}

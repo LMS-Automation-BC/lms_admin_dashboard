@@ -5,6 +5,7 @@ import StudentModal from "./StudentModal";
 import Modal from "./Modal";
 import GradeTranscript from "../components/GradeTranscript";
 import { getGrade } from "../grades/helpers/grade";
+import GradeReport from "./GradeReport";
 
 function StudentsComponent() {
   const [students, setStudents] = useState([]);
@@ -33,13 +34,18 @@ function StudentsComponent() {
   const [grades, setGrades] = useState<any[]>([]);
   const [gradeStudent, setGradeStudent] = useState<any>(null);
   const [showGrades, setShowGrades] = useState(false);
+  const [pageSize, setPageSize] = useState(20); // default 10
 
+  const handlePageSizeChange = (e: any) => {
+    setPageSize(Number(e.target.value));
+    setPage(1); // reset to first page after changing size
+  };
   const fetchStudents = () => {
     setLoading(true);
     const params = new URLSearchParams({
       type: "filterstudents",
       page: page.toString(),
-      limit: limit.toString(),
+      limit: pageSize.toString(),
       ...(searchName && { name: searchName }),
       ...(selectedProgram && { program: selectedProgram }),
       ...(selectedStatus && { status: selectedStatus }),
@@ -65,7 +71,7 @@ function StudentsComponent() {
   // Fetch students when page or filters change
   useEffect(() => {
     fetchStudents();
-  }, [page, searchName, selectedProgram, selectedStatus]);
+  }, [page, searchName, selectedProgram, selectedStatus, pageSize]);
 
   // Fetch program list once
   useEffect(() => {
@@ -152,14 +158,33 @@ function StudentsComponent() {
     });
   };
   const [loadingStudentId, setLoadingStudentId] = useState<string | null>(null);
+  const handleGetRawGrades = async (student: any) => {
+    setShowGrades(true);
+    setLoadingStudentId(student.Student_ID);
+    // setLoading(true);
+    setGradeStudent(student);
 
-  const handleGetGrades = async (student: any) => {
     try {
-      setLoadingStudentId(student.Student_ID);
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/grade?studentId=${student.Student_ID}`
       );
+      if (!res.ok) throw new Error("Failed to fetch grades");
       const data = await res.json();
+      setGrades(data); // assume API returns Course[] type
+    } catch (err: any) {
+      setGrades([]);
+    } finally {
+      setLoadingStudentId(null);
+      setLoading(false);
+    }
+  };
+  const handleGetGrades = async (student: any) => {
+    try {
+      // setLoadingStudentId(student.Student_ID);
+      // const res = await fetch(
+      //   `${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/grade?studentId=${student.Student_ID}`
+      // );
+      // const data = await res.json();
 
       setGradeStudent(student); // keep this if needed elsewhere
 
@@ -248,9 +273,9 @@ function StudentsComponent() {
           </tr>
         </thead>
         <tbody>
-          {students.map((student: any) => (
+          {students.map((student: any, index: number) => (
             <tr
-              key={student._id}
+              key={student._id ?? student.Student_ID ?? index}
               onDoubleClick={() => {
                 setModalMode("edit");
                 setSelectedStudent(student);
@@ -259,13 +284,28 @@ function StudentsComponent() {
               className={styles.clickableRow}
             >
               <td className={styles.td}>
+                <span>{student.Full_Name || ""}</span>
+
+                {/* SIS (S icon) */}
                 <a
                   href={`https://brookescollege.classe365.com/1/admin/students/view/${student.sisId}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={styles.link}
+                  className={`${styles.iconBadge} ${styles.sisBadge}`}
+                  title="Open SIS"
                 >
-                  {student.Full_Name || ""}
+                  S
+                </a>
+
+                {/* LMS (L icon) */}
+                <a
+                  href={`https://brookescollege.neolms.com/user/show/${student.LMS_ID}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`${styles.iconBadge} ${styles.lmsBadge}`}
+                  title="Open LMS"
+                >
+                  L
                 </a>
               </td>
 
@@ -275,22 +315,35 @@ function StudentsComponent() {
               <td className={styles.td}>{student.First_Name_Legal || ""}</td>
               {/* Action Buttons */}
               <td className={styles.td}>
+                {/* Edit button */}
                 <button
-                  className={styles.actionButton}
+                  className={`${styles.iconButton} ${styles.editButton}`}
                   onClick={() => handleEdit(student)}
+                  title="Edit"
                 >
-                  Edit
+                  ✏️
                 </button>
 
-                <button
-                  className={styles.actionButton}
-                  disabled={loadingStudentId === student.Student_ID}
-                  onClick={() => handleGetGrades(student)}
-                >
-                  {loadingStudentId === student.Student_ID
-                    ? "Loading..."
-                    : "Grades"}
-                </button>
+                {/* Grouped Grades Buttons */}
+                <div className={styles.buttonGroup}>
+                  <button
+                    className={`${styles.iconButton} ${styles.gradesButton}`}
+                    disabled={loadingStudentId === student.Student_ID}
+                    onClick={() => handleGetGrades(student)}
+                    title="Grades"
+                  >
+                    📊
+                  </button>
+
+                  <button
+                    className={`${styles.iconButton} ${styles.reportButton}`}
+                    disabled={loadingStudentId === student.Student_ID}
+                    onClick={() => handleGetRawGrades(student)}
+                    title="Grades Report"
+                  >
+                    📄
+                  </button>
+                </div>
               </td>
             </tr>
           ))}
@@ -305,26 +358,18 @@ function StudentsComponent() {
           onSave={handleSaveStudent}
         />
       )}
-      {showGrades && gradeStudent && (
+      {showGrades && (
         <Modal onClose={() => setShowGrades(false)}>
           <h2>Grades for {gradeStudent.Full_Name}</h2>
           {/* <GradesTable grades={grades}></GradesTable> */}
-          <GradeTranscript
-            studentName={gradeStudent?.Full_Name}
-            program={gradeStudent.Program}
-            programStartDate={new Date().toString()}
-            enrollmentNo={gradeStudent?.Student_ID}
-            printDate={new Date().toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
+          <GradeReport
             courses={grades}
-            selectedProgram={transformCourse(gradeStudent.Program)}
-          ></GradeTranscript>
+            studentName={gradeStudent.Full_Name}
+            student_ID={gradeStudent.Student_ID}
+          />
         </Modal>
       )}
-
+      {}
       {/* 🔁 Pagination Controls */}
       <div className={styles.pagination}>
         <button onClick={prevPage} disabled={page === 1}>
@@ -336,6 +381,15 @@ function StudentsComponent() {
         <button onClick={nextPage} disabled={page === totalPages}>
           Next ▶
         </button>
+        <div className={styles.pageSizeSelector}>
+          <span>Page size:</span>
+          <select value={pageSize} onChange={handlePageSizeChange}>
+            <option value={5}>5</option>
+            <option value={10}>10</option>
+            <option value={20}>20</option>
+            <option value={50}>50</option>
+          </select>
+        </div>
       </div>
     </div>
   );

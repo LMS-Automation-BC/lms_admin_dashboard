@@ -37,6 +37,12 @@ export default function AttendanceReport() {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
   const itemsPerPage = 10;
+  const [pageSize, setPageSize] = useState(20); // default 10
+
+const handlePageSizeChange = (e:any) => {
+  setPageSize(Number(e.target.value));
+  setCurrentPage(1); // reset to first page after changing size
+};
 
   // Fetch date range options from backend
   useEffect(() => {
@@ -74,7 +80,7 @@ export default function AttendanceReport() {
       name: filters.name || "",
       absentOnly: filters.absentOnly ? "true" : "false",
       page: currentPage.toString(),
-      limit: itemsPerPage.toString(),
+      limit: pageSize.toString(),
     });
     setLoading(true)
     // Fetch paginated attendance
@@ -103,7 +109,7 @@ export default function AttendanceReport() {
         setLoading(false)
       })
       .catch(console.error);
-  }, [filters, currentPage]);
+  }, [filters, currentPage, pageSize]);
 
   const handleNext = () => setCurrentPage((p) => Math.min(p + 1, totalPages));
   const handlePrev = () => setCurrentPage((p) => Math.max(p - 1, 1));
@@ -203,7 +209,7 @@ export default function AttendanceReport() {
               >
                 <td>{r.Student_Id}</td>
                 <td>{r.Name}</td>
-                <td>{r.Course_Name}</td>
+                <td><a className={styles.myLink}href={'https://brookescollege.neolms.com/teacher_attendance/show/'+r.Course_Id} target="_blank">{r.Course_Name}</a></td>
                 <td>{r.Attendance_Date?.split("T")[0]}</td>
                 <td>{r.Attendance_Percentage}</td>
                 <td>{r.Attendance_Notes}</td>
@@ -220,17 +226,31 @@ export default function AttendanceReport() {
         </tbody>
       </table>
 
-      <div className={styles.pagination}>
-        <button onClick={handlePrev} disabled={currentPage === 1}>
-          ◀ Prev
-        </button>
-        <span>
-          Page {currentPage} of {totalPages || 1}
-        </span>
-        <button onClick={handleNext} disabled={currentPage === totalPages}>
-          Next ▶
-        </button>
-      </div>
+     <div className={styles.pagination}>
+  <button onClick={handlePrev} disabled={currentPage === 1}>
+    ◀ Prev
+  </button>
+
+  <span>
+    Page {currentPage} of {totalPages || 1}
+  </span>
+
+  {/* PAGE SIZE DROPDOWN */}
+ 
+
+  <button onClick={handleNext} disabled={currentPage === totalPages}>
+    Next ▶
+  </button>
+   <div className={styles.pageSizeSelector}>
+  <span>Page size:</span>
+  <select value={pageSize} onChange={handlePageSizeChange}>
+    <option value={5}>5</option>
+    <option value={10}>10</option>
+    <option value={20}>20</option>
+    <option value={50}>50</option>
+  </select>
+</div>
+</div>
     </div>
   );
 }

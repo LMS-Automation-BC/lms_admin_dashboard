@@ -3,9 +3,9 @@ import { useEffect, useRef, useState } from "react";
 import CreatableSelect from "react-select/creatable";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-import "@/app/components/GradeTranscript.css";
+import "./GradeTranscript.css";
 import { useReactToPrint } from "react-to-print";
-import ContactColumns, { OrgData } from "@/app/components/GradeOrganization";
+import ContactColumns, { OrgData } from "@/app/students/transcripts/GradeOrganization";
 import { CsvRow } from "@/app/components/GradeParser";
 import SecondPage from "@/app/components/SecondPage";
 import TranscriptDate from "@/app/components/TranscriptDate";
@@ -170,7 +170,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
       .then(setHtml)
       .catch((error) => console.error("Error loading HTML:", error));
   }, []);
-  const [hideActions, setHideActions] = useState(false);
+  const [hideActions, setHideActions] = useState(true);
   const [programStatus, setProgramStatus] = useState<string>("");
   const [programStart, setProgramStart] = useState(
     toInputDate(programStartDate)
@@ -517,7 +517,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
                             className={`course-name ${
                               isDuplicate(row)
                                 ? "duplicate-highlight"
-                                : row.isInProgram === false
+                                :( row.isInProgram === false  && !hideActions)
                                 ? "notinprogram"
                                 : ""
                             }`}
