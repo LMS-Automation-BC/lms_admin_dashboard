@@ -5,7 +5,9 @@ import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import "./GradeTranscript.css";
 import { useReactToPrint } from "react-to-print";
-import ContactColumns, { OrgData } from "@/app/students/transcripts/GradeOrganization";
+import ContactColumns, {
+  OrgData,
+} from "@/app/students/transcripts/GradeOrganization";
 import { CsvRow } from "@/app/components/GradeParser";
 import SecondPage from "@/app/components/SecondPage";
 import TranscriptDate from "@/app/components/TranscriptDate";
@@ -29,7 +31,7 @@ interface TranscriptProps {
   courses: CsvRow[];
   selectedProgram: Course[];
   sisId: string;
-  viewOnly:boolean;
+  viewOnly: boolean;
   // unfinishedCourses: Course[];
 }
 
@@ -42,11 +44,12 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
   courses,
   selectedProgram,
   sisId,
-  viewOnly
+  viewOnly,
   // unfinishedCourses,
 }) => {
+  const sortedProgram = selectedProgram.sort((a: any, b: any) => a.id - b.id);
   const [unfinishedCourses, setUnfinishedCourses] = useState(
-    getUnfinishedCourses(selectedProgram, courses)
+    getUnfinishedCourses(sortedProgram, courses)
   );
   const courseoptions = unfinishedCourses.map((course) => ({
     value: course.Course_Name,
@@ -117,28 +120,28 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
   const [showDiffModal, setShowDiffModal] = useState(false);
   const [diffData, setDiffData] = useState<any[]>([]);
   const [reportLoading, setReportLoading] = useState(false);
- const handleGetReport = async () => {
-  try {
-    setReportLoading(true);
+  const handleGetReport = async () => {
+    try {
+      setReportLoading(true);
 
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/grade?type=getfromlms&studentId=${enrollmentNo}`
-    );
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/grade?type=getfromlms&studentId=${enrollmentNo}`
+      );
 
-    const data = await res.json();
+      const data = await res.json();
 
-    setCoursesTranscript([...data]);
+      setCoursesTranscript([...data]);
 
-    const diffs = compareTranscriptArrays(coursesTranscript, data);
-    setDiffData(diffs);
+      const diffs = compareTranscriptArrays(coursesTranscript, data);
+      setDiffData(diffs);
 
-    setShowDiffModal(true);
-  } catch (err) {
-    console.error("Error fetching report:", err);
-  } finally {
-    setReportLoading(false); // now runs at the correct time
-  }
-};
+      setShowDiffModal(true);
+    } catch (err) {
+      console.error("Error fetching report:", err);
+    } finally {
+      setReportLoading(false); // now runs at the correct time
+    }
+  };
 
   const [reloadTranscript, setReloadTranscript] = useState(0);
   const markAsTranscriptCreated = async () => {
@@ -181,20 +184,68 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
   const [transcriptRePrint, setTranscriptRePrint] = useState(
     toInputDate(new Date().toISOString())
   );
-  useEffect(() => {
-    calculateScores(courses);
-    setCoursesTranscript(courses);
-  }, [courses]);
+  // useEffect(() => {
+  //   calculateScores(courses);
+  //   setCoursesTranscript(courses);
+  // }, [courses]);
   const checkFail = () => {
     setHasFail(coursesTranscript.some((row) => row.Grade === "F"));
   };
+  // 1️⃣ Sort transcript when sortedProgram changes
   useEffect(() => {
-    setUnfinishedCourses([
-      ...getUnfinishedCourses(selectedProgram, coursesTranscript),
-    ]);
+    if (!sortedProgram.length) return;
+
+    // Track used indices to handle duplicates properly
+    const usedIndices = new Set<number>();
+
+    const matched: CsvRow[] = sortedProgram.map((course) => {
+      // Find first student course that hasn't been used yet and matches code AND/OR name
+      const index = coursesTranscript.findIndex((c, i) => {
+        if (usedIndices.has(i)) return false; // already matched
+        return (
+          c.Course_Code === course.Course_Code &&
+          c.Default_Course_Name === course.Course_Name
+        );
+      });
+
+      if (index !== -1) {
+        usedIndices.add(index);
+        return coursesTranscript[index];
+      }
+
+      // Not found → placeholder
+      return {
+        Course_Code: course.Course_Code,
+        Default_Course_Name: course.Course_Name,
+        Name: "",
+        Grade: "",
+        Grade_Point: 0,
+        Credits: course.Credits,
+      } as any;
+    });
+
+    // Extra student courses that were not matched
+    const extraStudentCourses = coursesTranscript.filter(
+      (_, i) => !usedIndices.has(i)
+    );
+
+    // Final transcript
+    const finalTranscript: CsvRow[] = [...matched, ...extraStudentCourses];
+
+    setCoursesTranscript(finalTranscript);
+  }, [sortedProgram]); // runs only when program changes
+
+  // 2️⃣ Recalculate scores, unfinished courses, fail whenever transcript changes
+  useEffect(() => {
+    if (!coursesTranscript.length) return;
+
+    setUnfinishedCourses(
+      getUnfinishedCourses(sortedProgram, coursesTranscript)
+    );
     calculateScores(coursesTranscript);
     checkFail();
-  }, [coursesTranscript]);
+  }, [coursesTranscript, sortedProgram]); // runs when transcript or program changes
+
   const handleRemove = (index: number) => {
     const updated = [...coursesTranscript];
     updated.splice(index, 1);
@@ -215,7 +266,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
   const calculateScores = (users: any[]) => {
     let totalCredits = 0;
     if (program) {
-      totalCredits = selectedProgram?.reduce(
+      totalCredits = sortedProgram?.reduce(
         (sum, course) => sum + (course.Credits || 0),
         0
       );
@@ -225,17 +276,25 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
     let creditsToConsider = totalCredits;
     let processedusers = users.map((user: any) => {
       if (
+        user["Grade"] !== undefined &&
         user["Grade_Point"] != 0 &&
         user["Grade"] !== "TR" &&
         user["Grade"] !== "RW"
       )
         creditsEarned += user["Credits"];
       //if tr detect from total credits
-      if (user["Grade"] == "TR" || user["Grade"] == "RW") {
+      if (
+        (user["Grade"] !== undefined && user["Grade"] == "TR") ||
+        user["Grade"] == "RW"
+      ) {
         user["Grade_Point"] = "NA";
         creditsToConsider -= user["Credits"];
       }
-      if (user["Grade"] !== "TR" && user["Grade"] !== "RW")
+      if (
+        user["Grade"] !== undefined &&
+        user["Grade"] !== "TR" &&
+        user["Grade"] !== "RW"
+      )
         totalGPA += user["Credits"] * user["Grade_Point"];
       // console.log(user["Program Start Date"])
       return user;
@@ -312,25 +371,31 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
         differences={diffData}
         onClose={() => setShowDiffModal(false)}
       />
-      {!viewOnly && <UnfinishedCoursesList unfinishedCourses={unfinishedCourses} />}
-      {!viewOnly && (<div style={{ border: "1px solid", width: "30%" }}>
-        <p style={{ fontSize: "20", fontWeight: "bold" }}>
-          Course Discrepancy Highlight codes
-        </p>
-        <ul>
-          <li className="duplicate-highlight"> (Duplicate)</li>
-          <li>Program course</li>
-          <li className="notinprogram">
-            Random Elective Course - XYZ123 (Not in Program)
-          </li>
-        </ul>
-      </div>)}
-      {!viewOnly && enrollmentNo && studentName && program &&(
-        <TranscriptHistory studentId={enrollmentNo} 
-        student_name={studentName}
-        program={program}
-        selectedProgram={selectedProgram}
-        reload={reloadTranscript} />
+      {!viewOnly && (
+        <UnfinishedCoursesList unfinishedCourses={unfinishedCourses} />
+      )}
+      {!viewOnly && (
+        <div style={{ border: "1px solid", width: "30%" }}>
+          <p style={{ fontSize: "20", fontWeight: "bold" }}>
+            Course Discrepancy Highlight codes
+          </p>
+          <ul>
+            <li className="duplicate-highlight"> (Duplicate)</li>
+            <li>Program course</li>
+            <li className="notinprogram">
+              Random Elective Course - XYZ123 (Not in Program)
+            </li>
+          </ul>
+        </div>
+      )}
+      {!viewOnly && enrollmentNo && studentName && program && (
+        <TranscriptHistory
+          studentId={enrollmentNo}
+          student_name={studentName}
+          program={program}
+          selectedProgram={selectedProgram}
+          reload={reloadTranscript}
+        />
       )}
       <div
         className="transcript-page"
@@ -349,14 +414,18 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
             Print
           </button>{" "}
           <button
-          hidden={viewOnly}
+            hidden={viewOnly}
             onClick={handleGetReport}
             className="export-button"
             disabled={reportLoading}
           >
             {reportLoading ? "Loading..." : "Get Report From LMS"}
           </button>{" "}
-          <button  hidden={viewOnly} onClick={markAsTranscriptCreated} className="export-button">
+          <button
+            hidden={viewOnly}
+            onClick={markAsTranscriptCreated}
+            className="export-button"
+          >
             Transcript Created
           </button>
           <div
@@ -517,7 +586,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
                             className={`course-name ${
                               isDuplicate(row)
                                 ? "duplicate-highlight"
-                                :( row.isInProgram === false  && !hideActions)
+                                : row.isInProgram === false && !hideActions
                                 ? "notinprogram"
                                 : ""
                             }`}
@@ -559,7 +628,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
                                 }
                               />
                             ) : (
-                              row["Last_Attempt"]
+                              row["Last_Attempt"] || row["Semester"]
                             )}
                           </td>
                           <td className="credits">

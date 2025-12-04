@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react";
 import GradeTranscript from "@/app/students/transcripts/GradeTranscript";
 import { getGrade } from "@/app/grades/helpers/grade";
-import UnfinishedCoursesList, { getUnfinishedCourses } from "./UnfinishedCoursesList";
+
 
 interface Props {
   studentId: string;
@@ -48,7 +48,7 @@ export default function TranscriptPageClient({
         "Course_Name":user.Course_Name,
         "Default_Course_Name": user.Default_Course_Name || user.Course_Name,
         Credits: user.Credits,
-        "Last_Attempt": user.Last_Attempt || undefined,
+        "Last_Attempt": user.Last_Attempt || user.Semester || undefined,
         Grade: user.Grade || undefined,
         "Grade_Point": gradePoint,
         isInProgram,

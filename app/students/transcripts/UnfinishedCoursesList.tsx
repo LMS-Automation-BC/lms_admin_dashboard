@@ -19,8 +19,8 @@ const UnfinishedCoursesList: React.FC<Props> = ({
      <div className={styles.unfinishedcontainer}>
       <h3>Unfinished Courses</h3>
       <ul className={styles.unfinishedlist}>
-        {unfinishedCourses.map(course => (
-          <li key={course.Course_Code} className={styles.unfinisheditem}>
+        {unfinishedCourses.map((course, index) => (
+          <li key={course.Course_Code + index} className={styles.unfinisheditem}>
             <span className={styles.coursename}>{course.Course_Name}</span>
             <span className={styles.coursecode}>{course.Course_Code}</span>
             <span className={styles.coursecredits}>{course.Credits} credits</span>
@@ -37,8 +37,10 @@ export function getUnfinishedCourses(
   userGrades: any[]
 ): any[] {
   const completedCourses = new Set(
-    userGrades.map(grade => grade["Default_Course_Name"]?.toLowerCase()?.trim())
-  );
+  userGrades
+    .filter(grade => grade["Default_Course_Name"]?.trim() && grade["Grade"] !== "")
+    .map(grade => grade["Default_Course_Name"]!.toLowerCase().trim())
+);
 
   return programCourses.filter(course => {
     const courseName = course.Course_Name.toLowerCase().trim();
