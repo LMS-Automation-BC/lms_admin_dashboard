@@ -1,0 +1,22 @@
+.courseGroup {
+  margin-bottom: 20px;
+}
+
+.table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.table th,
+.table td {
+  border: 1px solid #ccc;
+  padding: 2px 4px;          /* smaller padding */
+  font-size: 12px;           /* smaller text */
+  line-height: 0.75;          /* tighter vertical space */
+  white-space: nowrap;       /* avoid multi-line rows */
+}
+
+.table th {
+  background-color: #f5f5f5;
+  font-weight: 600;
+}

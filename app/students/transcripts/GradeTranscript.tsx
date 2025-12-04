@@ -170,7 +170,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
       .then(setHtml)
       .catch((error) => console.error("Error loading HTML:", error));
   }, []);
-  const [hideActions, setHideActions] = useState(true);
+  const [hideActions, setHideActions] = useState(false);
   const [programStatus, setProgramStatus] = useState<string>("");
   const [programStart, setProgramStart] = useState(
     toInputDate(programStartDate)

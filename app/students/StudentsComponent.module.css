@@ -191,6 +191,7 @@
 /* Edit button - blue */
 .editButton {
   background-color: #007bff;
+  margin-left: 6px;
 }
 .editButton:hover:not(:disabled) {
   background-color: #0056b3;

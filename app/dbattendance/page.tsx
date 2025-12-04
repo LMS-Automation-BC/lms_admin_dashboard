@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import styles from "./AttendanceFilter.module.css"; // CSS Modules
 import ReportButton from "./ReportButton";
 
-interface AttendanceRecord {
+export interface AttendanceRecord {
   Id: number;
   Student_Id: string;
   Name: string | null;

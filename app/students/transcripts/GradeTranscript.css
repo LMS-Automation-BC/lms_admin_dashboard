@@ -345,6 +345,11 @@
     margin-top: 2px;
     margin-bottom: 5px; /* space before footer */
   }
+  @media print {
+  .president {
+    margin-bottom: 80px !important;
+  }
+}
 .grade-select {
   padding: 6px 10px;
   border: 1px solid #ccc;

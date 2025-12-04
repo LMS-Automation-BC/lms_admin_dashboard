@@ -6,6 +6,8 @@ import Modal from "./Modal";
 import GradeTranscript from "../components/GradeTranscript";
 import { getGrade } from "../grades/helpers/grade";
 import GradeReport from "./GradeReport";
+import { AttendanceRecord } from "../dbattendance/page";
+import AttendanceReport from "./AttendanceReport";
 
 function StudentsComponent() {
   const [students, setStudents] = useState([]);
@@ -34,8 +36,9 @@ function StudentsComponent() {
   const [grades, setGrades] = useState<any[]>([]);
   const [gradeStudent, setGradeStudent] = useState<any>(null);
   const [showGrades, setShowGrades] = useState(false);
+  const [showAttendance, setShowAttendance] = useState(false);
   const [pageSize, setPageSize] = useState(20); // default 10
-
+  const [attendanceData, setAttendanceData] = useState<AttendanceRecord[]>([]);
   const handlePageSizeChange = (e: any) => {
     setPageSize(Number(e.target.value));
     setPage(1); // reset to first page after changing size
@@ -158,6 +161,33 @@ function StudentsComponent() {
     });
   };
   const [loadingStudentId, setLoadingStudentId] = useState<string | null>(null);
+  const handleGetAttendance = async (student: { Full_Name: string }) => {
+  try {
+    setShowAttendance(true);
+    setGradeStudent(student);
+
+    const params = new URLSearchParams({
+      type: "data",
+      name: student.Full_Name,
+      absentOnly: "false",
+      page: "1",
+      limit: "1000",
+    });
+
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/attendance?${params.toString()}`
+    );
+
+    if (!res.ok) throw new Error("Failed to fetch attendance");
+
+    const response = await res.json();
+    setAttendanceData(response.data || []);
+  } catch (error) {
+    console.error("Error fetching attendance:", error);
+    setAttendanceData([]); // optional: clear previous data on error
+  }
+};
+
   const handleGetRawGrades = async (student: any) => {
     setShowGrades(true);
     setLoadingStudentId(student.Student_ID);
@@ -307,6 +337,13 @@ function StudentsComponent() {
                 >
                   L
                 </a>
+                 <button
+                  className={`${styles.iconButton} ${styles.editButton}`}
+                  onClick={() => handleEdit(student)}
+                  title="Edit"
+                >
+                  ✏️
+                </button>
               </td>
 
               <td className={styles.td}>{student.Student_ID || ""}</td>
@@ -315,15 +352,6 @@ function StudentsComponent() {
               <td className={styles.td}>{student.First_Name_Legal || ""}</td>
               {/* Action Buttons */}
               <td className={styles.td}>
-                {/* Edit button */}
-                <button
-                  className={`${styles.iconButton} ${styles.editButton}`}
-                  onClick={() => handleEdit(student)}
-                  title="Edit"
-                >
-                  ✏️
-                </button>
-
                 {/* Grouped Grades Buttons */}
                 <div className={styles.buttonGroup}>
                   <button
@@ -332,16 +360,24 @@ function StudentsComponent() {
                     onClick={() => handleGetGrades(student)}
                     title="Grades"
                   >
-                    📊
+                    📊 Transcript
                   </button>
-
+                
                   <button
                     className={`${styles.iconButton} ${styles.reportButton}`}
                     disabled={loadingStudentId === student.Student_ID}
                     onClick={() => handleGetRawGrades(student)}
                     title="Grades Report"
                   >
-                    📄
+                    🏅Report
+                  </button>
+                  <button
+                    className={`${styles.iconButton} ${styles.reportButton}`}
+                    disabled={loadingStudentId === student.Student_ID}
+                    onClick={() => handleGetAttendance(student)}
+                    title="Attendance Report"
+                  >
+                    🗓️ Report
                   </button>
                 </div>
               </td>
@@ -369,7 +405,17 @@ function StudentsComponent() {
           />
         </Modal>
       )}
-      {}
+      {showAttendance && (
+        <Modal onClose={() => setShowAttendance(false)}>
+          <h2>Attendance for {gradeStudent.Full_Name}</h2>
+          {/* <GradesTable grades={grades}></GradesTable> */}
+          <AttendanceReport
+            data={attendanceData}
+            studentName={gradeStudent.Full_Name}
+            student_ID={gradeStudent.Student_ID}
+          />
+        </Modal>
+      )}
       {/* 🔁 Pagination Controls */}
       <div className={styles.pagination}>
         <button onClick={prevPage} disabled={page === 1}>
