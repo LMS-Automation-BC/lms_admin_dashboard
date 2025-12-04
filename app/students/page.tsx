@@ -315,7 +315,13 @@ function StudentsComponent() {
             >
               <td className={styles.td}>
                 <span>{student.Full_Name || ""}</span>
-
+                  <button
+                  className={`${styles.iconButton} ${styles.editButton}`}
+                  onClick={() => handleEdit(student)}
+                  title="Edit"
+                >
+                  ✏️
+                </button>
                 
               </td>
 
@@ -346,13 +352,7 @@ function StudentsComponent() {
                 </td>
               {/* Action Buttons */}
               <td className={styles.td}>
-                 <button
-                  className={`${styles.iconButton} ${styles.editButton}`}
-                  onClick={() => handleEdit(student)}
-                  title="Edit"
-                >
-                  ✏️
-                </button>
+               
                 {/* Grouped Grades Buttons */}
                 <div className={styles.buttonGroup}>
                   <button
