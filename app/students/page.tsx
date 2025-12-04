@@ -298,7 +298,7 @@ function StudentsComponent() {
             <th className={styles.th}>Student ID</th>
             <th className={styles.th}>Program</th>
             <th className={styles.th}>Status</th>
-            <th className={styles.th}>First Name</th>
+            <th className={styles.th}>SIS/LMS</th>
             <th className={styles.th}>Actions</th>
           </tr>
         </thead>
@@ -316,7 +316,13 @@ function StudentsComponent() {
               <td className={styles.td}>
                 <span>{student.Full_Name || ""}</span>
 
-                {/* SIS (S icon) */}
+                
+              </td>
+
+              <td className={styles.td}>{student.Student_ID || ""}</td>
+              <td className={styles.td}>{student.Program || ""}</td>
+              <td className={styles.td}>{student.Current_Status || ""}</td>
+              <td className={styles.td}>{/* SIS (S icon) */}
                 <a
                   href={`https://brookescollege.classe365.com/1/admin/students/view/${student.sisId}`}
                   target="_blank"
@@ -324,7 +330,7 @@ function StudentsComponent() {
                   className={`${styles.iconBadge} ${styles.sisBadge}`}
                   title="Open SIS"
                 >
-                  S
+                  SIS
                 </a>
 
                 {/* LMS (L icon) */}
@@ -335,8 +341,11 @@ function StudentsComponent() {
                   className={`${styles.iconBadge} ${styles.lmsBadge}`}
                   title="Open LMS"
                 >
-                  L
+                  LMS
                 </a>
+                </td>
+              {/* Action Buttons */}
+              <td className={styles.td}>
                  <button
                   className={`${styles.iconButton} ${styles.editButton}`}
                   onClick={() => handleEdit(student)}
@@ -344,14 +353,6 @@ function StudentsComponent() {
                 >
                   ✏️
                 </button>
-              </td>
-
-              <td className={styles.td}>{student.Student_ID || ""}</td>
-              <td className={styles.td}>{student.Program || ""}</td>
-              <td className={styles.td}>{student.Current_Status || ""}</td>
-              <td className={styles.td}>{student.First_Name_Legal || ""}</td>
-              {/* Action Buttons */}
-              <td className={styles.td}>
                 {/* Grouped Grades Buttons */}
                 <div className={styles.buttonGroup}>
                   <button
