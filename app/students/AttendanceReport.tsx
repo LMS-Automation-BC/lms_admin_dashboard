@@ -80,7 +80,6 @@ const AttendanceReport: React.FC<AttendanceReportProps> = ({
                     <th>Date</th>
                     <th>Student Name</th>
                     <th>Attendance %</th>
-                    <th>Notes</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -89,7 +88,6 @@ const AttendanceReport: React.FC<AttendanceReportProps> = ({
                       <td>{record.Attendance_Date?.split("T")[0]}</td>
                       <td>{record.Name}</td>
                       <td>{record.Attendance_Percentage}</td>
-                      <td>{record.Attendance_Notes || "-"}</td>
                     </tr>
                   ))}
                 </tbody>

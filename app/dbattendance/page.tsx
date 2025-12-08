@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import React, { useEffect, useState } from "react";
 import styles from "./AttendanceFilter.module.css"; // CSS Modules
 import ReportButton from "./ReportButton";
@@ -30,6 +30,8 @@ export default function AttendanceReport() {
     absentOnly: false,
   });
 
+  const [pendingFilters, setPendingFilters] = useState(filters);
+
   const [attendanceData, setAttendanceData] = useState<AttendanceRecord[]>([]);
   const [courseOptions, setCourseOptions] = useState<string[]>([]);
   const [nameOptions, setNameOptions] = useState<string[]>([]);
@@ -39,95 +41,95 @@ export default function AttendanceReport() {
   const itemsPerPage = 10;
   const [pageSize, setPageSize] = useState(20); // default 10
 
-const handlePageSizeChange = (e:any) => {
-  setPageSize(Number(e.target.value));
-  setCurrentPage(1); // reset to first page after changing size
-};
-
+  const handlePageSizeChange = (e: any) => {
+    setPageSize(Number(e.target.value));
+    setCurrentPage(1); // reset to first page after changing size
+  };
   // Fetch date range options from backend
   useEffect(() => {
-     const params = new URLSearchParams({
-      type:"options"})
-      setLoading(true)
-    fetch(`${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/attendance?${params.toString()}`)
-      .then((res) => res.json())
-      .then((data) => {
-        
-        const formatDate = (d: string) => d.split("T")[0]; // extract YYYY-MM-DD
-        const start = formatDate(data.startDate);
-        const end = formatDate(data.endDate);
+    const params = new URLSearchParams({ type: "options" });
+    setLoading(true);
 
-        setDateRange({ start, end });
-        setFilters((f) => ({ ...f, start, end }));
-
-        // Set course and student options
-        setCourseOptions(data.courses || []);
-        setNameOptions(data.students || []);
-        setLoading(false)
-      })
-      .catch(console.error);
-  }, []);
-
-  // Fetch attendance data & dropdown options whenever filters or page change
-  useEffect(() => {
-    if (!filters.start || !filters.end) return;
-
-    const params = new URLSearchParams({
-      type:"data",
-      start: filters.start,
-      end: filters.end,
-      course: filters.course || "",
-      name: filters.name || "",
-      absentOnly: filters.absentOnly ? "true" : "false",
-      page: currentPage.toString(),
-      limit: pageSize.toString(),
-    });
-    setLoading(true)
-    // Fetch paginated attendance
-    fetch(`${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/attendance?${params.toString()}`)
-      .then((res) => res.json())
-      .then((response: any) => {
-        setAttendanceData(response.data);
-        setTotalPages(response.totalPages);
-        setLoading(false)
-      })
-      .catch(console.error);
-      
-    const paramsCurrent = new URLSearchParams({
-      type:"options",
-      start: filters.start,
-    end:filters.end});
-    // Fetch dropdown options for current date range
-    setLoading(true)
     fetch(
-      `${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/attendance?${paramsCurrent.toString()}`
+      `${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/attendance?${params}`
     )
       .then((res) => res.json())
       .then((data) => {
-        setCourseOptions(data.courses);
-        setNameOptions(data.students);
-        setLoading(false)
+        const format = (d: string) => d.split("T")[0];
+        const start = format(data.startDate);
+        const end = format(data.endDate);
+
+        const initial = { ...filters, start, end };
+
+        setDateRange({ start, end });
+        setFilters(initial);
+        setPendingFilters(initial);
+
+        setCourseOptions(data.courses || []);
+        setNameOptions(data.students || []);
+
+        // Load data once filters are initialized
+        getAttendance(initial);
+
+        setLoading(false);
       })
       .catch(console.error);
-  }, [filters, currentPage, pageSize]);
+  }, []);
+  const handleSearch = () => {
+    setFilters(pendingFilters);
+    getAttendance(pendingFilters);
+  };
+
+  // Fetch attendance data & dropdown options whenever filters or page change
+  const getAttendance = (activeFilters = filters) => {
+    if (!activeFilters.start || !activeFilters.end) return;
+    const params = new URLSearchParams({
+      type: "data",
+      start: activeFilters.start,
+      end: activeFilters.end,
+      course: activeFilters.course || "",
+      name: activeFilters.name || "",
+      absentOnly: activeFilters.absentOnly ? "true" : "false",
+      page: currentPage.toString(),
+      limit: pageSize.toString(),
+    });
+
+    setLoading(true);
+
+    fetch(
+      `${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/attendance?${params}`
+    )
+      .then((res) => res.json())
+      .then((response) => {
+        setAttendanceData(response.data);
+        setTotalPages(response.totalPages);
+        setLoading(false);
+      })
+      .catch(console.error);
+  };
+
+  useEffect(() => {
+    getAttendance();
+  }, [currentPage, pageSize]);
 
   const handleNext = () => setCurrentPage((p) => Math.min(p + 1, totalPages));
   const handlePrev = () => setCurrentPage((p) => Math.max(p - 1, 1));
-    if (loading)
-    return <p style={{ textAlign: "center", marginTop: "2rem" }}>Loading...</p>;
+ 
   return (
     <div className={styles.container}>
       <h2 className={styles.title}>📋 Attendance Report</h2>
-     <ReportButton  />
+
       <div className={styles.filterRow}>
         <label>
           Start Date:
           <input
             type="date"
-            value={filters.start}
+            value={pendingFilters.start}
             min={dateRange.start}
             max={dateRange.end}
-            onChange={(e) => setFilters({ ...filters, start: e.target.value })}
+            onChange={(e) =>
+              setPendingFilters({ ...pendingFilters, start: e.target.value })
+            }
           />
         </label>
 
@@ -135,13 +137,28 @@ const handlePageSizeChange = (e:any) => {
           End Date:
           <input
             type="date"
-            value={filters.end}
+            value={pendingFilters.end}
             min={dateRange.start}
             max={dateRange.end}
-            onChange={(e) => setFilters({ ...filters, end: e.target.value })}
+            onChange={(e) =>
+              setPendingFilters({ ...pendingFilters, end: e.target.value })
+            }
           />
         </label>
-
+         <label>
+          Student:
+          <select
+            value={filters.name}
+            onChange={(e) => setFilters({ ...filters, name: e.target.value })}
+          >
+            <option value="">All Students</option>
+            {nameOptions.map((n) => (
+              <option key={n} value={n}>
+                {n}
+              </option>
+            ))}
+          </select>
+        </label>
         <label>
           Course:
           <select
@@ -157,34 +174,27 @@ const handlePageSizeChange = (e:any) => {
           </select>
         </label>
 
-        <label>
-          Student:
-          <select
-            value={filters.name}
-            onChange={(e) => setFilters({ ...filters, name: e.target.value })}
-          >
-            <option value="">All Students</option>
-            {nameOptions.map((n) => (
-              <option key={n} value={n}>
-                {n}
-              </option>
-            ))}
-          </select>
-        </label>
+       
       </div>
-
-      <div className={styles.checkboxRow}>
-        <label>
+      <div className={styles.searchRow}>
+         <label className={styles.checkboxLabel}>
           <input
             type="checkbox"
-            checked={filters.absentOnly}
+            checked={pendingFilters.absentOnly}
             onChange={(e) =>
-              setFilters({ ...filters, absentOnly: e.target.checked })
+              setPendingFilters({ ...pendingFilters, absentOnly: e.target.checked })
             }
           />{" "}
           Show only absent students
         </label>
+        <button className={styles.searchButton} onClick={handleSearch}>
+          Search
+        </button>
+        <ReportButton />
+       
       </div>
+        { loading ??
+     <p style={{ textAlign: "center", marginTop: "2rem" }}>Loading...</p>}
 
       <table className={styles.table}>
         <thead>
@@ -209,7 +219,22 @@ const handlePageSizeChange = (e:any) => {
               >
                 <td>{r.Student_Id}</td>
                 <td>{r.Name}</td>
-                <td><a className={styles.myLink}href={'https://brookescollege.neolms.com/teacher_attendance/show/'+r.Course_Id} target="_blank">{r.Course_Name}</a></td>
+                <td>
+                  {r.Course_Id ? (
+                    <a
+                      className={styles.myLink}
+                      href={
+                        "https://brookescollege.neolms.com/teacher_attendance/show/" +
+                        r.Course_Id
+                      }
+                      target="_blank"
+                    >
+                      {r.Course_Name}
+                    </a>
+                  ) : (
+                    r.Course_Name
+                  )}
+                </td>
                 <td>{r.Attendance_Date?.split("T")[0]}</td>
                 <td>{r.Attendance_Percentage}</td>
                 <td>{r.Attendance_Notes}</td>
@@ -226,31 +251,30 @@ const handlePageSizeChange = (e:any) => {
         </tbody>
       </table>
 
-     <div className={styles.pagination}>
-  <button onClick={handlePrev} disabled={currentPage === 1}>
-    ◀ Prev
-  </button>
+      <div className={styles.pagination}>
+        <button onClick={handlePrev} disabled={currentPage === 1}>
+          ◀ Prev
+        </button>
 
-  <span>
-    Page {currentPage} of {totalPages || 1}
-  </span>
+        <span>
+          Page {currentPage} of {totalPages || 1}
+        </span>
 
-  {/* PAGE SIZE DROPDOWN */}
- 
+        {/* PAGE SIZE DROPDOWN */}
 
-  <button onClick={handleNext} disabled={currentPage === totalPages}>
-    Next ▶
-  </button>
-   <div className={styles.pageSizeSelector}>
-  <span>Page size:</span>
-  <select value={pageSize} onChange={handlePageSizeChange}>
-    <option value={5}>5</option>
-    <option value={10}>10</option>
-    <option value={20}>20</option>
-    <option value={50}>50</option>
-  </select>
-</div>
-</div>
+        <button onClick={handleNext} disabled={currentPage === totalPages}>
+          Next ▶
+        </button>
+        <div className={styles.pageSizeSelector}>
+          <span>Page size:</span>
+          <select value={pageSize} onChange={handlePageSizeChange}>
+            <option value={5}>5</option>
+            <option value={10}>10</option>
+            <option value={20}>20</option>
+            <option value={50}>50</option>
+          </select>
+        </div>
+      </div>
     </div>
   );
 }

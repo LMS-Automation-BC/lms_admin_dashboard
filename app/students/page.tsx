@@ -162,31 +162,33 @@ function StudentsComponent() {
   };
   const [loadingStudentId, setLoadingStudentId] = useState<string | null>(null);
   const handleGetAttendance = async (student: { Full_Name: string }) => {
-  try {
-    setShowAttendance(true);
-    setGradeStudent(student);
+    try {
+      setShowAttendance(true);
+      setGradeStudent(student);
 
-    const params = new URLSearchParams({
-      type: "data",
-      name: student.Full_Name,
-      absentOnly: "false",
-      page: "1",
-      limit: "1000",
-    });
+      const params = new URLSearchParams({
+        type: "data",
+        name: student.Full_Name,
+        absentOnly: "false",
+        page: "1",
+        limit: "1000",
+      });
 
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/attendance?${params.toString()}`
-    );
+      const res = await fetch(
+        `${
+          process.env.NEXT_PUBLIC_FUNCTION_APP_URL
+        }/api/attendance?${params.toString()}`
+      );
 
-    if (!res.ok) throw new Error("Failed to fetch attendance");
+      if (!res.ok) throw new Error("Failed to fetch attendance");
 
-    const response = await res.json();
-    setAttendanceData(response.data || []);
-  } catch (error) {
-    console.error("Error fetching attendance:", error);
-    setAttendanceData([]); // optional: clear previous data on error
-  }
-};
+      const response = await res.json();
+      setAttendanceData(response.data || []);
+    } catch (error) {
+      console.error("Error fetching attendance:", error);
+      setAttendanceData([]); // optional: clear previous data on error
+    }
+  };
 
   const handleGetRawGrades = async (student: any) => {
     setShowGrades(true);
@@ -314,21 +316,20 @@ function StudentsComponent() {
               className={styles.clickableRow}
             >
               <td className={styles.td}>
-                <span>{student.Full_Name || ""}</span>
-                  <button
-                  className={`${styles.iconButton} ${styles.editButton}`}
+                <button
+                  className={styles.linkButton}
                   onClick={() => handleEdit(student)}
                   title="Edit"
                 >
-                  ✏️
+                  {student.Full_Name || ""}
                 </button>
-                
               </td>
 
               <td className={styles.td}>{student.Student_ID || ""}</td>
               <td className={styles.td}>{student.Program || ""}</td>
               <td className={styles.td}>{student.Current_Status || ""}</td>
-              <td className={styles.td}>{/* SIS (S icon) */}
+              <td className={styles.td}>
+                {/* SIS (S icon) */}
                 <a
                   href={`https://brookescollege.classe365.com/1/admin/students/view/${student.sisId}`}
                   target="_blank"
@@ -349,10 +350,9 @@ function StudentsComponent() {
                 >
                   LMS
                 </a>
-                </td>
+              </td>
               {/* Action Buttons */}
               <td className={styles.td}>
-               
                 {/* Grouped Grades Buttons */}
                 <div className={styles.buttonGroup}>
                   <button
@@ -363,14 +363,14 @@ function StudentsComponent() {
                   >
                     📊 Transcript
                   </button>
-                
+
                   <button
                     className={`${styles.iconButton} ${styles.reportButton}`}
                     disabled={loadingStudentId === student.Student_ID}
                     onClick={() => handleGetRawGrades(student)}
                     title="Grades Report"
                   >
-                    🏅Report
+                    🏅Grade
                   </button>
                   <button
                     className={`${styles.iconButton} ${styles.reportButton}`}
@@ -378,7 +378,7 @@ function StudentsComponent() {
                     onClick={() => handleGetAttendance(student)}
                     title="Attendance Report"
                   >
-                    🗓️ Report
+                    🗓️ Attendance
                   </button>
                 </div>
               </td>

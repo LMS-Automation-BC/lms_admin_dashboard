@@ -1,7 +1,5 @@
 
 import React from 'react';
-import CsvUpload from './components/CSVUploader';
-import CsvCombiner from './components/AttendanceProcessor';
 import DashboardPage from './dashboard/page';
 
 const AttendancePage = () => {
