@@ -71,7 +71,7 @@ export default function AttendanceReport() {
         // Load data once filters are initialized
         getAttendance(initial);
 
-        setLoading(false);
+        // setLoading(false);
       })
       .catch(console.error);
   }, []);
@@ -114,167 +114,183 @@ export default function AttendanceReport() {
 
   const handleNext = () => setCurrentPage((p) => Math.min(p + 1, totalPages));
   const handlePrev = () => setCurrentPage((p) => Math.max(p - 1, 1));
- 
+
   return (
-    <div className={styles.container}>
-      <h2 className={styles.title}>📋 Attendance Report</h2>
+    <>
+      {loading ?(
+        <p style={{ textAlign: "center", marginTop: "2rem" }}>Loading...</p>
+      ):<div className={styles.container}>
+        <h2 className={styles.title}>
+          📋 Attendance Report 
+        </h2>
 
-      <div className={styles.filterRow}>
-        <label>
-          Start Date:
-          <input
-            type="date"
-            value={pendingFilters.start}
-            min={dateRange.start}
-            max={dateRange.end}
-            onChange={(e) =>
-              setPendingFilters({ ...pendingFilters, start: e.target.value })
-            }
-          />
-        </label>
+        <div className={styles.filterRow}>
+          <label>
+            Start Date:
+            <input
+              type="date"
+              value={pendingFilters.start}
+              min={dateRange.start}
+              max={dateRange.end}
+              onChange={(e) =>
+                setPendingFilters({ ...pendingFilters, start: e.target.value })
+              }
+            />
+          </label>
 
-        <label>
-          End Date:
-          <input
-            type="date"
-            value={pendingFilters.end}
-            min={dateRange.start}
-            max={dateRange.end}
-            onChange={(e) =>
-              setPendingFilters({ ...pendingFilters, end: e.target.value })
-            }
-          />
-        </label>
-         <label>
-          Student:
-          <select
-            value={filters.name}
-            onChange={(e) => setFilters({ ...filters, name: e.target.value })}
-          >
-            <option value="">All Students</option>
-            {nameOptions.map((n) => (
-              <option key={n} value={n}>
-                {n}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Course:
-          <select
-            value={filters.course}
-            onChange={(e) => setFilters({ ...filters, course: e.target.value })}
-          >
-            <option value="">All Courses</option>
-            {courseOptions.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
-        </label>
-
-       
-      </div>
-      <div className={styles.searchRow}>
-         <label className={styles.checkboxLabel}>
-          <input
-            type="checkbox"
-            checked={pendingFilters.absentOnly}
-            onChange={(e) =>
-              setPendingFilters({ ...pendingFilters, absentOnly: e.target.checked })
-            }
-          />{" "}
-          Show only absent students
-        </label>
-        <button className={styles.searchButton} onClick={handleSearch}>
-          Search
-        </button>
-        <ReportButton />
-       
-      </div>
-        { loading ??
-     <p style={{ textAlign: "center", marginTop: "2rem" }}>Loading...</p>}
-
-      <table className={styles.table}>
-        <thead>
-          <tr>
-            <th>Student ID</th>
-            <th>Name</th>
-            <th>Course</th>
-            <th>Date</th>
-            <th>Percentage</th>
-            <th>Notes</th>
-            <th>Email</th>
-          </tr>
-        </thead>
-        <tbody>
-          {attendanceData.length > 0 ? (
-            attendanceData.map((r) => (
-              <tr
-                key={r.Id}
-                className={
-                  r.Attendance_Percentage !== "100%" ? styles.absentRow : ""
-                }
-              >
-                <td>{r.Student_Id}</td>
-                <td>{r.Name}</td>
-                <td>
-                  {r.Course_Id ? (
-                    <a
-                      className={styles.myLink}
-                      href={
-                        "https://brookescollege.neolms.com/teacher_attendance/show/" +
-                        r.Course_Id
-                      }
-                      target="_blank"
-                    >
-                      {r.Course_Name}
-                    </a>
-                  ) : (
-                    r.Course_Name
-                  )}
-                </td>
-                <td>{r.Attendance_Date?.split("T")[0]}</td>
-                <td>{r.Attendance_Percentage}</td>
-                <td>{r.Attendance_Notes}</td>
-                <td>{r.Email}</td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan={7} style={{ textAlign: "center" }}>
-                No data found
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-
-      <div className={styles.pagination}>
-        <button onClick={handlePrev} disabled={currentPage === 1}>
-          ◀ Prev
-        </button>
-
-        <span>
-          Page {currentPage} of {totalPages || 1}
-        </span>
-
-        {/* PAGE SIZE DROPDOWN */}
-
-        <button onClick={handleNext} disabled={currentPage === totalPages}>
-          Next ▶
-        </button>
-        <div className={styles.pageSizeSelector}>
-          <span>Page size:</span>
-          <select value={pageSize} onChange={handlePageSizeChange}>
-            <option value={5}>5</option>
-            <option value={10}>10</option>
-            <option value={20}>20</option>
-            <option value={50}>50</option>
-          </select>
+          <label>
+            End Date:
+            <input
+              type="date"
+              value={pendingFilters.end}
+              min={dateRange.start}
+              max={dateRange.end}
+              onChange={(e) =>
+                setPendingFilters({ ...pendingFilters, end: e.target.value })
+              }
+            />
+          </label>
+          <label>
+            Student:
+            <select
+              value={filters.name}
+              onChange={(e) => setFilters({ ...filters, name: e.target.value })}
+            >
+              <option value="">All Students</option>
+              {nameOptions.map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Course:
+            <select
+              value={filters.course}
+              onChange={(e) =>
+                setFilters({ ...filters, course: e.target.value })
+              }
+            >
+              <option value="">All Courses</option>
+              {courseOptions.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
-      </div>
-    </div>
+        <div className={styles.searchRow}>
+          <label className={styles.checkboxLabel}>
+            <input
+              type="checkbox"
+              checked={pendingFilters.absentOnly}
+              onChange={(e) =>
+                setPendingFilters({
+                  ...pendingFilters,
+                  absentOnly: e.target.checked,
+                })
+              }
+            />{" "}
+            Show only absent students
+          </label>
+          <button className={styles.searchButton} onClick={handleSearch}>
+            Search
+          </button>
+          <ReportButton />
+        </div>
+
+        {!loading && (
+          <>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  {/* <th>Student ID</th> */}
+                  <th>Name</th>
+                  <th>Course</th>
+                  <th>Date</th>
+                  <th>Percentage</th>
+                  <th>Notes</th>
+                  <th>Email</th>
+                </tr>
+              </thead>
+              <tbody>
+                {attendanceData.length > 0 ? (
+                  attendanceData.map((r) => (
+                    <tr
+                      key={r.Id}
+                      className={
+                        r.Attendance_Percentage !== "100%"
+                          ? styles.absentRow
+                          : ""
+                      }
+                    >
+                      {/* <td>{r.Student_Id}</td> */}
+                      <td>{r.Name}</td>
+                      <td>
+                        {r.Course_Id ? (
+                          <a
+                            className={styles.myLink}
+                            href={
+                              "https://brookescollege.neolms.com/teacher_attendance/show/" +
+                              r.Course_Id
+                            }
+                            target="_blank"
+                          >
+                            {r.Course_Name}
+                          </a>
+                        ) : (
+                          r.Course_Name
+                        )}
+                      </td>
+                      <td>{r.Attendance_Date?.split("T")[0]}</td>
+                      <td>{r.Attendance_Percentage}</td>
+                      <td>{r.Attendance_Notes}</td>
+                      <td>{r.Email}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={7} style={{ textAlign: "center" }}>
+                      No data found
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+
+            <div className={styles.pagination}>
+              <button onClick={handlePrev} disabled={currentPage === 1}>
+                ◀ Prev
+              </button>
+
+              <span>
+                Page {currentPage} of {totalPages || 1}
+              </span>
+
+              {/* PAGE SIZE DROPDOWN */}
+
+              <button
+                onClick={handleNext}
+                disabled={currentPage === totalPages}
+              >
+                Next ▶
+              </button>
+              <div className={styles.pageSizeSelector}>
+                <span>Page size:</span>
+                <select value={pageSize} onChange={handlePageSizeChange}>
+                  <option value={5}>5</option>
+                  <option value={10}>10</option>
+                  <option value={20}>20</option>
+                  <option value={50}>50</option>
+                </select>
+              </div>
+            </div>
+          </>
+        )}
+      </div>}{" "}
+      
+    </>
   );
 }
