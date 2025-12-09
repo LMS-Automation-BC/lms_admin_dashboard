@@ -37,6 +37,7 @@ export default function ProgramsPage() {
 
   const [editingCourseCode, setEditingCourseCode] = useState<string | null>(null);
   const [editCourseName, setEditCourseName] = useState("");
+  const [editCourseCode, setEditCourseCode] =  useState("");
   const [editCourseId, setEditCourseId] = useState<number | null>(null);
   const [editCredits, setEditCredits] = useState<number | "">("");
 
@@ -157,6 +158,7 @@ export default function ProgramsPage() {
   // START EDIT COURSE
   const startEditing = (course: Course) => {
     setEditingCourseCode(course.Course_Code);
+    setEditCourseCode(course.Course_Code)
     setEditCourseName(course.Course_Name);
     setEditCredits(course.Credits);
     setEditCourseId(course.id ?? null);
@@ -164,6 +166,7 @@ export default function ProgramsPage() {
 
   const cancelEditing = () => {
     setEditingCourseCode(null);
+    setEditCourseCode("");
     setEditCourseName("");
     setEditCredits("");
     setEditCourseId(null);
@@ -175,7 +178,8 @@ export default function ProgramsPage() {
 
     const payload = [
       {
-        courseCode: editingCourseCode,
+        id:editCourseId,
+        courseCode: editCourseCode,
         courseName: editCourseName.trim(),
         credits: Number(editCredits),
       },
@@ -200,6 +204,7 @@ export default function ProgramsPage() {
         c.Course_Code === editingCourseCode
           ? {
               ...c,
+              Course_Code: editCourseCode.trim(),
               Course_Name: editCourseName.trim(),
               Credits: Number(editCredits),
             }
@@ -464,10 +469,10 @@ export default function ProgramsPage() {
               {programs[selectedProgram].map(
                 ({ Course_Code, Course_Name, Credits, id }) => (
                   <tr key={id}>
-                    <td> {editingCourseCode === Course_Code ? (
+                    <td> {editCourseId === id ? (
                         <input
-                          value={editingCourseCode}
-                          onChange={(e) => setEditingCourseCode(e.target.value)}
+                          value={editCourseCode}
+                          onChange={(e) => setEditCourseCode(e.target.value)}
                         />
                       ) : (
                         Course_Code
@@ -475,7 +480,7 @@ export default function ProgramsPage() {
 
                     {/* EDIT NAME */}
                     <td>
-                      {editingCourseCode === Course_Code ? (
+                      {editCourseId === id ? (
                         <input
                           value={editCourseName}
                           onChange={(e) => setEditCourseName(e.target.value)}
@@ -488,7 +493,7 @@ export default function ProgramsPage() {
 
                     {/* EDIT CREDITS */}
                     <td>
-                      {editingCourseCode === Course_Code ? (
+                      {editCourseId === id ? (
                         <input
                           type="number"
                           min={0}
@@ -508,7 +513,7 @@ export default function ProgramsPage() {
                     </td>
 
                     <td>
-                      {editingCourseCode === Course_Code ? (
+                      {editCourseId === id ? (
                         <>
                           <button className="button small" onClick={saveEdit}>
                             <FiCheck />
