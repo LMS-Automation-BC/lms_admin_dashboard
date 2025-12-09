@@ -161,14 +161,14 @@ function StudentsComponent() {
     });
   };
   const [loadingStudentId, setLoadingStudentId] = useState<string | null>(null);
-  const handleGetAttendance = async (student: { Full_Name: string }) => {
+  const handleGetAttendance = async (student: { First_Name_Legal: string, Last_Name:string }) => {
     try {
       setShowAttendance(true);
       setGradeStudent(student);
 
       const params = new URLSearchParams({
         type: "data",
-        name: student.Full_Name,
+        name: `${student.First_Name_Legal + ' '+ student.Last_Name}`,
         absentOnly: "false",
         page: "1",
         limit: "1000",
