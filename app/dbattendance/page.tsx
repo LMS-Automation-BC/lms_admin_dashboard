@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import styles from "./AttendanceFilter.module.css"; // CSS Modules
 import ReportButton from "./ReportButton";
+import FastSelect from "./FastSelect";
 
 export interface AttendanceRecord {
   Id: number;
@@ -75,6 +76,10 @@ export default function AttendanceReport() {
       })
       .catch(console.error);
   }, []);
+  const nameOptionsFormatted = [
+    { value: "", label: "All Students" },
+    ...nameOptions.map((n) => ({ value: n, label: n })),
+  ];
   const handleSearch = () => {
     setFilters(pendingFilters);
     getAttendance(pendingFilters);
@@ -117,12 +122,8 @@ export default function AttendanceReport() {
 
   return (
     <>
-      {loading ?(
-        <p style={{ textAlign: "center", marginTop: "2rem" }}>Loading...</p>
-      ):<div className={styles.container}>
-        <h2 className={styles.title}>
-          📋 Attendance Report 
-        </h2>
+      <div className={styles.container}>
+        <h2 className={styles.title}>📋 Attendance Report</h2>
 
         <div className={styles.filterRow}>
           <label>
@@ -137,7 +138,6 @@ export default function AttendanceReport() {
               }
             />
           </label>
-
           <label>
             End Date:
             <input
@@ -150,35 +150,28 @@ export default function AttendanceReport() {
               }
             />
           </label>
-          <label>
+            <label>
             Student:
-            <select
-              value={filters.name}
-              onChange={(e) => setFilters({ ...filters, name: e.target.value })}
-            >
-              <option value="">All Students</option>
-              {nameOptions.map((n) => (
-                <option key={n} value={n}>
-                  {n}
-                </option>
-              ))}
-            </select>
-          </label>
+          <FastSelect
+            value={pendingFilters.name}
+            onChange={(val) =>
+              setPendingFilters({ ...pendingFilters, name: val })
+            }
+            options={nameOptions}
+            placeholder="All Students"
+          />
+       </label>
           <label>
             Course:
-            <select
-              value={filters.course}
-              onChange={(e) =>
-                setFilters({ ...filters, course: e.target.value })
+            <FastSelect
+              style={{ width: "400px" }}
+              value={pendingFilters.course}
+              onChange={(val) =>
+                setPendingFilters({ ...pendingFilters, course: val })
               }
-            >
-              <option value="">All Courses</option>
-              {courseOptions.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
+              options={["", ...courseOptions]} // include empty option
+              placeholder="All Courses"
+            />
           </label>
         </div>
         <div className={styles.searchRow}>
@@ -200,7 +193,9 @@ export default function AttendanceReport() {
           </button>
           <ReportButton />
         </div>
-
+        {loading && (
+          <p style={{ textAlign: "center", marginTop: "2rem" }}>Loading...</p>
+        )}
         {!loading && (
           <>
             <table className={styles.table}>
@@ -289,8 +284,7 @@ export default function AttendanceReport() {
             </div>
           </>
         )}
-      </div>}{" "}
-      
+      </div>{" "}
     </>
   );
 }

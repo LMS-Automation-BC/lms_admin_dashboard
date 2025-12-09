@@ -1,0 +1,36 @@
+.fastselect {
+  position: relative;
+  width: 200px;
+}
+
+.fastselect input {
+  width: 100%;
+  padding: 6px;
+  border: 1px solid #ccc;
+  borderradius: 4px;
+}
+
+.fastselectlist {
+  position: absolute;
+  background: white;
+  width: 100%;
+  border: 1px solid #ccc;
+  bordertop: none;
+  maxheight: 180px;
+  overflowy: auto;
+  zindex: 10;
+}
+
+.fastselectlist li {
+  padding: 6px;
+  cursor: pointer;
+}
+
+.fastselectlist li:hover {
+  background: #f0f0f0;
+}
+
+.noresults {
+  padding: 6px;
+  color: #888;
+}

@@ -152,3 +152,21 @@
   cursor: pointer;
   accent-color: #0070f3; /* modern browsers: changes checkbox color */
 }
+.student-select__control {
+  border: 1px solid #ccc;
+  min-height: 32px;
+}
+
+.student-select__control--is-focused {
+  border-color: #007bff;
+  box-shadow: 0 0 0 1px #007bff;
+}
+
+.student-select__option--is-focused {
+  background: #f0f0f0;
+}
+
+.student-select__option--is-selected {
+  background: #007bff;
+  color: white;
+}

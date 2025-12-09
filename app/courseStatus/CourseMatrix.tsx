@@ -17,7 +17,7 @@ const CourseMatrix: React.FC<CourseMatrixProps> = ({
   programs,
   students,
 }) => {
-  if (!selectedProgram || !programs[selectedProgram]) return null;
+  if (!selectedProgram || !programs[selectedProgram] || !students) return null;
 
   const headers = programs[selectedProgram].map((p) => p.Course_Name);
   const studentNames = Object.keys(students);

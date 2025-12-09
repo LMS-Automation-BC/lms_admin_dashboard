@@ -22,16 +22,17 @@ export default function CourseStatus() {
       .catch(console.error);
   }, []);
   useEffect(() => {
+    if(selectedProgram){
     setLoading(true);
     fetch(
-      `${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/grade?program=${selectedProgram}`
+      `${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/grade?program=${encodeURIComponent(selectedProgram || '')}`
     )
       .then((res) => res.json())
       .then((data) => {
         setLoading(false);
         setStudents(data);
       })
-      .catch(console.error);
+      .catch(console.error);}
   }, [selectedProgram]);
 
   if (loading)
@@ -55,12 +56,12 @@ export default function CourseStatus() {
           ))}
         </select>
         
-            <CourseMatrix
+            {selectedProgram && <CourseMatrix
               selectedProgram={selectedProgram}
               programs={programs}
               students={students}
             />
-          
+            }
         
       </>
     );
