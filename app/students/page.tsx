@@ -163,7 +163,7 @@ function StudentsComponent() {
   const [loadingStudentId, setLoadingStudentId] = useState<string | null>(null);
   const handleGetAttendance = async (student: { First_Name_Legal: string, Last_Name:string }) => {
     try {
-      setShowAttendance(true);
+      
       setGradeStudent(student);
 
       const params = new URLSearchParams({
@@ -181,9 +181,10 @@ function StudentsComponent() {
       );
 
       if (!res.ok) throw new Error("Failed to fetch attendance");
-
+      
       const response = await res.json();
       setAttendanceData(response.data || []);
+      setShowAttendance(true);
     } catch (error) {
       console.error("Error fetching attendance:", error);
       setAttendanceData([]); // optional: clear previous data on error
@@ -390,7 +391,7 @@ function StudentsComponent() {
         <StudentModal
           mode={modalMode}
           student={selectedStudent}
-          grades={grades}
+          // grades={grades}
           onClose={() => setShowModal(false)}
           onSave={handleSaveStudent}
         />

@@ -107,7 +107,9 @@
     display: table-header-group;
     
   }
-
+   .printTable td {
+    white-space: nowrap;
+  }
   .printTable thead {
     display: table-header-group;
   }
