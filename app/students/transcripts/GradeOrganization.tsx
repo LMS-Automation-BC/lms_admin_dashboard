@@ -20,9 +20,9 @@ const ContactColumns: React.FC<ContactColumnsProps> = ({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-
+   
     
-    fetch("/api/organization")
+    fetch(`${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/organization`)
       .then((res) => {
         if (!res.ok) throw new Error("Not found");
         return res.json();
