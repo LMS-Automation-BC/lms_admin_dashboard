@@ -21,6 +21,7 @@ import TranscriptHistory from "./TranscriptHistory";
 import TranscriptDiffModal, {
   compareTranscriptArrays,
 } from "./TranscriptDiffModal";
+import GetReportButton from "../GetReportButton";
 
 interface TranscriptProps {
   studentName: string | undefined;
@@ -413,14 +414,24 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
           <button onClick={handlePrint} className="export-button">
             Print
           </button>{" "}
-          <button
+           {enrollmentNo && <GetReportButton
+        enrollmentNo={enrollmentNo}
+        viewOnly={viewOnly}
+        reportLoading={reportLoading}
+        setReportLoading={setReportLoading}
+        setCoursesTranscript={setCoursesTranscript}
+        setDiffData={setDiffData}
+        setShowDiffModal={setShowDiffModal}
+        existingTranscript={coursesTranscript}
+      />}{" "}
+          {/* <button
             hidden={viewOnly}
             onClick={handleGetReport}
             className="export-button"
             disabled={reportLoading}
           >
             {reportLoading ? "Loading..." : "Get Report From LMS"}
-          </button>{" "}
+          </button>{" "} */}
           <button
             hidden={viewOnly}
             onClick={markAsTranscriptCreated}

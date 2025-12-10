@@ -25,3 +25,15 @@ body {
   background-color: #fff;
 }
 
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
+/* Only visible in print */
+@media print {
+  .no-screen { display: block; }
+}
+@media screen {
+  .no-screen { display: none; }
+}

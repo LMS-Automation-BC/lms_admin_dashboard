@@ -20,3 +20,36 @@
   background-color: #f0f0f0;
   font-weight: bold;
 }
+.tdNoWrap {
+  white-space: nowrap;       /* Keep text on a single line */
+  overflow: hidden;          /* Hide overflow if necessary */
+  text-overflow: ellipsis;   /* Show ... if text is too long */
+}/* Hide elements when printing */
+.noPrint {
+  display: table-cell;
+}
+
+@media print {
+  .noPrint {
+    display: none !important;
+  }
+}
+.inforow {
+  margin: 10px;
+  /* width: 90%; */
+  display: flex;
+  justify-content: space-between;
+  /*  margin: 0 auto 1px auto; Center horizontally */
+  font-size: 13pt;
+}
+
+.left {
+  text-align: left;
+  /* width: 50%; */
+}
+
+.right {
+  text-align: right;
+  /* width: 50%; */
+  white-space: nowrap;
+}

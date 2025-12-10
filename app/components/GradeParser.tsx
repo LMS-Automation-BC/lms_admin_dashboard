@@ -25,6 +25,7 @@ export interface CsvRow {
   Semester?: string;
   Credits?: number;
   "Percent%"?: number;
+  Percentage?:number;
   Grade: string;
   "Enrolled at"?: string;
 }

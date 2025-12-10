@@ -315,7 +315,7 @@ function StudentsComponent() {
               }}
               className={styles.clickableRow}
             >
-              <td className={styles.td}>
+              <td className={`${styles.td} ${styles.tdNoWrap}`}>
                 <button
                   className={styles.linkButton}
                   onClick={() => handleEdit(student)}
@@ -325,10 +325,10 @@ function StudentsComponent() {
                 </button>
               </td>
 
-              <td className={styles.td}>{student.Student_ID || ""}</td>
+              <td className={`${styles.td} ${styles.tdNoWrap}`}>{student.Student_ID || ""}</td>
               <td className={styles.td}>{student.Program || ""}</td>
               <td className={styles.td}>{student.Current_Status || ""}</td>
-              <td className={styles.td}>
+              <td className={`${styles.td} ${styles.tdNoWrap}`}>
                 {/* SIS (S icon) */}
                 <a
                   href={`https://brookescollege.classe365.com/1/admin/students/view/${student.sisId}`}
@@ -352,7 +352,7 @@ function StudentsComponent() {
                 </a>
               </td>
               {/* Action Buttons */}
-              <td className={styles.td}>
+              <td className={`${styles.td} ${styles.tdNoWrap}`}>
                 {/* Grouped Grades Buttons */}
                 <div className={styles.buttonGroup}>
                   <button
@@ -409,6 +409,7 @@ function StudentsComponent() {
       {showAttendance && (
         <Modal onClose={() => setShowAttendance(false)}>
           <h2>Attendance for {gradeStudent.Full_Name}</h2>
+          <p><b>Note :</b> If you dont see any course or attendance run the LMS report from attendance page for the missing dates </p>
           {/* <GradesTable grades={grades}></GradesTable> */}
           <AttendanceReport
             data={attendanceData}
