@@ -192,7 +192,7 @@ function StudentsComponent() {
   };
 
   const handleGetRawGrades = async (student: any) => {
-    setShowGrades(true);
+    
     setLoadingStudentId(student.Student_ID);
     // setLoading(true);
     setGradeStudent(student);
@@ -204,6 +204,7 @@ function StudentsComponent() {
       if (!res.ok) throw new Error("Failed to fetch grades");
       const data = await res.json();
       setGrades(data); // assume API returns Course[] type
+      setShowGrades(true);
     } catch (err: any) {
       setGrades([]);
     } finally {

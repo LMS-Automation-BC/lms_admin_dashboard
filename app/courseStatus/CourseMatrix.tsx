@@ -23,7 +23,7 @@ const CourseMatrix: React.FC<CourseMatrixProps> = ({
   const studentNames = Object.keys(students);
 
   return (
-    <div className={styles.container}>
+    <div className={styles.container}><div className="tableWrapper">
       <table className={styles.table}>
         <thead>
           <tr>
@@ -72,7 +72,7 @@ const CourseMatrix: React.FC<CourseMatrixProps> = ({
             </tr>
           ))}
         </tbody>
-      </table>
+      </table></div>
     </div>
   );
 };
