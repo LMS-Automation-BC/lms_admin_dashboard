@@ -108,10 +108,14 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
     setEditingIndex(index);
     setEditedRow({ ...coursesTranscript[index] });
   };
-
+  
   const handleSave = (index: number) => {
     const updated = [...coursesTranscript];
-    if (editedRow) updated[index] = editedRow;
+    if (editedRow){
+      if (typeof editedRow["Credits"] === "string") {
+  editedRow["Credits"] = parseInt(editedRow["Credits"], 10);
+}
+       updated[index] = editedRow;}
     setCoursesTranscript(updated);
     setEditingIndex(null);
     

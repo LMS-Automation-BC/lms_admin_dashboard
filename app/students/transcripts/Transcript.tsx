@@ -118,7 +118,8 @@ export default function TranscriptPageClient({
     </>
   );
 }
-function sortUserGrades(programCourses: any[], userGrades: any[]): any[] {
+export function sortUserGrades(programCourses: any[], userGrades: any[]): any[] {
+  console.log('sortusergrades');
   // Step 1: Build lookup maps
   const courseNameToIndex: Record<string, number> = {};
   const courseNameToCode: Record<string, string> = {};
