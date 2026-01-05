@@ -11,7 +11,7 @@ import ContactColumns, {
 import { CsvRow } from "@/app/components/GradeParser";
 import SecondPage from "@/app/components/SecondPage";
 import TranscriptDate from "@/app/components/TranscriptDate";
-import { gradeScale } from "@/app/grades/helpers/grade";
+import { extractMonthYear, gradeScale } from "@/app/grades/helpers/grade";
 import { parseISO, format } from "date-fns";
 import { FiCheck, FiX, FiEdit2, FiTrash2 } from "react-icons/fi";
 import UnfinishedCoursesList, {
@@ -192,16 +192,11 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
   const checkFail = () => {
     setHasFail(coursesTranscript.some((row) => row.Grade === "F"));
   };
-  // 1️⃣ Sort transcript when sortedProgram changes
-  useEffect(() => {
-    if (!sortedProgram.length) return;
-
-    // Track used indices to handle duplicates properly
+  const sortCourses = (courses:any[]) => {
     const usedIndices = new Set<number>();
-
     const matched: CsvRow[] = sortedProgram.map((course) => {
       // Find first student course that hasn't been used yet and matches code AND/OR name
-      const index = coursesTranscript.findIndex((c, i) => {
+      const index = courses.findIndex((c, i) => {
         if (usedIndices.has(i)) return false; // already matched
         return (
           c.Course_Code === course.Course_Code &&
@@ -211,7 +206,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
 
       if (index !== -1) {
         usedIndices.add(index);
-        return coursesTranscript[index];
+        return courses[index];
       }
 
       // Not found → placeholder
@@ -226,7 +221,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
     });
 
     // Extra student courses that were not matched
-    const extraStudentCourses = coursesTranscript.filter(
+    const extraStudentCourses = courses.filter(
       (_, i) => !usedIndices.has(i)
     );
 
@@ -234,6 +229,13 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
     const finalTranscript: CsvRow[] = [...matched, ...extraStudentCourses];
 
     setCoursesTranscript(finalTranscript);
+  }
+  // 1️⃣ Sort transcript when sortedProgram changes
+  useEffect(() => {
+    if (!sortedProgram.length) return;
+
+    // Track used indices to handle duplicates properly
+   sortCourses(coursesTranscript)
   }, [sortedProgram]); // runs only when program changes
 
   // 2️⃣ Recalculate scores, unfinished courses, fail whenever transcript changes
@@ -260,8 +262,15 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
 
   const handleSave = (index: number) => {
     const updated = [...coursesTranscript];
-    if (editedRow) updated[index] = editedRow;
-    setCoursesTranscript(updated);
+    
+    if (editedRow) {
+      if (typeof editedRow["Credits"] === "string") {
+        editedRow["Credits"] = parseInt(editedRow["Credits"], 10);
+      }
+      updated[index] = editedRow;
+    }
+    //setCoursesTranscript(updated);
+    sortCourses(updated);
     setEditingIndex(null);
   };
   const calculateScores = (users: any[]) => {
@@ -414,16 +423,18 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
           <button onClick={handlePrint} className="export-button">
             Print
           </button>{" "}
-           {enrollmentNo && <GetReportButton
-        enrollmentNo={enrollmentNo}
-        viewOnly={viewOnly}
-        reportLoading={reportLoading}
-        setReportLoading={setReportLoading}
-        setCoursesTranscript={setCoursesTranscript}
-        setDiffData={setDiffData}
-        setShowDiffModal={setShowDiffModal}
-        existingTranscript={coursesTranscript}
-      />}{" "}
+          {enrollmentNo && (
+            <GetReportButton
+              enrollmentNo={enrollmentNo}
+              viewOnly={viewOnly}
+              reportLoading={reportLoading}
+              setReportLoading={setReportLoading}
+              setCoursesTranscript={setCoursesTranscript}
+              setDiffData={setDiffData}
+              setShowDiffModal={setShowDiffModal}
+              existingTranscript={coursesTranscript}
+            />
+          )}{" "}
           {/* <button
             hidden={viewOnly}
             onClick={handleGetReport}
@@ -629,17 +640,17 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
                           <td className="last-attempt">
                             {isEditing ? (
                               <input
-                                value={
-                                  isEditing && editedRow
-                                    ? editedRow["Last_Attempt"]
-                                    : ""
-                                }
+                                value={editedRow?.["Last_Attempt"] || ""}
                                 onChange={(e) =>
                                   handleChange("Last_Attempt", e.target.value)
                                 }
                               />
                             ) : (
-                              row["Last_Attempt"] || row["Semester"]
+                              (() => {
+                                const value =
+                                  row["Last_Attempt"] ?? row["Semester"];
+                                return value ? extractMonthYear(value) : "";
+                              })()
                             )}
                           </td>
                           <td className="credits">
