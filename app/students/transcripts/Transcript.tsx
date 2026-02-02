@@ -30,7 +30,8 @@ export default function TranscriptPageClient({
     const programCourseNames = new Set(
       selectedProgram.map((course) => course.Course_Name.toLowerCase().trim())
     );
-    return sortUserGrades(selectedProgram, users).map((user: any) => {
+    // return sortUserGrades(selectedProgram, users)
+    return users.map((user: any) => {
       const gradePoint = getGrade(user["Grade"])?.gpa || 0;
       const userCourseName = (user.Default_Course_Name || "")
         .toLowerCase()
