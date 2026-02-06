@@ -184,3 +184,27 @@
 .confirmLink a:hover {
   color: #005bb5;
 }
+.notestextarea {
+  border: 1px solid #ccc;
+  padding: 8px;
+  resize: vertical;
+}
+.notestextarea:focus {
+  border-color: black;
+  box-shadow: 0 0 0 1px black;
+}
+.percentWrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.percentWrapper input {
+  flex: 1;          /* input takes available space */
+  min-width: 0;     /* prevents overflow weirdness */
+}
+
+.percent {
+  white-space: nowrap;
+}
+
