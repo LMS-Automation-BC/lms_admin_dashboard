@@ -63,8 +63,8 @@ const GradeParser: React.FC = () => {
 
         return (
           csvCode === courseCode ||
-          csvName.includes(courseName) ||
-          courseName.includes(csvName) // <-- added reverse match
+          csvName?.includes(courseName) ||
+          courseName?.includes(csvName) // <-- added reverse match
         );
       });
       if (matches.length > 0) {

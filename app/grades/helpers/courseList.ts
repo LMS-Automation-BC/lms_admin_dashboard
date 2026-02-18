@@ -162,11 +162,11 @@ export function parseCourseString(courseString:string) {
 }
 
 const normalize = (str: string) =>
-  str.toLowerCase().replace(/[^a-z0-9\s]/gi, "").trim();
+  str?.toLowerCase().replace(/[^a-z0-9\s]/gi, "").trim();
 
 const nameSimilarity = (a: string, b: string): boolean => {
-  const aWords = new Set(normalize(a).split(/\s+/));
-  const bWords = new Set(normalize(b).split(/\s+/));
+  const aWords = new Set(normalize(a)?.split(/\s+/));
+  const bWords = new Set(normalize(b)?.split(/\s+/));
 
   // Count common words
   const commonWords = [...aWords].filter(word => bWords.has(word));
