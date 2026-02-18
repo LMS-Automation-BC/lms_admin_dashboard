@@ -332,7 +332,11 @@ const StudentModal = ({
                               type={
                                 isbool ? "checkbox" : isDate ? "date" : "text"
                               }
-                              value={formData[field] ?? ""}
+                              value={
+                                isDate && formData[field]
+                                  ? formData[field].split("T")[0]
+                                  : (formData[field] ?? "")
+                              }
                               onChange={(e) =>
                                 handleChange(field, e.target.value)
                               }
@@ -344,7 +348,11 @@ const StudentModal = ({
                             type={
                               isbool ? "checkbox" : isDate ? "date" : "text"
                             }
-                            value={formData[field] ?? ""}
+                            value={
+                              isDate && formData[field]
+                                ? formData[field].split("T")[0]
+                                : (formData[field] ?? "")
+                            }
                             onChange={(e) =>
                               handleChange(field, e.target.value)
                             }
