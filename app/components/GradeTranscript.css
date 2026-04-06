@@ -370,10 +370,6 @@
   font-weight: bold;
 }
 .notinprogram{
-   background-color: #b7d8b3; /* light green background */
-  font-weight: bold;
-}
-.unfinished-highlight {
-  background-color: #fff4b3; /* light yellow background */
+   background-color: #b7d8b3; /* light red background */
   font-weight: bold;
 }

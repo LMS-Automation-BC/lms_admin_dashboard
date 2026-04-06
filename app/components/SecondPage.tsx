@@ -84,7 +84,7 @@ const SecondPage: React.FC = () => {
       <SpecialGradesTable></SpecialGradesTable>
       <div>
         <p>
-          <span style={{ fontWeight: "bold" }}>
+          <span style={{ fontWeight: "590" }}>
             Computation of Grade Point Average (GPA){" "}
           </span>
           <br></br>

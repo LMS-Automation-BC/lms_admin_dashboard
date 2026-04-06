@@ -9,6 +9,8 @@ import {
   FiEdit2,
   FiCheck,
   FiX,
+  FiArrowUp,
+  FiArrowDown,
 } from "react-icons/fi";
 
 interface Course {
@@ -233,6 +235,76 @@ export default function ProgramsPage() {
         (c) => c.Course_Code !== courseCodeToDelete
       ),
     }));
+  };
+
+  // MOVE COURSE UP
+  const moveCourseUp = async (id: number) => {
+    if (!selectedProgram) return;
+    const courses = programs[selectedProgram];
+    const index = courses.findIndex((c) => c.id === id);
+    if (index <= 0) return;
+
+    const updatedCourses = [...courses];
+    [updatedCourses[index - 1], updatedCourses[index]] = [
+      updatedCourses[index],
+      updatedCourses[index - 1],
+    ];
+
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/program/reorder`,
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          program: selectedProgram,
+          courses: updatedCourses,
+        }),
+      }
+    );
+
+    if (res.ok) {
+      setPrograms((prev) => ({
+        ...prev,
+        [selectedProgram]: updatedCourses,
+      }));
+    } else {
+      alert("Failed to move course up");
+    }
+  };
+
+  // MOVE COURSE DOWN
+  const moveCourseDown = async (id: number) => {
+    if (!selectedProgram) return;
+    const courses = programs[selectedProgram];
+    const index = courses.findIndex((c) => c.id === id);
+    if (index >= courses.length - 1) return;
+
+    const updatedCourses = [...courses];
+    [updatedCourses[index], updatedCourses[index + 1]] = [
+      updatedCourses[index + 1],
+      updatedCourses[index],
+    ];
+
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/program/reorder`,
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          program: selectedProgram,
+          courses: updatedCourses,
+        }),
+      }
+    );
+
+    if (res.ok) {
+      setPrograms((prev) => ({
+        ...prev,
+        [selectedProgram]: updatedCourses,
+      }));
+    } else {
+      alert("Failed to move course down");
+    }
   };
 
   if (loading)
@@ -467,7 +539,7 @@ export default function ProgramsPage() {
 
             <tbody>
               {programs[selectedProgram].map(
-                ({ Course_Code, Course_Name, Credits, id }) => (
+                ({ Course_Code, Course_Name, Credits, id }, index) => (
                   <tr key={id}>
                     <td> {editCourseId === id ? (
                         <input
@@ -527,6 +599,22 @@ export default function ProgramsPage() {
                         </>
                       ) : (
                         <>
+                          <button
+                            className="button small"
+                            onClick={() => moveCourseUp(id ?? 0)}
+                            title="Move up"
+                            disabled={index === 0}
+                          >
+                            <FiArrowUp />
+                          </button>
+                          <button
+                            className="button small"
+                            onClick={() => moveCourseDown(id ?? 0)}
+                            title="Move down"
+                            disabled={index === programs[selectedProgram].length - 1}
+                          >
+                            <FiArrowDown />
+                          </button>
                           <button
                             className="button small"
                             onClick={() =>

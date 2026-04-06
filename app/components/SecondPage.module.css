@@ -79,7 +79,7 @@
 
 .gradingTable thead th {
   background-color: #d3d3d3; /* grey header */
-  font-weight: 600;
+  font-weight: 590;
 }
 
 .gradingTable tbody tr:nth-child(even) {
@@ -121,5 +121,5 @@
   line-height: 1;
 }
 .boldgrade {
-  font-weight: 600;
+  font-weight: 590;
 }
