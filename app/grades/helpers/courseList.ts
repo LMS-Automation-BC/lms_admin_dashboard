@@ -175,6 +175,9 @@ const nameSimilarity = (a: string, b: string): boolean => {
 };
 
 export const getMatchingProgram = (programs:CoursesMap,csvData: CsvRow[]): string | null => {
+  if(csvData[0]["Program Name"] && programs[csvData[0]["Program Name"]]){
+    return  csvData[0]["Program Name"];
+  }
   const studentCourseCodes = csvData.map(row => row["Course code"]);
   const studentCourseNames = csvData.map(row => row["Overall Class Name"] || row["Name"]);
 

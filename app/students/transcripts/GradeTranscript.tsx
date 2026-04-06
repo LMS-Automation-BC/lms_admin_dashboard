@@ -50,12 +50,11 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
   // unfinishedCourses,
 }) => {
   const sortedProgram = useMemo(() => {
-  return [...selectedProgram].sort((a: any, b: any) => a.id - b.id);
-}, [selectedProgram]);
-
+    return [...selectedProgram].sort((a: any, b: any) => a.id - b.id);
+  }, [selectedProgram]);
 
   const [unfinishedCourses, setUnfinishedCourses] = useState(
-    getUnfinishedCourses(sortedProgram, courses)
+    getUnfinishedCourses(sortedProgram, courses),
   );
   const courseoptions = unfinishedCourses.map((course) => ({
     value: course.Course_Name,
@@ -131,7 +130,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
       setReportLoading(true);
 
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/grade?type=getfromlms&studentId=${enrollmentNo}`
+        `${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/grade?type=getfromlms&studentId=${enrollmentNo}`,
       );
 
       const data = await res.json();
@@ -162,7 +161,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
             Transcript_Data: JSON.stringify(coursesTranscript),
             CreatedDate: new Date().toISOString(),
           }),
-        }
+        },
       );
 
       const newTranscript = await res.json();
@@ -182,13 +181,13 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
   const [hideActions, setHideActions] = useState(false);
   const [programStatus, setProgramStatus] = useState<string>("");
   const [programStart, setProgramStart] = useState(
-    toInputDate(programStartDate)
+    toInputDate(programStartDate),
   );
   const [transcriptPrint, setTranscriptPrint] = useState(
-    toInputDate(new Date().toISOString())
+    toInputDate(new Date().toISOString()),
   );
   const [transcriptRePrint, setTranscriptRePrint] = useState(
-    toInputDate(new Date().toISOString())
+    toInputDate(new Date().toISOString()),
   );
   // useEffect(() => {
   //   calculateScores(courses);
@@ -198,59 +197,64 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
     setHasFail(coursesTranscript.some((row) => row.Grade === "F"));
   };
   const sortCourses = (courses: CsvRow[]) => {
-    console.log('sort courses')
-  const usedIndices = new Set<number>();
+    console.log("sort courses");
+    const usedIndices = new Set<number>();
 
-  // Step 1: Build lookup map for program course order
-  const courseNameToIndex: Record<string, number> = {};
-  sortedProgram.forEach((course, index) => {
-    courseNameToIndex[course.Course_Name.toLowerCase().trim()] = index;
-  });
-
-  // Step 2: Map matched program courses
-  const matched: CsvRow[] = sortedProgram.map((programCourse) => {
-    // Find first student course that hasn't been used yet and matches code AND/OR name
-    const index = courses.findIndex((c, i) => {
-      if (usedIndices.has(i)) return false;
-      return (
-        c.Course_Code === programCourse.Course_Code &&
-        c.Default_Course_Name === programCourse.Course_Name
-      );
+    // Step 1: Build lookup map for program course order
+    const courseNameToIndex: Record<string, number> = {};
+    sortedProgram.forEach((course, index) => {
+      courseNameToIndex[course.Course_Name.toLowerCase().trim()] = index;
     });
 
-    if (index !== -1) {
-      usedIndices.add(index);
-      return courses[index];
-    }
+    // Step 2: Map matched program courses
+    const matched: CsvRow[] = sortedProgram.map((programCourse) => {
+      // Find first student course that hasn't been used yet and matches code AND/OR name
+      const index = courses.findIndex((c, i) => {
+        if (usedIndices.has(i)) return false;
+        return (
+          c.Course_Code === programCourse.Course_Code &&
+          c.Default_Course_Name === programCourse.Course_Name
+        );
+      });
 
-    // Not found → placeholder
-    return {
-      Course_Code: programCourse.Course_Code,
-      Default_Course_Name: programCourse.Course_Name,
-      Name: "",
-      Grade: "",
-      Grade_Point: 0,
-      Credits: programCourse.Credits,
-    } as any as  CsvRow;
-  });
+      if (index !== -1) {
+        usedIndices.add(index);
+        return courses[index];
+      }
 
-  // Step 3: Sort matched program courses according to program order
-  const sortedMatched = [...matched].sort((a, b) => {
-    const aIndex =
-      courseNameToIndex[a.Default_Course_Name?.toLowerCase()?.trim()] ?? Infinity;
-    const bIndex =
-      courseNameToIndex[b.Default_Course_Name?.toLowerCase()?.trim()] ?? Infinity;
-    return aIndex - bIndex;
-  });
+      // Not found → placeholder
+      return {
+        Course_Code: programCourse.Course_Code,
+        Default_Course_Name: programCourse.Course_Name,
+        Name: "",
+        Grade: "",
+        Grade_Point: 0,
+        Credits: programCourse.Credits,
+      } as any as CsvRow;
+    });
 
-  // Step 4: Extra student courses that were not matched
-  const extraStudentCourses = courses.filter((_, i) => !usedIndices.has(i));
+    // Step 3: Sort matched program courses according to program order
+    const sortedMatched = [...matched].sort((a, b) => {
+      const aIndex =
+        courseNameToIndex[a.Default_Course_Name?.toLowerCase()?.trim()] ??
+        Infinity;
+      const bIndex =
+        courseNameToIndex[b.Default_Course_Name?.toLowerCase()?.trim()] ??
+        Infinity;
+      return aIndex - bIndex;
+    });
 
-  // Step 5: Combine
-  const finalTranscript: CsvRow[] = [...sortedMatched, ...extraStudentCourses];
+    // Step 4: Extra student courses that were not matched
+    const extraStudentCourses = courses.filter((_, i) => !usedIndices.has(i));
 
-  setCoursesTranscript(finalTranscript);
-};
+    // Step 5: Combine
+    const finalTranscript: CsvRow[] = [
+      ...sortedMatched,
+      ...extraStudentCourses,
+    ];
+
+    setCoursesTranscript(finalTranscript);
+  };
 
   // 1️⃣ Sort transcript when sortedProgram changes
   useEffect(() => {
@@ -265,7 +269,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
     if (!coursesTranscript.length) return;
 
     setUnfinishedCourses(
-      getUnfinishedCourses(sortedProgram, coursesTranscript)
+      getUnfinishedCourses(sortedProgram, coursesTranscript),
     );
     calculateScores(coursesTranscript);
     checkFail();
@@ -283,36 +287,38 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
   };
 
   const handleSave = (index: number) => {
-  const updated = [...coursesTranscript];
+    const updated = [...coursesTranscript];
 
-  if (editedRow) {
-    const normalizedRow = {
-      ...editedRow,
-      Credits:
-        typeof editedRow.Credits === "string"
-          ? parseInt(editedRow.Credits, 10)
-          : editedRow.Credits,
-    };
+    if (editedRow) {
+      const normalizedRow = {
+        ...editedRow,
+        Credits:
+          typeof editedRow.Credits === "string"
+            ? parseInt(editedRow.Credits, 10)
+            : editedRow.Credits,
+      };
 
-    updated[index] = normalizedRow;
-  }
+      updated[index] = normalizedRow;
+    }
 
-  // 1️⃣ Re-sort courses based on program order
-  const sortedUpdated = sortUserGrades(selectedProgram, updated);
+    // 1️⃣ Re-sort courses based on program order
+    const sortedUpdated = sortUserGrades(selectedProgram, updated);
 
-  // 2️⃣ Recalculate isInProgram for ALL rows
-  const withProgramFlags = calculateIsInProgram(selectedProgram, sortedUpdated);
+    // 2️⃣ Recalculate isInProgram for ALL rows
+    const withProgramFlags = calculateIsInProgram(
+      selectedProgram,
+      sortedUpdated,
+    );
 
-  // 3️⃣ Update transcript
-  setCoursesTranscript(withProgramFlags);
+    // 3️⃣ Update transcript
+    setCoursesTranscript(withProgramFlags);
 
-  setEditingIndex(null);
-};
-
+    setEditingIndex(null);
+  };
 
   const calculateIsInProgram = (selectedProgram: any[], users: any[]) => {
     const programCourseNames = new Set(
-      selectedProgram.map((course) => course.Course_Name.toLowerCase().trim())
+      selectedProgram.map((course) => course.Course_Name.toLowerCase().trim()),
     );
 
     return users.map((user) => {
@@ -324,7 +330,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
         ? Array.from(programCourseNames).some(
             (programName) =>
               programName.includes(userCourseName) ||
-              userCourseName.includes(programName)
+              userCourseName.includes(programName),
           )
         : false;
 
@@ -334,14 +340,13 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
       };
     });
   };
-  
 
   const calculateScores = (users: any[]) => {
     let totalCredits = 0;
     if (program) {
       totalCredits = sortedProgram?.reduce(
         (sum, course) => sum + (course.Credits || 0),
-        0
+        0,
       );
     }
     let totalGPA = 0;
@@ -390,7 +395,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
       if (field === "Default_Course_Name") {
         const match = unfinishedCourses.find(
           (x) =>
-            x.Course_Name.toLowerCase().trim() === value.toLowerCase().trim()
+            x.Course_Name.toLowerCase().trim() === value.toLowerCase().trim(),
         );
 
         updatedRow = {
@@ -431,8 +436,15 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
       if (className) acc[className] = (acc[className] || 0) + 1;
       return acc;
     },
-    {}
+    {},
   );
+  const isUnfinished = (row: CsvRow) =>
+    row["Default_Course_Name"] &&
+    unfinishedCourses.some(
+      (course) =>
+        course.Course_Name.toLowerCase().trim() ===
+        row["Default_Course_Name"].toLowerCase().trim()
+    );
 
   // Function to check if a row is duplicate
   const isDuplicate = (row: CsvRow) =>
@@ -445,9 +457,9 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
         differences={diffData}
         onClose={() => setShowDiffModal(false)}
       />
-      {!viewOnly && (
+      {/* {!viewOnly && (
         <UnfinishedCoursesList unfinishedCourses={unfinishedCourses} />
-      )}
+      )} */}
       {!viewOnly && (
         <div style={{ border: "1px solid", width: "30%" }}>
           <p style={{ fontSize: "20", fontWeight: "bold" }}>
@@ -455,6 +467,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
           </p>
           <ul>
             <li className="duplicate-highlight"> (Duplicate)</li>
+            <li className="unfinished-highlight"> (Unfinished)</li>
             <li>Program course</li>
             <li className="notinprogram">
               Random Elective Course - XYZ123 (Not in Program)
@@ -577,7 +590,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
                   </span>
                   :{" "}
                   {formatDateWithHyphen(
-                    rePrint ? transcriptPrint : programStart
+                    rePrint ? transcriptPrint : programStart,
                   )}
                 </div>
               ) : (
@@ -614,7 +627,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
                   </span>
                   :{" "}
                   {formatDateWithHyphen(
-                    rePrint ? transcriptRePrint : transcriptPrint
+                    rePrint ? transcriptRePrint : transcriptPrint,
                   )}
                 </div>
               ) : (
@@ -672,9 +685,11 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
                             className={`course-name ${
                               isDuplicate(row)
                                 ? "duplicate-highlight"
-                                : row.isInProgram === false && !hideActions
-                                ? "notinprogram"
-                                : ""
+                                : isUnfinished(row) && !hideActions
+                                  ? "unfinished-highlight"
+                                  : row.isInProgram === false && !hideActions
+                                    ? "notinprogram"
+                                    : ""
                             }`}
                           >
                             {isEditing ? (
@@ -690,7 +705,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
                                 onChange={(selectedOption: any) =>
                                   handleChange(
                                     "Default_Course_Name",
-                                    selectedOption?.value || ""
+                                    selectedOption?.value || "",
                                   )
                                 }
                                 options={courseoptions}

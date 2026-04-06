@@ -3,7 +3,7 @@
 
 import './login.css';
 import { useState } from 'react';
-
+import { signIn } from "next-auth/react";
 export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -48,6 +48,11 @@ export default function LoginPage() {
           <button type="submit" className="login-button">
             Sign In
           </button>
+           {/* <button type="button"
+  className="login-button"
+  onClick={() => signIn("azure-ad")}>
+            SSO
+          </button> */}
         </form>
       </div>
     </div>

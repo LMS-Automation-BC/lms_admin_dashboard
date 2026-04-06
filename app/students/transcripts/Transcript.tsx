@@ -125,11 +125,13 @@ export function sortUserGrades(programCourses: any[], userGrades: any[]): any[] 
   const courseNameToIndex: Record<string, number> = {};
   const courseNameToCode: Record<string, string> = {};
 
-  programCourses.forEach((course: any, index: number) => {
-    const name = course.Course_Name.toLowerCase().trim();
-    courseNameToIndex[name] = index;
-    courseNameToCode[name] = course.Course_Code;
-  });
+  programCourses
+    .sort((a: any, b: any) => a.id - b.id)
+    .forEach((course: any, index: number) => {
+      const name = course.Course_Name.toLowerCase().trim();
+      courseNameToIndex[name] = index;
+      courseNameToCode[name] = course.Course_Code;
+    });
 
   // Step 2: Map user grades to ensure Course_Code exists
   const mappedGrades = userGrades.map((grade: any) => {

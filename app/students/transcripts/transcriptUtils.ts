@@ -31,6 +31,7 @@ export const calculateGradePoint = (program: any[], users: any[]) => {
 };
  const sortUserGrades = (programCourses: any[], userGrades: any[])=> { 
     // Step 1: Build lookup maps 
+    console.log('sortUserGrades - transcript utils')
     const courseNameToIndex: Record<string, number> = {};
      const courseNameToCode: Record<string, string> = {}; 
      programCourses.forEach((course: any, index: number) => { 
