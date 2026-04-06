@@ -599,7 +599,7 @@ export default function ProgramsPage() {
                         </>
                       ) : (
                         <>
-                          <button
+                          {/* <button
                             className="button small"
                             onClick={() => moveCourseUp(id ?? 0)}
                             title="Move up"
@@ -614,7 +614,7 @@ export default function ProgramsPage() {
                             disabled={index === programs[selectedProgram].length - 1}
                           >
                             <FiArrowDown />
-                          </button>
+                          </button> */}
                           <button
                             className="button small"
                             onClick={() =>
