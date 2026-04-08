@@ -11,7 +11,7 @@ export function middleware(req: NextRequest) {
   }
 
   if (isLoggedIn && isLoginPage) {
-    return NextResponse.redirect(new URL('/attendance', req.url));
+    return NextResponse.redirect(new URL('/dborganization', req.url));
   }
 
   return NextResponse.next();
