@@ -17,7 +17,7 @@ export default function LoginPage() {
     });
 
     if (res.ok) {
-      window.location.href = '/attendance'; // redirect to home
+      window.location.href = '/'; // redirect to home
     } else {
       setError('Invalid credentials');
     }
