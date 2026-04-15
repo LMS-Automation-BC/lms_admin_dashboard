@@ -28,22 +28,18 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Debug environment variables
+      - name: Create .env.local file
         run: |
-          echo "NEXT_PUBLIC_FUNCTION_APP_URL: $NEXT_PUBLIC_FUNCTION_APP_URL"
-          echo "NEXT_PUBLIC_BASE_URL: $NEXT_PUBLIC_BASE_URL"
-        env:
-          NEXT_PUBLIC_FUNCTION_APP_URL: ${{ secrets.NEXT_PUBLIC_FUNCTION_APP_URL }}
-          NEXT_PUBLIC_BASE_URL: ${{ secrets.NEXT_PUBLIC_BASE_URL }}
+          echo "NEXT_PUBLIC_FUNCTION_APP_URL=${{ secrets.NEXT_PUBLIC_FUNCTION_APP_URL }}" > .env.local
+          echo "NEXTAUTH_URL=${{ secrets.NEXTAUTH_URL }}" >> .env.local
+          echo "NEXT_PUBLIC_BASE_URL=${{ secrets.NEXT_PUBLIC_BASE_URL }}" >> .env.local
+          echo "NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}" >> .env.local
+          echo "AZURE_AD_CLIENT_ID=${{ secrets.AZURE_AD_CLIENT_ID }}" >> .env.local
+          echo "AZURE_AD_TENANT_ID=${{ secrets.AZURE_AD_TENANT_ID }}" >> .env.local
+          echo "AZURE_AD_CLIENT_SECRET=${{ secrets.AZURE_AD_CLIENT_SECRET }}" >> .env.local
 
       - name: Build Next.js app
-        run: npm run build
-        env:
-          NEXT_PUBLIC_FUNCTION_APP_URL: ${{ secrets.NEXT_PUBLIC_FUNCTION_APP_URL }}
-          NEXT_PUBLIC_BASE_URL: ${{ secrets.NEXT_PUBLIC_BASE_URL }}
-          AZURE_AD_CLIENT_ID: ${{ secrets.AZURE_AD_CLIENT_ID }}
-          AZURE_AD_TENANT_ID: ${{ secrets.AZURE_AD_TENANT_ID }}
-          AZURE_AD_CLIENT_SECRET: ${{ secrets.AZURE_AD_CLIENT_SECRET }} 
+        run: npm run build 
 
       - name: Upload artifact and deploy
         id: builddeploy
