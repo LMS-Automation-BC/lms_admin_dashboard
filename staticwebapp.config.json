@@ -1,5 +1,5 @@
 {
   "buildCommand": "npm run build",
-  "outputLocation": ".next",
-  "apiLocation": "pages/api"
+  "outputLocation": "out",
+  "apiLocation": "api"
 }

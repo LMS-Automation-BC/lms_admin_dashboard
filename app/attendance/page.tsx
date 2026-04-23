@@ -2,7 +2,7 @@ import CsvCombiner from "../components/AttendanceProcessor";
 import CsvUpload from "../components/CSVUploader";
 // import { checkPermission } from '@/lib/permissions';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../api/auth/[...nextauth]/route';
+import { authOptions } from '../../lib/auth';
 
 const AttendancePage: React.FC = async () => {
   const session = await getServerSession(authOptions);
