@@ -24,7 +24,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     });
 
     res.setHeader("Set-Cookie", cookie);
-    return res.status(200).json({ success: true });
+    return res.status(200).json({ success: true, userId: username });
   }
 
   return res.status(401).json({ error: "Invalid credentials" });

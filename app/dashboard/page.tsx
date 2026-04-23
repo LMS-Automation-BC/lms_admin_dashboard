@@ -1,15 +1,13 @@
-// app/dashboard/page.tsx or pages/dashboard.tsx
+import { getServerSession } from 'next-auth';
+import { redirect } from 'next/navigation';
+import { authOptions } from '../api/auth/[...nextauth]/route';
 
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-
-export  default async function DashboardPage() {
-  const cookieStore = cookies();
-  const isAuth = (await cookieStore).get("auth");
-
-  if (!isAuth) {
-    redirect("/login");
+export default async function DashboardPage() {
+  const session = await getServerSession(authOptions);
+  console.log('Dashboard session', session);
+  if (!session) {
+    redirect('/login');
   }
 
   return <h1>Protected Dashboard</h1>;
-}
+} 

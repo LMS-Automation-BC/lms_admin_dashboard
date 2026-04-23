@@ -17,6 +17,9 @@ export default function LoginPage() {
     });
 
     if (res.ok) {
+      const data = await res.json();
+      // Store user ID in localStorage
+      localStorage.setItem('userId', data.userId);
       window.location.href = '/'; // redirect to home
     } else {
       setError('Invalid credentials');
@@ -48,9 +51,11 @@ export default function LoginPage() {
           <button type="submit" className="login-button">
             Sign In
           </button>
-           <button type="button"
-  className="login-button"
-  onClick={() => signIn("azure-ad")}>
+          <button
+            type="button"
+            className="login-button"
+            onClick={() => signIn('azure-ad', { callbackUrl: '/' })}
+          >
             SSO
           </button>
         </form>
