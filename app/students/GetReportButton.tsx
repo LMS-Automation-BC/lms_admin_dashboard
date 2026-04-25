@@ -1,6 +1,7 @@
 import React from "react";
 import { compareTranscriptArrays } from "./transcripts/TranscriptDiffModal";
 import { CsvRow } from "../components/GradeParser";
+import toast from 'react-hot-toast';
 
 export interface DiffResult {
   field: string;
@@ -49,9 +50,14 @@ const GetReportButton: React.FC<GetReportButtonProps> = ({
       const diffs = compareTranscriptArrays(existingTranscript, data);
       setDiffData(diffs);
 
-      setShowDiffModal(true);
+      if (diffs.length === 0) {
+        toast.success("Report fetched successfully, no changes found.");
+      } else {
+        toast.success("Report fetched successfully, differences found.");
+      }
     } catch (err) {
       console.error("Error fetching report:", err);
+      toast.error("Failed to fetch LMS report");
     } finally {
       setReportLoading(false);
     }

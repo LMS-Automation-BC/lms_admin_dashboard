@@ -51,13 +51,13 @@ export default function LoginPage() {
           <button type="submit" className="login-button">
             Sign In
           </button>
-          <button
+          {/* <button
             type="button"
             className="login-button"
             onClick={() => signIn('azure-ad', { callbackUrl: '/' })}
           >
             SSO
-          </button>
+          </button> */}
         </form>
       </div>
     </div>

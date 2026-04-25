@@ -6,7 +6,7 @@ import { useSession } from 'next-auth/react';
 export default function UserGreeting() {
   const { data: session } = useSession();
   const userId =
-    session?.user?.email || session?.user?.name || session?.user?.id || null;
+    session?.user?.email || session?.user?.name || null;
 
   if (!userId) return null;
 

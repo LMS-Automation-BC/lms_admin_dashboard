@@ -5,6 +5,7 @@ import Sidebar from './components/Sidebar';
 import Providers from './providers';
 import './globals.css'; // Create this if you want basic styles
 import { OrganizationProvider } from './dborganization/OrganizationContext';
+import { Toaster } from 'react-hot-toast';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -19,6 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </OrganizationProvider>
             </main>
           </div>
+          <Toaster />
         </Providers>
       </body>
     </html>
