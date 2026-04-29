@@ -21,6 +21,7 @@ const GradeReport: React.FC<GradeReportProps> = ({
   const [coursesTranscript, setCoursesTranscript] = useState<CsvRow[]>(
     courses || []
   );
+  const [showAssignments, setShowAssignments] = useState(false);
   const [diffData, setDiffData] = useState<any[]>([]);
   const [showDiffModal, setShowDiffModal] = useState(false);
   const [reportLoading, setReportLoading] = useState(false);
@@ -30,7 +31,7 @@ const GradeReport: React.FC<GradeReportProps> = ({
   const reactToPrintFn = useReactToPrint({
     contentRef: transcriptRef,
     onAfterPrint: () => setHideActions(false),
-    documentTitle: `${studentName}-Transcript`,
+    documentTitle: `${studentName}-${showAssignments ? "Assignments" : "Transcript"}`,
   });
 
   const handlePrint = async () => {
@@ -62,21 +63,36 @@ const GradeReport: React.FC<GradeReportProps> = ({
 
   return (
     <>
-      <button onClick={handlePrint} className="export-button">
-        Print
-      </button>
-      {student_ID && (
-        <GetReportButton
-          enrollmentNo={student_ID}
-          viewOnly={false}
-          reportLoading={reportLoading}
-          setReportLoading={setReportLoading}
-          setCoursesTranscript={setCoursesTranscript}
-          setDiffData={setDiffData}
-          setShowDiffModal={setShowDiffModal}
-          existingTranscript={coursesTranscript}
-        />
-      )}
+      <div className={styles.toolbar}>
+        <button onClick={handlePrint} className="export-button">
+          Print
+        </button>
+        {student_ID && (
+          <GetReportButton
+            enrollmentNo={student_ID}
+            viewOnly={false}
+            reportLoading={reportLoading}
+            setReportLoading={setReportLoading}
+            setCoursesTranscript={setCoursesTranscript}
+            setDiffData={setDiffData}
+            setShowDiffModal={setShowDiffModal}
+            existingTranscript={coursesTranscript}
+            assignments={showAssignments}
+          />
+        )}
+        <div className={styles.toggleContainer}>
+          <label className={styles.toggleLabel}>
+            <input
+              type="checkbox"
+              checked={showAssignments}
+              onChange={() => setShowAssignments(!showAssignments)}
+            />
+            <span>
+              {showAssignments ? "Assignments" : "Grades"}
+            </span>
+          </label>
+        </div>
+      </div>
 
       <div ref={transcriptRef} className="printable-content print-area">
       
@@ -114,42 +130,78 @@ const GradeReport: React.FC<GradeReportProps> = ({
           <table className={styles.table}>
             <thead>
               <tr>
-                <th className={styles.th}>Enrolled at</th>
-                <th className={styles.th}>Overall Class Name</th>
-                <th className={styles.th}>Letter Grade</th>
-                <th className={styles.th}>Average of Percent%</th>
-                {!hideActions && <th className={styles.th}>Actions</th>}
+                {showAssignments ? (
+                  <>
+                    <th className={styles.th}>Assignment Name</th>
+                    <th className={styles.th}>Due Date</th>
+                    <th className={styles.th}>Score</th>
+                    <th className={styles.th}>Max Score</th>
+                    {!hideActions && <th className={styles.th}>Actions</th>}
+                  </>
+                ) : (
+                  <>
+                    <th className={styles.th}>Enrolled at</th>
+                    <th className={styles.th}>Overall Class Name</th>
+                    <th className={styles.th}>Letter Grade</th>
+                    <th className={styles.th}>Average of Percent%</th>
+                    {!hideActions && <th className={styles.th}>Actions</th>}
+                  </>
+                )}
               </tr>
             </thead>
             <tbody>
               {coursesTranscript.map((course, index) => (
                 <tr key={course.Course_Code + index} className={styles.trHover}>
-                  <td className={`${styles.td} ${styles.tdNoWrap}`}>
-                    {convertToYMD(course.Enrolled_At)}
-                  </td>
-                  <td className={styles.td}>{course.Course_Name}</td>
-                  <td className={styles.td}>{course.Grade}</td>
-                  <td className={styles.td}>{course.Percentage?.toFixed(2)}</td>
-                  {!hideActions && (
-                    <td className={`${styles.td} no-print`}>
-                      <button
-                        className="delete-button"
-                        onClick={() => handleDeleteRow(course.Course_Code)}
-                      >
-                        <FiTrash2 />
-                      </button>
-                    </td>
+                  {showAssignments ? (
+                    <>
+                      <td className={styles.td}>{course.Course_Name}</td>
+                      <td className={`${styles.td} ${styles.tdNoWrap}`}>
+                        {course.Due_Date ? convertToYMD(course.Due_Date) : "N/A"}
+                      </td>
+                      <td className={styles.td}>{course.Score || "N/A"}</td>
+                      <td className={styles.td}>{course.Max_Score || "N/A"}</td>
+                      {!hideActions && (
+                        <td className={`${styles.td} no-print`}>
+                          <button
+                            className="delete-button"
+                            onClick={() => handleDeleteRow(course.Course_Code)}
+                          >
+                            <FiTrash2 />
+                          </button>
+                        </td>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <td className={`${styles.td} ${styles.tdNoWrap}`}>
+                        {convertToYMD(course.Enrolled_At)}
+                      </td>
+                      <td className={styles.td}>{course.Course_Name}</td>
+                      <td className={styles.td}>{course.Grade}</td>
+                      <td className={styles.td}>{course.Percentage?.toFixed(2)}</td>
+                      {!hideActions && (
+                        <td className={`${styles.td} no-print`}>
+                          <button
+                            className="delete-button"
+                            onClick={() => handleDeleteRow(course.Course_Code)}
+                          >
+                            <FiTrash2 />
+                          </button>
+                        </td>
+                      )}
+                    </>
                   )}
                 </tr>
               ))}
               {/* GRAND TOTAL */}
               <tr className={styles.trTotal}>
-                <td className={styles.td} colSpan={3}>
-                  <strong>Grand Total / Average</strong>
+                <td className={styles.td} colSpan={showAssignments ? 2 : 3}>
+                  <strong>{showAssignments ? "Total" : "Grand Total / Average"}</strong>
                 </td>
                 <td className={styles.td}>
                   <strong>{averagePercentage}</strong>
                 </td>
+                {!showAssignments && <td className={styles.td}></td>}
                 <td className="no-print"></td>
               </tr>
             </tbody>

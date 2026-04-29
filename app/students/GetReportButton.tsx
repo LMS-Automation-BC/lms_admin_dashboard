@@ -19,6 +19,7 @@ interface GetReportButtonProps {
   setDiffData: React.Dispatch<React.SetStateAction<DiffResult[]>>;
   setShowDiffModal: React.Dispatch<React.SetStateAction<boolean>>;
   existingTranscript: CsvRow[];
+  assignments?: boolean;
 }
 
 const GetReportButton: React.FC<GetReportButtonProps> = ({
@@ -30,14 +31,16 @@ const GetReportButton: React.FC<GetReportButtonProps> = ({
   setDiffData,
   setShowDiffModal,
   existingTranscript,
+  assignments = false,
 }) => {
   const handleGetReport = async () => {
     try {
       setReportLoading(true);
 
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/grade?type=getfromlms&studentId=${enrollmentNo}`
-      );
+      const assignmentsParam = assignments ? "&assignments=true" : "";
+      const url = assignments? `${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/grade?studentId=${enrollmentNo}${assignmentsParam}`
+      : `${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/grade?type=getfromlms&studentId=${enrollmentNo}`;
+      const res = await fetch(url);
 
       if (!res.ok) {
         throw new Error("Failed to fetch LMS report");
@@ -51,13 +54,13 @@ const GetReportButton: React.FC<GetReportButtonProps> = ({
       setDiffData(diffs);
 
       if (diffs.length === 0) {
-        toast.success("Report fetched successfully, no changes found.");
+        toast.success(`${assignments ? "Assignments" : "Report"} fetched successfully, no changes found.`);
       } else {
-        toast.success("Report fetched successfully, differences found.");
+        toast.success(`${assignments ? "Assignments" : "Report"} fetched successfully, differences found.`);
       }
     } catch (err) {
       console.error("Error fetching report:", err);
-      toast.error("Failed to fetch LMS report");
+      toast.error(`Failed to fetch ${assignments ? "assignments" : "LMS report"}`);
     } finally {
       setReportLoading(false);
     }
@@ -70,7 +73,7 @@ const GetReportButton: React.FC<GetReportButtonProps> = ({
       className="export-button"
       disabled={reportLoading}
     >
-      {reportLoading ? "Loading..." : "Get Report From LMS"}
+      {reportLoading ? "Loading..." : `Get ${assignments ? "Assignments" : "Report"} From LMS`}
     </button>
   );
 };

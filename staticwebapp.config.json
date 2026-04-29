@@ -1,5 +1,20 @@
 {
   "buildCommand": "npm run build",
   "outputLocation": ".next",
-  "apiLocation": "pages/api"
+  "apiLocation": "pages/api",
+  "routes": [
+    {
+      "route": "/dashboard/*",
+      "allowedRoles": ["authenticated"]
+    },{
+      "route": "/organization/*",
+      "allowedRoles": ["authenticated"]
+    }
+  ],
+  "responseOverrides": {
+    "401": {
+      "redirect": "/.auth/login/aad",
+      "statusCode": 302
+    }
+  }
 }

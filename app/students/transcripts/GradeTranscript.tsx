@@ -125,28 +125,28 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
   const [showDiffModal, setShowDiffModal] = useState(false);
   const [diffData, setDiffData] = useState<any[]>([]);
   const [reportLoading, setReportLoading] = useState(false);
-  const handleGetReport = async () => {
-    try {
-      setReportLoading(true);
+  // const handleGetReport = async () => {
+  //   try {
+  //     setReportLoading(true);
 
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/grade?type=getfromlms&studentId=${enrollmentNo}`,
-      );
+  //     const res = await fetch(
+  //       `${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/grade?type=getfromlms&studentId=${enrollmentNo}`,
+  //     );
 
-      const data = await res.json();
+  //     const data = await res.json();
 
-      setCoursesTranscript([...data]);
+  //     setCoursesTranscript([...data]);
 
-      const diffs = compareTranscriptArrays(coursesTranscript, data);
-      setDiffData(diffs);
+  //     const diffs = compareTranscriptArrays(coursesTranscript, data);
+  //     setDiffData(diffs);
 
-      setShowDiffModal(true);
-    } catch (err) {
-      console.error("Error fetching report:", err);
-    } finally {
-      setReportLoading(false); // now runs at the correct time
-    }
-  };
+  //     setShowDiffModal(true);
+  //   } catch (err) {
+  //     console.error("Error fetching report:", err);
+  //   } finally {
+  //     setReportLoading(false); // now runs at the correct time
+  //   }
+  // };
 
   const [reloadTranscript, setReloadTranscript] = useState(0);
   const markAsTranscriptCreated = async () => {
@@ -208,18 +208,20 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
 
     // Step 2: Map matched program courses
     const matched: CsvRow[] = sortedProgram.map((programCourse) => {
-      // Find first student course that hasn't been used yet and matches code AND/OR name
+      // Find first student course that hasn't been used yet and matches course name
       const index = courses.findIndex((c, i) => {
         if (usedIndices.has(i)) return false;
-        return (
-          c.Course_Code === programCourse.Course_Code &&
-          c.Default_Course_Name === programCourse.Course_Name
-        );
+        return c.Default_Course_Name === programCourse.Course_Name;
       });
 
       if (index !== -1) {
         usedIndices.add(index);
-        return courses[index];
+        // Use program's course code and normalized course name to avoid duplicates
+        return {
+          ...courses[index],
+          Course_Code: programCourse.Course_Code,
+          Default_Course_Name: programCourse.Course_Name,
+        };
       }
 
       // Not found → placeholder
@@ -263,6 +265,14 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
     // Track used indices to handle duplicates properly
     sortCourses(coursesTranscript);
   }, [sortedProgram]); // runs only when program changes
+
+  // 1️⃣B Sort transcript when new data is loaded from LMS (when coursesTranscript changes)
+  useEffect(() => {
+    if (!coursesTranscript.length || !sortedProgram.length) return;
+
+    // Sort courses whenever transcript is updated (e.g., from LMS)
+    sortCourses(coursesTranscript);
+  }, [coursesTranscript.length, sortedProgram.length]); // runs when transcript or program length changes
 
   // 2️⃣ Recalculate scores, unfinished courses, fail whenever transcript changes
   useEffect(() => {
