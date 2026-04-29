@@ -20,6 +20,13 @@
     },{
       "route": "/dbattendance",
       "allowedRoles": ["authenticated"] 
+    },{
+      "route": "/students",
+      "allowedRoles": ["authenticated"] 
+    },
+    {
+      "route": "/courseStatus",
+      "allowedRoles": ["authenticated"] 
     }
 
   ],
