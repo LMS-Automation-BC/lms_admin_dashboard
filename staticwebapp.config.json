@@ -2,43 +2,43 @@
   "routes": [
     {
       "route": "/dashboard/*",
-      "allowedRoles": ["authenticated"]
+      "allowedRoles": ["adminuser"]
     },{
       "route": "/organization/*",
-      "allowedRoles": ["authenticated"]
+      "allowedRoles": ["adminuser"]
     },
     {
       "route": "/organization",
-      "allowedRoles": ["authenticated"]
+      "allowedRoles": ["adminuser"]
     },
     {      "route": "/programs",
-      "allowedRoles": ["authenticated"] 
+      "allowedRoles": ["adminuser"] 
     },    {
       "route": "/attendance",
-      "allowedRoles": ["authenticated"]
+      "allowedRoles": ["adminuser"]
     },
     {      "route": "/grades",
-      "allowedRoles": ["authenticated"] 
+      "allowedRoles": ["adminuser"] 
     },
     {
       "route": "/dborganization",
-      "allowedRoles": ["authenticated"]
+      "allowedRoles": ["adminuser"]
     },{
       "route": "/dbprograms",
-      "allowedRoles": ["authenticated"] 
+      "allowedRoles": ["adminuser"] 
     },{
       "route": "/dbattendance",
-      "allowedRoles": ["authenticated"] 
+      "allowedRoles": ["adminuser"] 
     },{
       "route": "/students",
-      "allowedRoles": ["authenticated"] 
+      "allowedRoles": ["adminuser"] 
     },{
       "route": "/students/*",
-      "allowedRoles": ["authenticated"]
+      "allowedRoles": ["adminuser"]
     },
     {
       "route": "/courseStatus",
-      "allowedRoles": ["authenticated"] 
+      "allowedRoles": ["adminuser"] 
     }
 
   ],
