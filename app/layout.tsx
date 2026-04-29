@@ -23,12 +23,12 @@ export default function RootLayout({
                   <UserGreeting />
                 </div>
 
-                <a
+                {/* <a
                   href="/.auth/logout?post_logout_redirect_uri=/"
                   className="logout-btn"
                 >
                   Logout
-                </a>
+                </a> */}
               </div>
               <OrganizationProvider>{children}</OrganizationProvider>
             </main>
