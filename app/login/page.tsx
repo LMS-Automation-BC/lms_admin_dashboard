@@ -51,6 +51,9 @@ export default function LoginPage() {
           <button type="submit" className="login-button">
             Sign In
           </button>
+          <a href="/.auth/login/aad" className="login-button">
+  SSO
+</a>
           {/* <button
             type="button"
             className="login-button"
