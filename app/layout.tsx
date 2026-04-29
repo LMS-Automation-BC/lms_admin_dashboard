@@ -18,7 +18,6 @@ export default function RootLayout({
           <div style={{ display: "flex", height: "100vh" }}>
             <Sidebar />
             <main style={{ flexGrow: 1, padding: "20px" }}>
-              // JSX
               <div className="top-bar">
                 <div className="user-greeting">
                   <UserGreeting />

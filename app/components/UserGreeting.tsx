@@ -1,23 +1,18 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-// import { useSession } from 'next-auth/react';
+import styles from './UserGreeting.module.css';
 
 export default function UserGreeting() {
-  // const { data: session } = useSession();
-  // const userId =
-  //   session?.user?.email || session?.user?.name || null;
+  const [userId, setUserId] = useState<string | null>(null);
 
   const getUserInfo = async () => {
-  const response = await fetch('/.auth/me');
-  const payload = await response.json();
-  const { clientPrincipal } = payload;
-  
-  // The 'userDetails' property typically contains the username or email
-  return clientPrincipal ? clientPrincipal.userDetails : null;
-}
+    const response = await fetch('/.auth/me');
+    const payload = await response.json();
+    const { clientPrincipal } = payload;
 
-  const [userId, setUserId] = useState<string | null>(null);
+    return clientPrincipal ? clientPrincipal.userDetails : null;
+  };
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -30,9 +25,20 @@ export default function UserGreeting() {
 
   if (!userId) return null;
 
+  const getInitials = (text: string) => {
+    const parts = text.split('@')[0].split(/[.\s_-]/);
+    return parts
+      .map((part) => part.charAt(0).toUpperCase())
+      .slice(0, 2)
+      .join('');
+  };
+
+  const initials = getInitials(userId);
+
   return (
-    <p style={{ fontSize: '16px', color: '#555' }}>
-      Logged in as: <strong>{userId}</strong>
-    </p>
+    <div className={styles.userProfile}>
+      <div className={styles.avatar}>{initials}</div>
+      <span className={styles.userEmail}>{userId}</span>
+    </div>
   );
 }
