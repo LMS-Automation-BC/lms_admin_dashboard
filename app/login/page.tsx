@@ -32,7 +32,7 @@ export default function LoginPage() {
         <h1>Login</h1>
         {error && <div className="error-message">{error}</div>}
         <form onSubmit={handleSubmit} className="login-form">
-          <label>Username</label>
+          {/* <label>Username</label>
           <input
             type="text"
             value={username}
@@ -50,9 +50,9 @@ export default function LoginPage() {
 
           <button type="submit" className="login-button">
             Sign In
-          </button>
+          </button> */}
           <a href="/.auth/login/aad" className="login-button">
-  SSO
+  Brookes Login
 </a>
           {/* <button
             type="button"
