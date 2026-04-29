@@ -11,6 +11,15 @@
       "route": "/organization",
       "allowedRoles": ["authenticated"]
     },
+    {      "route": "/programs",
+      "allowedRoles": ["authenticated"] 
+    },    {
+      "route": "/attendance",
+      "allowedRoles": ["authenticated"]
+    },
+    {      "route": "/grades",
+      "allowedRoles": ["authenticated"] 
+    },
     {
       "route": "/dborganization",
       "allowedRoles": ["authenticated"]
@@ -23,6 +32,9 @@
     },{
       "route": "/students",
       "allowedRoles": ["authenticated"] 
+    },{
+      "route": "/students/*",
+      "allowedRoles": ["authenticated"]
     },
     {
       "route": "/courseStatus",
