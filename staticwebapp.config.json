@@ -1,7 +1,4 @@
 {
-  "buildCommand": "npm run build",
-  "outputLocation": ".next",
-  "apiLocation": "pages/api",
   "routes": [
     {
       "route": "/dashboard/*",
@@ -9,7 +6,22 @@
     },{
       "route": "/organization/*",
       "allowedRoles": ["authenticated"]
+    },
+    {
+      "route": "/organization",
+      "allowedRoles": ["authenticated"]
+    },
+    {
+      "route": "/dborganization",
+      "allowedRoles": ["authenticated"]
+    },{
+      "route": "/dbprograms",
+      "allowedRoles": ["authenticated"] 
+    },{
+      "route": "/dbattendance",
+      "allowedRoles": ["authenticated"] 
     }
+
   ],
   "responseOverrides": {
     "401": {
