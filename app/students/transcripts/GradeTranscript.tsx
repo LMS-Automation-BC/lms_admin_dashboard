@@ -268,6 +268,10 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
 
   // 1️⃣B Sort transcript when new data is loaded from LMS (when coursesTranscript changes)
   useEffect(() => {
+    if (isDeleting.current) {
+      isDeleting.current = false;
+      return;
+    }
     if (!coursesTranscript.length || !sortedProgram.length) return;
 
     // Sort courses whenever transcript is updated (e.g., from LMS)
@@ -284,8 +288,11 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
     calculateScores(coursesTranscript);
     checkFail();
   }, [coursesTranscript, sortedProgram]); // runs when transcript or program changes
+  const isDeleting = useRef(false); // Track the delete action
 
   const handleRemove = (index: number) => {
+    isDeleting.current = true; // Set flag before updating state
+
     const updated = [...coursesTranscript];
     updated.splice(index, 1);
     setCoursesTranscript(updated);
@@ -453,7 +460,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
     unfinishedCourses.some(
       (course) =>
         course.Course_Name.toLowerCase().trim() ===
-        row["Default_Course_Name"].toLowerCase().trim()
+        row["Default_Course_Name"].toLowerCase().trim(),
     );
 
   // Function to check if a row is duplicate
