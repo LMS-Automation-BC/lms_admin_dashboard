@@ -1,44 +1,87 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import styles from './UserGreeting.module.css';
 
 export default function UserGreeting() {
-  const [userId, setUserId] = useState<string | null>(null);
+  const [user, setUser] = useState<{ name: string; email: string } | null>(null);
+  const [open, setOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const getUserInfo = async () => {
     const response = await fetch('/.auth/me');
     const payload = await response.json();
     const { clientPrincipal } = payload;
 
-    return clientPrincipal ? clientPrincipal.userDetails : null;
+    if (!clientPrincipal) return null;
+
+    return {
+      name: clientPrincipal.userDetails?.split('@')[0] || 'User',
+      email: clientPrincipal.userDetails || '',
+    };
   };
 
   useEffect(() => {
     const fetchUserInfo = async () => {
       const userInfo = await getUserInfo();
-      setUserId(userInfo);
+      setUser(userInfo);
     };
 
     fetchUserInfo();
   }, []);
 
-  if (!userId) return null;
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setOpen(false);
+      }
+    };
 
-  const getInitials = (text: string) => {
-    const parts = text.split('@')[0].split(/[.\s_-]/);
-    return parts
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  if (!user) return null;
+
+  const getInitials = (text: string) =>
+    text
+      .split(/[.\s_-]/)
       .map((part) => part.charAt(0).toUpperCase())
       .slice(0, 2)
       .join('');
-  };
-
-  const initials = getInitials(userId);
 
   return (
-    <div className={styles.userProfile}>
-      <div className={styles.avatar}>{initials}</div>
-      <span className={styles.userEmail}>{userId}</span>
+    <div className={styles.wrapper} ref={dropdownRef}>
+      <button
+        className={styles.avatarBtn}
+        onClick={() => setOpen(!open)}
+      >
+        {getInitials(user.name)}
+      </button>
+
+      {open && (
+        <div className={styles.dropdown}>
+          <div className={styles.profileTop}>
+            <div className={styles.avatarLarge}>
+              {getInitials(user.name)}
+            </div>
+            <div>
+              <p className={styles.name}>{user.name}</p>
+              <p className={styles.email}>{user.email}</p>
+            </div>
+          </div>
+
+          <a
+            href="/.auth/logout?post_logout_redirect_uri=/"
+            className={styles.logoutBtn}
+          >
+            Logout
+          </a>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,33 +1,82 @@
-/* User Greeting UI */
-.user-profile {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: #ffffff;
-  padding: 6px 12px;
-  border-radius: 24px;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+/* UserGreeting.module.css */
+
+.wrapper {
+  position: relative;
 }
 
-.avatar {
-  width: 34px;
-  height: 34px;
+.avatarBtn {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: 0 4px 10px rgba(79, 70, 229, 0.25);
+}
+
+.dropdown {
+  position: absolute;
+  top: 52px;
+  right: 0;
+  width: 260px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+  z-index: 100;
+}
+
+.profileTop {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.avatarLarge {
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   background: linear-gradient(135deg, #4f46e5, #7c3aed);
   color: #fff;
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.user-email {
+.name {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #222;
+  text-transform: capitalize;
+}
+
+.email {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: #666;
+  word-break: break-word;
+}
+
+.logoutBtn {
+  display: block;
+  text-align: center;
+  background: linear-gradient(135deg, #ef5350, #d32f2f);
+  color: #fff;
+  padding: 10px;
+  border-radius: 12px;
+  text-decoration: none;
   font-size: 13px;
-  font-weight: 500;
-  color: #333;
-  max-width: 180px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-weight: 600;
+  transition: transform 0.2s ease;
+}
+
+.logoutBtn:hover {
+  transform: scale(1.03);
 }
