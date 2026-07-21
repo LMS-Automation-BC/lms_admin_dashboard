@@ -306,10 +306,6 @@
     margin-bottom: 0;
   }
 
-  .page-break {
-    page-break-before: always;
-  }
-  
   @page {
     size: 210mm 297mm;
 

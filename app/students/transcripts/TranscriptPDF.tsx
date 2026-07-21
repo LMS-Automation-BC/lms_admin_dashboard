@@ -1,5 +1,5 @@
 import { format, parseISO } from "date-fns";
-import SecondPage from "@/app/components/SecondPage";
+import SecondPage from "@/app/students/transcripts/SecondPage";
 import { CsvRow } from "@/app/components/GradeParser";
 import ContactColumns from "@/app/students/transcripts/GradeOrganization";
 import { extractMonthYear } from "@/app/grades/helpers/grade";
@@ -65,10 +65,7 @@ export default function TranscriptPDF({
 
 	return (
 		<div>
-			<div
-				className="transcript-container"
-				style={{ pageBreakAfter: "always" }}
-			>
+			<div className="transcript-container">
 				<div className="header">
 					<img
 						src="/brookes_college.png"
