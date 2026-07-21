@@ -19,17 +19,19 @@ const TranscriptDate: React.FC<TranscriptDateProps> = ({
   setProgramStart,
   label
 }) => {
+  const inputId = label.toLowerCase().replace(/\s+/g, "-");
+
   return hideActions ? (
     <div className="right">
-      <span style={{ fontWeight: 550 }}>Program Start Date</span>:{" "}
+      <span style={{ fontWeight: 550 }}>{label}</span>: {" "}
       {formatDateWithHyphen(programStart)}
     </div>
   ) : (
-    <label htmlFor="programStartDate" className="right">
+    <label htmlFor={inputId} className="right">
       {label}:{" "}
       <input
         type="date"
-        id="programStartDate"
+        id={inputId}
         value={programStart}
         onChange={(e) => setProgramStart(e.target.value)}
       />
