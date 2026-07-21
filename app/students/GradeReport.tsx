@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import styles from "./GradeReport.module.css";
 import "./transcripts/GradeTranscript.css";
 import { useReactToPrint } from "react-to-print";
@@ -18,10 +18,13 @@ const GradeReport: React.FC<GradeReportProps> = ({
   student_ID,
 }) => {
   // ---------------- Hooks always at the top ----------------
+  const [gradeData, setGradeData] = useState<CsvRow[]>(courses || []);
+  const [assignmentsData, setAssignmentsData] = useState<CsvRow[]>([]);
   const [coursesTranscript, setCoursesTranscript] = useState<CsvRow[]>(
     courses || []
   );
   const [showAssignments, setShowAssignments] = useState(false);
+  const [assignmentsLoading, setAssignmentsLoading] = useState(false);
   const [diffData, setDiffData] = useState<any[]>([]);
   const [showDiffModal, setShowDiffModal] = useState(false);
   const [reportLoading, setReportLoading] = useState(false);
@@ -45,9 +48,56 @@ const GradeReport: React.FC<GradeReportProps> = ({
     setCoursesTranscript((prev) =>
       prev.filter((c) => c.Course_Code !== courseCode)
     );
+    if (showAssignments) {
+      setAssignmentsData((prev) =>
+        prev.filter((c) => c.Course_Code !== courseCode)
+      );
+    } else {
+      setGradeData((prev) =>
+        prev.filter((c) => c.Course_Code !== courseCode)
+      );
+    }
   };
 
-  const convertToYMD = (dateStr: string) => dateStr.split(" ")[0];
+  const convertToYMD = (dateStr: string) => dateStr?.split(" ")[0];
+
+  // Fetch assignments when showAssignments becomes true, restore grades when toggled back
+  useEffect(() => {
+    if (showAssignments && student_ID) {
+      setAssignmentsLoading(true);
+      const fetchAssignments = async () => {
+        try {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/grade?studentId=${student_ID}&assignments=true`);
+          if (response.ok) {
+            const data = await response.json();
+            setAssignmentsData(data || []);
+            setCoursesTranscript(data || []);
+          } else {
+            console.error('Failed to fetch assignments:', response.statusText);
+          }
+        } catch (error) {
+          console.error('Error fetching assignments:', error);
+        } finally {
+          setAssignmentsLoading(false);
+        }
+      };
+      fetchAssignments();
+    } else if (!showAssignments) {
+      // Restore grade data when toggling back to grades
+      setCoursesTranscript(gradeData);
+    }
+  }, [showAssignments, student_ID, gradeData]);
+
+  // Wrapper to update both coursesTranscript and gradeData
+  const handleUpdateTranscript: React.Dispatch<React.SetStateAction<CsvRow[]>> = (newDataOrFn) => {
+    const newData = typeof newDataOrFn === 'function' ? newDataOrFn(coursesTranscript) : newDataOrFn;
+    setCoursesTranscript(newData);
+    if (!showAssignments) {
+      setGradeData(newData);
+    } else {
+      setAssignmentsData(newData);
+    }
+  };
 
   const averagePercentage = coursesTranscript.length
     ? (
@@ -56,7 +106,50 @@ const GradeReport: React.FC<GradeReportProps> = ({
       ).toFixed(2)
     : "0.00";
 
-  // ---------------- Conditional JSX ----------------
+  // Show loading state when fetching assignments
+  if (showAssignments && assignmentsLoading) {
+    return (
+      <>
+        <div className={styles.toolbar}>
+          <button onClick={handlePrint} className="export-button">
+            Print
+          </button>
+          {student_ID && (
+            <GetReportButton
+              enrollmentNo={student_ID}
+              viewOnly={false}
+              reportLoading={reportLoading}
+              setReportLoading={setReportLoading}
+              setCoursesTranscript={handleUpdateTranscript}
+              setDiffData={setDiffData}
+              setShowDiffModal={setShowDiffModal}
+              existingTranscript={coursesTranscript}
+              assignments={showAssignments}
+            />
+          )}
+          <div className={styles.toggleContainer}>
+            <span className={styles.toggleLabel}>Grades</span>
+            <label className={styles.toggleSwitch}>
+              <input
+                type="checkbox"
+                id="assignmentsToggle"
+                checked={showAssignments}
+                onChange={() => setShowAssignments(!showAssignments)}
+              />
+              <span className={styles.slider}></span>
+            </label>
+            <span className={styles.toggleLabel}>Assignments</span>
+          </div>
+        </div>
+        <div className={styles.loadingContainer}>
+          <div className={styles.spinner}></div>
+          <p>Loading assignments...</p>
+        </div>
+      </>
+    );
+  }
+
+  // Show no data message
   if (!coursesTranscript || coursesTranscript.length === 0) {
     return <p>No course data available.</p>;
   }
@@ -73,7 +166,7 @@ const GradeReport: React.FC<GradeReportProps> = ({
             viewOnly={false}
             reportLoading={reportLoading}
             setReportLoading={setReportLoading}
-            setCoursesTranscript={setCoursesTranscript}
+            setCoursesTranscript={handleUpdateTranscript}
             setDiffData={setDiffData}
             setShowDiffModal={setShowDiffModal}
             existingTranscript={coursesTranscript}
@@ -81,16 +174,17 @@ const GradeReport: React.FC<GradeReportProps> = ({
           />
         )}
         <div className={styles.toggleContainer}>
-          <label className={styles.toggleLabel}>
+          <span className={styles.toggleLabel}>Grades</span>
+          <label className={styles.toggleSwitch}>
             <input
               type="checkbox"
+              id="assignmentsToggle"
               checked={showAssignments}
               onChange={() => setShowAssignments(!showAssignments)}
             />
-            <span>
-              {showAssignments ? "Assignments" : "Grades"}
-            </span>
+            <span className={styles.slider}></span>
           </label>
+          <span className={styles.toggleLabel}>Assignments</span>
         </div>
       </div>
 
@@ -132,10 +226,12 @@ const GradeReport: React.FC<GradeReportProps> = ({
               <tr>
                 {showAssignments ? (
                   <>
-                    <th className={styles.th}>Assignment Name</th>
-                    <th className={styles.th}>Due Date</th>
+                    <th className={styles.th}>Class Name</th>
+                    <th className={styles.th}>Title</th>                    
+                    
+                    <th className={styles.th}>Started At</th>
+                    <th className={styles.th}>Section Code</th>
                     <th className={styles.th}>Score</th>
-                    <th className={styles.th}>Max Score</th>
                     {!hideActions && <th className={styles.th}>Actions</th>}
                   </>
                 ) : (
@@ -151,15 +247,17 @@ const GradeReport: React.FC<GradeReportProps> = ({
             </thead>
             <tbody>
               {coursesTranscript.map((course, index) => (
-                <tr key={course.Course_Code + index} className={styles.trHover}>
+                <tr key={course.Course_Code ? `${course.Course_Code}-${index}` : `assignment-${index}`} className={styles.trHover}>
                   {showAssignments ? (
                     <>
-                      <td className={styles.td}>{course.Course_Name}</td>
+                      
+                      <td className={styles.td}>{course.Class_Name || "N/A"}-{course.Type?.split('Assignment')[0] || "N/A"}</td>
+                      <td className={styles.td}>{course.Title || "N/A"}</td>
                       <td className={`${styles.td} ${styles.tdNoWrap}`}>
-                        {course.Due_Date ? convertToYMD(course.Due_Date) : "N/A"}
+                        {course.Started_At ? convertToYMD(course.Started_At) : "N/A"}
                       </td>
+                      <td className={styles.td}>{course.Section_Code || "N/A"}</td>
                       <td className={styles.td}>{course.Score || "N/A"}</td>
-                      <td className={styles.td}>{course.Max_Score || "N/A"}</td>
                       {!hideActions && (
                         <td className={`${styles.td} no-print`}>
                           <button

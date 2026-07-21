@@ -1,15 +1,50 @@
 {
-  "buildCommand": "npm run build",
-  "outputLocation": ".next",
-  "apiLocation": "pages/api",
   "routes": [
     {
+      "route": "/",
+      "allowedRoles": ["adminuser"]
+    },
+    {
       "route": "/dashboard/*",
-      "allowedRoles": ["authenticated"]
+      "allowedRoles": ["adminuser"]
     },{
       "route": "/organization/*",
-      "allowedRoles": ["authenticated"]
+      "allowedRoles": ["adminuser"]
+    },
+    {
+      "route": "/organization",
+      "allowedRoles": ["adminuser"]
+    },
+    {      "route": "/programs",
+      "allowedRoles": ["adminuser"] 
+    },    {
+      "route": "/attendance",
+      "allowedRoles": ["adminuser"]
+    },
+    {      "route": "/grades",
+      "allowedRoles": ["adminuser"] 
+    },
+    {
+      "route": "/dborganization",
+      "allowedRoles": ["adminuser"]
+    },{
+      "route": "/dbprograms",
+      "allowedRoles": ["adminuser"] 
+    },{
+      "route": "/dbattendance",
+      "allowedRoles": ["adminuser"] 
+    },{
+      "route": "/students",
+      "allowedRoles": ["adminuser"] 
+    },{
+      "route": "/students/*",
+      "allowedRoles": ["adminuser"]
+    },
+    {
+      "route": "/courseStatus",
+      "allowedRoles": ["adminuser"] 
     }
+
   ],
   "responseOverrides": {
     "401": {
