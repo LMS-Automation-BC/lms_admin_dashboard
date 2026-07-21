@@ -96,18 +96,11 @@ const SecondPage: React.FC = () => {
       </div>
       <GPA></GPA>
       <div
-            style={{
-              position:"absolute",
-              bottom: 0,
-              left: 0,
-              width: "100%",
-              margin: 0,
-            }}
-            className="footer"
+            className={`${styles.footer} second-page-footer`}
           >
             
           
-      <ContactColumns  showPresident={false}></ContactColumns>
+      <ContactColumns showPresident={false}></ContactColumns>
       </div>
     </div>
   );

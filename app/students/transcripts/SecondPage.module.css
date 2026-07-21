@@ -2,9 +2,8 @@
     font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
     font-size: 11pt;
     font-weight: normal;
-     display: flex;
+  display: flex;
   flex-direction: column;
-  min-height: 100vh; 
 }
 .title-sp {
   text-align: center;
@@ -18,8 +17,8 @@
     text-align: justify;
 }
 .footer {
-  border:blue 1px solid !important;
-  margin-top: auto;
+  /* border:blue 1px solid !important; */
+  margin-top: 98px;
 }
 .grading-table {
   width: 100%;

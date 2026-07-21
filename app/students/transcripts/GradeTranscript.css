@@ -252,6 +252,14 @@
 .contact-columns .email {
   text-align: right;
 }
+
+.second-page-footer {
+  width: 100%;
+}
+
+.second-page-footer .contact-columns {
+  position: static;
+}
 .export-button {
   margin: 1rem 0;
   padding: 0.5rem 1rem;
@@ -330,6 +338,15 @@
     text-align: left;
     font-family: "Book Antiqua";
     padding: 2px 0; /* small padding top/bottom */
+  }
+
+  .second-page-footer {
+    /* margin-top: auto; */
+    width: 100%;
+  }
+
+  .second-page-footer .contact-columns {
+    position: static;
   }
 
   

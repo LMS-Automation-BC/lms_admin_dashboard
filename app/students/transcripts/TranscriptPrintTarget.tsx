@@ -47,7 +47,7 @@ const TranscriptPrintTarget = forwardRef<
     <div
       ref={ref}
       className="transcript-page printable-content print-area"
-      style={{ width: "100%", maxWidth: "572pt", marginTop: "20px" }}
+      style={{ width: "100%", maxWidth: "572pt", marginTop: "0" }}
     >
       <TranscriptPDF
         studentName={studentName}
