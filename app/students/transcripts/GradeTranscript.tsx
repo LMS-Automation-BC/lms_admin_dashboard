@@ -632,7 +632,7 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
           isUnfinished={isUnfinished}
         />
       </div>
-      {false && (
+      {showPrintPreview && (
         <TranscriptPrintTarget
           ref={transcriptRef}
           studentName={studentName}
