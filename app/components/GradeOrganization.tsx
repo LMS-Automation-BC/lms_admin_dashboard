@@ -12,51 +12,53 @@ export interface OrgData {
 }
 interface ContactColumnsProps{
   showPresident: boolean
+  orgData: OrgData | null;
 }
 const ContactColumns: React.FC<ContactColumnsProps> = ({
-  showPresident
+  showPresident,
+  orgData
 }) => {
-  const [orgData, setOrgData] = useState<OrgData | null>(null);
+  // const [orgData, setOrgData] = useState<OrgData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetch("/api/organization")
-      .then((res) => {
-        if (!res.ok) throw new Error("Not found");
-        return res.json();
-      })
-      .then((data) => setOrgData(data))
-      .catch((err) => console.error(err))
-      .finally(() => setLoading(false));
-  }, []);
+  // useEffect(() => {
+  //   fetch("/api/organization")
+  //     .then((res) => {
+  //       if (!res.ok) throw new Error("Not found");
+  //       return res.json();
+  //     })
+  //     .then((data) => setOrgData(data))
+  //     .catch((err) => console.error(err))
+  //     .finally(() => setLoading(false));
+  // }, []);
 
-  if (loading) return <p>Loading contact info...</p>;
-  if (!orgData) return <p>No organization data found.</p>;
+    // if (loading) return <p>Loading contact info...</p>;
+    // if (!orgData) return <p>No organization data found.</p>;
 
   return (<div>{showPresident?
     <p className='president'>
-            {orgData.name}
+            {orgData?.name}
             <br />
-            {orgData.role}
+            {orgData?.role}
           </p> : <></>}
     <div className="contact-columns">
       <div className="column address">
         {/* assuming address is multiline string or you can split by \n if needed */}
-        {orgData.address.split('\n').map((line, i) => (
+        {orgData?.address.split('\n').map((line, i) => (
           <React.Fragment key={i}>
             {line} {' '}
           </React.Fragment>
         ))}
       </div>
       <div className="column phone">
-        Phone: {orgData.phone} <br />
-        <a href={orgData.website.startsWith('http') ? orgData.website : `https://${orgData.website}`} target="_blank" rel="noopener noreferrer">
-          {orgData.website}
+        Phone: {orgData?.phone} <br />
+        <a href={orgData?.website?.startsWith('http') ? orgData.website : `https://${orgData?.website}`} target="_blank" rel="noopener noreferrer">
+          {orgData?.website}
         </a>
       </div>
       <div className="column email">
-        <a href={`mailto:${orgData.email}`}>
-          {orgData.email}
+        <a href={`mailto:${orgData?.email}`}>
+          {orgData?.email}
         </a>
       </div>
     </div></div>

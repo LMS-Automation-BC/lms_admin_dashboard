@@ -1,6 +1,6 @@
 "use client";
 import './GradeTranscript.css';
-import React, { useEffect, useState } from "react";
+import React from "react";
 
 export interface OrgData {
   name: string;
@@ -11,27 +11,15 @@ export interface OrgData {
   website: string;
 }
 interface ContactColumnsProps{
-  showPresident: boolean
+  showPresident: boolean;
+  orgData: OrgData | null;
+  loading?: boolean;
 }
 const ContactColumns: React.FC<ContactColumnsProps> = ({
-  showPresident
+  showPresident,
+  orgData,
+  loading = false,
 }) => {
-  const [orgData, setOrgData] = useState<OrgData | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-   
-    
-    fetch(`${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/organization`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Not found");
-        return res.json();
-      })
-      .then((data) => setOrgData(data))
-      .catch((err) => console.error(err))
-      .finally(() => setLoading(false));
-  }, []);
-
   if (loading) return <p>Loading contact info...</p>;
   if (!orgData) return <p>No organization data found.</p>;
 

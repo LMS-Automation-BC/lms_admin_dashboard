@@ -2,6 +2,7 @@
 
 import { forwardRef } from "react";
 import { CsvRow } from "@/app/components/GradeParser";
+import { OrgData } from "./GradeOrganization";
 import TranscriptPDF from "./TranscriptPDF";
 
 interface TranscriptPrintTargetProps {
@@ -19,6 +20,8 @@ interface TranscriptPrintTargetProps {
   programStart: string;
   transcriptPrint: string;
   transcriptRePrint: string;
+  orgData: OrgData | null;
+  orgLoading: boolean;
 }
 
 const TranscriptPrintTarget = forwardRef<
@@ -40,6 +43,8 @@ const TranscriptPrintTarget = forwardRef<
     programStart,
     transcriptPrint,
     transcriptRePrint,
+    orgData,
+    orgLoading,
   },
   ref,
 ) {
@@ -64,6 +69,8 @@ const TranscriptPrintTarget = forwardRef<
         programStart={programStart}
         transcriptPrint={transcriptPrint}
         transcriptRePrint={transcriptRePrint}
+        orgData={orgData}
+        orgLoading={orgLoading}
       />
     </div>
   );

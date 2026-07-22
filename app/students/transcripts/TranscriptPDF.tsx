@@ -1,7 +1,7 @@
 import { format, parseISO } from "date-fns";
 import SecondPage from "@/app/students/transcripts/SecondPage";
 import { CsvRow } from "@/app/components/GradeParser";
-import ContactColumns from "@/app/students/transcripts/GradeOrganization";
+import ContactColumns, { OrgData } from "@/app/students/transcripts/GradeOrganization";
 import { extractMonthYear } from "@/app/grades/helpers/grade";
 
 interface TranscriptPDFProps {
@@ -19,6 +19,8 @@ interface TranscriptPDFProps {
 	programStart: string;
 	transcriptPrint: string;
 	transcriptRePrint: string;
+	orgData: OrgData | null;
+	orgLoading: boolean;
 }
 
 export const formatDateWithHyphen = (dateStr: string) => {
@@ -41,6 +43,8 @@ export default function TranscriptPDF({
 	programStart,
 	transcriptPrint,
 	transcriptRePrint,
+	orgData,
+	orgLoading,
 }: TranscriptPDFProps) {
 	const defaultClassCount = coursesTranscript.reduce<Record<string, number>>(
 		(acc, row) => {
@@ -252,12 +256,12 @@ export default function TranscriptPDF({
 					}}
 					className="footer"
 				>
-					<ContactColumns showPresident={true}></ContactColumns>
+					<ContactColumns showPresident={true} orgData={orgData} loading={orgLoading}></ContactColumns>
 				</div>
 			</div>
 
 			<div className="transcript-container">
-				<SecondPage></SecondPage>
+				<SecondPage orgData={orgData} orgLoading={orgLoading}></SecondPage>
 			</div>
 		</div>
 	);

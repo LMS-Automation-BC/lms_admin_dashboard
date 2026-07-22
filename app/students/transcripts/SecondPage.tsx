@@ -4,9 +4,14 @@ import "./GradeTranscript.css";
 import { gradeScale } from "../../grades/helpers/grade";
 import SpecialGradesTable from "./SpecialGradesTable";
 import GPA from "./GPA";
-import ContactColumns from "./GradeOrganization";
+import ContactColumns, { OrgData } from "./GradeOrganization";
 
-const SecondPage: React.FC = () => {
+interface SecondPageProps {
+  orgData: OrgData | null;
+  orgLoading: boolean;
+}
+
+const SecondPage: React.FC<SecondPageProps> = ({ orgData, orgLoading }) => {
   const grouped = gradeScale.reduce<Record<string, typeof gradeScale>>(
     (acc, row) => {
       const key = row.description || "—";
@@ -100,7 +105,7 @@ const SecondPage: React.FC = () => {
           >
             
           
-      <ContactColumns showPresident={false}></ContactColumns>
+      <ContactColumns showPresident={false} orgData={orgData} loading={orgLoading}></ContactColumns>
       </div>
     </div>
   );

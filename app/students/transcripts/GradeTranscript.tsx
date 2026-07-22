@@ -14,9 +14,10 @@ import TranscriptDiffModal, {
 } from "./TranscriptDiffModal";
 import GetReportButton from "../GetReportButton";
 import { sortUserGrades } from "./Transcript";
-import TranscriptPDF, { formatDateWithHyphen } from "./TranscriptPDF";
+import TranscriptPDF from "./TranscriptPDF";
 import TranscriptEditableTable from "@/app/students/transcripts/TranscriptEditableTable";
 import TranscriptPrintTarget from "@/app/students/transcripts/TranscriptPrintTarget";
+import { OrgData } from "./GradeOrganization";
 
 interface TranscriptProps {
   studentName: string | undefined;
@@ -81,51 +82,84 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
   const transcriptRef = useRef<HTMLDivElement>(null);
   const [hasFail, setHasFail] = useState(false);
   const [showPrintPreview, setShowPrintPreview] = useState(false);
+  const [isPrinting, setIsPrinting] = useState(false);
+  const [orgData, setOrgData] = useState<OrgData | null>(null);
+  const [orgLoading, setOrgLoading] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+    setOrgLoading(true);
+
+    fetch(`${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/organization`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Not found");
+        return res.json();
+      })
+      .then((data) => {
+        if (isMounted) setOrgData(data);
+      })
+      .catch((err) => {
+        console.error(err);
+        if (isMounted) setOrgData(null);
+      })
+      .finally(() => {
+        if (isMounted) setOrgLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const reactToPrintFn = useReactToPrint({
     contentRef: transcriptRef,
     onAfterPrint: () => {
       setHideActions(false);
       setShowPrintPreview(false);
+          setIsPrinting(false);
+
     },
     documentTitle: `${studentName}-Transcript`,
   });
-  const generatePdfFromDom = async (element: any) => {
-    const canvas = await html2canvas(element, { scale: 2 });
-    const imgData = canvas.toDataURL("image/png");
+  // const generatePdfFromDom = async (element: any) => {
+  //   const canvas = await html2canvas(element, { scale: 2 });
+  //   const imgData = canvas.toDataURL("image/png");
 
-    const pdf = new jsPDF("p", "pt", "a4");
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+  //   const pdf = new jsPDF("p", "pt", "a4");
+  //   const pdfWidth = pdf.internal.pageSize.getWidth();
+  //   const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
-    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+  //   pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
 
-    // Return Base64 without prefix
-    return pdf.output("datauristring").split(",")[1];
-  };
+  //   // Return Base64 without prefix
+  //   return pdf.output("datauristring").split(",")[1];
+  // };
   const handlePrint = async () => {
-    setHideActions(true); // Hide before printing
-    setShowPrintPreview(true);
+  if (orgLoading || !orgData) {
+    return;
+  }
+
+  setIsPrinting(true);
+  setHideActions(true);
+  setShowPrintPreview(true);
+
+  try {
     await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
     await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
+
     if (!transcriptRef.current) {
       setHideActions(false);
       setShowPrintPreview(false);
       return;
     }
-    const pdfBase64 = await generatePdfFromDom(transcriptRef.current);
-    // Send to backend
-    // await fetch(`${process.env.NEXT_PUBLIC_FUNCTION_APP_URL}/api/grade`, {
-    //   method: "POST",
-    //   headers: { "Content-Type": "application/json" },
-    //   body: JSON.stringify({
-    //     id: sisId,
-    //     filename: `${studentName}-Transcript.pdf`,
-    //     file_type: "pdf",
-    //     file: pdfBase64,
-    //   }),
-    // });
+
+    // const pdfBase64 = await generatePdfFromDom(transcriptRef.current);
     await reactToPrintFn();
-  };
+  } finally {
+    // fallback in case onAfterPrint doesn't fire in some browser paths
+    setIsPrinting(false);
+  }
+};
   const [showDiffModal, setShowDiffModal] = useState(false);
   const [diffData, setDiffData] = useState<any[]>([]);
   const [reportLoading, setReportLoading] = useState(false);
@@ -477,6 +511,8 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
           programStart={programStart}
           transcriptPrint={transcriptPrint}
           transcriptRePrint={transcriptRePrint}
+          orgData={orgData}
+          orgLoading={orgLoading}
         />
       </div>
     );
@@ -526,9 +562,9 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
           Reprint
         </label>
         <div>
-          <button onClick={handlePrint} className="export-button">
-            Print
-          </button>{" "}
+            <button onClick={handlePrint} className="export-button" disabled={isPrinting || orgLoading}>
+          {orgLoading ? "Loading contact info..." : isPrinting ? "Opening Print..." : "Print"}
+</button>{" "}
           {enrollmentNo && (
             <GetReportButton
               enrollmentNo={enrollmentNo}
@@ -649,6 +685,8 @@ const GradeTranscript: React.FC<TranscriptProps> = ({
           programStart={programStart}
           transcriptPrint={transcriptPrint}
           transcriptRePrint={transcriptRePrint}
+          orgData={orgData}
+          orgLoading={orgLoading}
         />
       )}
     </>
